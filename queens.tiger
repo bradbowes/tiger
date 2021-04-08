@@ -1,0 +1,36 @@
+let
+   var n := 8
+
+   type int_array = array of int
+
+   var row := int_array [n] of 0
+   var col := int_array [n] of 0
+   var diag1 := int_array [n + n - 1] of 0
+   var diag2 := int_array [n + n - 1] of 0
+
+   function print_board() = (
+      for i := 0 to n - 1 do (
+         for j := 0 to n - 1 do
+            print(if col[i] = j then " O" else " .");
+         print("\n")
+      );
+      print("\n")
+   )
+
+   function try(c: int) =
+      if c = n then
+         print_board()
+      else
+         for r := 0 to n - 1 do
+            if row[r] = 0 & diag1[r + c] = 0 & diag2[r + 7 -c] = 0 then (
+               row[r] := 1;
+               diag1[r + c] := 0;
+               diag2[r + 7 - c] := 1;
+               col[c] := r;
+               try(c + 1);
+               row[r] := 0;
+               diag1[r + c] := 0;
+               diag2[r + 7 - c] := 0
+            )
+in try(0)
+               
