@@ -1,0 +1,8 @@
+*~
+*.o
+*.s
+*.ppu
+ppas.sh
+compile
+print
+

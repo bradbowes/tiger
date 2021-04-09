@@ -22,8 +22,19 @@ type
          record_type: (fields: field);
          array_type: (base: spec);
    end;
-   
-   var void_type, nil_type, int_type, bool_type, string_type: spec;
+
+   const
+      _void_type: spec_t = (tag: primitive_type; base: nil);
+      void_type: spec = @_void_type;
+      _nil_type: spec_t = (tag: primitive_type; base: nil);
+      nil_type: spec = @_nil_type;
+      _int_type: spec_t = (tag: primitive_type; base: nil);
+      int_type: spec = @_int_type;
+      _bool_type: spec_t = (tag: primitive_type; base: nil);
+      bool_type: spec = @_bool_type;
+      _string_type: spec_t = (tag: primitive_type; base: nil);
+      string_type: spec = @string_type;
+
    
    function make_record_type(): spec;
    procedure append_field(rec: spec; name: symbol; ty: spec);
@@ -33,8 +44,6 @@ type
 implementation
 
 uses utils;
-
-var v, n, i, b, s: spec_t;
 
 function make_record_type(): spec;
 var s: spec;
@@ -94,23 +103,5 @@ begin
    make_array_type := s;
 end;
 
-
-begin
-
-  v.tag := primitive_type;
-  void_type := @v;
-  
-  n.tag := primitive_type;  
-  nil_type := @n;
-  
-  i.tag := primitive_type;
-  int_type := @i;
-  
-  b.tag := primitive_type;
-  bool_type := @b;
-  
-  s.tag := primitive_type;  
-  string_type := @s;
-   
 end.
 

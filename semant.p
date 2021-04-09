@@ -1,84 +1,68 @@
-unit formats;
+unit semant;
 
 interface
 
-uses nodes;
+uses bindings, types, nodes;
 
-function format(n: node): string;
+function type_check(n: node; env, tenv: binding): spec;
 
 implementation
 
-uses ops;
+uses utils, ops;
 
-var indent_level: integer;
-
-function newline: string;
-begin
-   newline := chr(10) + space(indent_level * 3);
-end;
-
-procedure indent;
-begin
-  indent_level := indent_level + 1;
-end;
-
-procedure dedent;
-begin
-  if indent_level > 0 then
-     indent_level := indent_level - 1;
-end;
-
-function format_list(l: node_list; sep: string; break_lines: boolean): string;
-var it: node_list_item;
-    s: string;
-begin
-   indent;
-   s := '';
-   it := l^.first;
-   while it <> nil do
-      begin
-         if break_lines then s := s + newline;
-         s := s + format(it^.node);
-         if it^.next <> nil then
-            s := s + sep;
-         it := it^.next;
-      end;
-   dedent;
-   format_list := s;
-end;
-
-function format(n: node): string;
-var s: string;
+function type_check(n: node; env, tenv: binding): spec;
+var ty1, ty2 : spec; op: op_tag;
 begin
    case n^.tag of
-      assign_node: 
-         format := format(n^.variable) + ' := ' + format(n^.expression);
+      assign_node: begin
+         ty1 := type_check(n^.variable, env, tenv);
+         if ty1 = type_check(n^.expression, env, tenv) then
+            type_check := ty1
+         else
+            err('assignment incompatible type', n^.line, n^.col);
+      end;
+{      
       call_node:
          format :=  n^.call^.id + '(' + format_list(n^.args, ', ', false) + ')';
+}
       simple_var_node:
-         format := n^.name^.id;
+         type_check := lookup(env, n^.name);
+{
+
       field_var_node:
          format := format(n^.obj) + '.' + n^.field^.id;
       indexed_var_node:
          format := format(n^.arr) + '[' + format(n^.index) + ']';
-      integer_node: begin
-         str(n^.int_val, s);
-         format := s;
-      end;
+}
+      integer_node:
+         type_check := int_type;
       string_node:
-         format := '"' + n^.string_val^.id + '"';
+         type_check := string_type;
       boolean_node:
-         if n^.bool_val then format := 'true' else format := 'false';
+         type_check := bool_type;
       nil_node:
-         format := 'nil';
+         type_check := nil_type;
+{
       type_decl_node:
          format := newline + 'type ' + n^.type_name^.id + ' = ' + format(n^.type_spec);
+}
       var_decl_node: begin
-         s := 'var ' + n^.var_name^.id; 
-         if n^.var_type <> nil then
-            s := s + ': ' + n^.var_type^.id;
-         format := s + ' := ' + format( n^.initial_value);
+         ty1 := type_check(n^.initial_value, env, tenv);
+         if n^.var_type = nil then
+            begin
+               if ty1 = nil_type then
+                  err('variable with nil initializer must specify type', n^.line, n^.col);
+            end
+         else
+            begin
+               ty2 := lookup(tenv, n^.var_type);
+               if ty1 <> ty2 then
+                  err('initializer doesn''t match type spec', n^.line, n^.col);
+            end;
+         bind(env, n^.var_name, ty1);
+         type_check := void_type;
       end;
+(*
       fun_decl_node: begin
          s := newline + 'function ' + n^.fun_name^.id + 
               '(' + format_list(n^.params, ', ', false) + ')';
@@ -94,10 +78,39 @@ begin
          format := '{' + format_list(n^.field_list, ',', true) + newline + '}';
       array_desc_node:
          format := 'array of ' + n^.base^.id;
+*)         
       unary_op_node:
-         format := op_display[n^.unary_op] + ' ' + format(n^.unary_exp);
-      binary_op_node:
-         format := format(n^.left) + ' ' + op_display[n^.binary_op] + ' ' + format(n^.right);
+         { minus is the only unary op }
+         if type_check(n^.unary_exp, env, tenv) = int_type then
+            type_check := int_type
+         else 
+            err('sign operator incompatible type', n^.line, n^.col);
+      binary_op_node: begin
+         op := n^.binary_op;
+         ty1 := type_check(n^.left, env, tenv);
+         ty2 := type_check(n^.right, env, tenv);
+         if ty1 = ty2 then
+            if op in numeric_ops then
+               if ty1 = int_type then
+                  type_check := int_type
+               else
+                  err('numeric operator incompatible type', n^.line, n^.col)
+            else if op in comparison_ops then
+               if (ty1 = int_type) or (ty1 = string_type) then
+                  type_check := bool_type
+               else
+                  err('comparison operator incompatible type', n^.line, n^.col)
+            else if op in boolean_ops then
+               if ty1 = bool_type then
+                  type_check := bool_type
+               else
+                  err('boolean operator incompatible type', n^.line, n^.col)
+            else
+               type_check := bool_type
+         else
+            err('operator incompatible types', n^.line, n^.col);
+      end;
+(*
       field_node:
          format := n^.field_name^.id + ' = ' + format(n^.field_value);
       field_desc_node:
@@ -146,8 +159,8 @@ begin
          str(n^.tag, s);
          format := '???? ' + s + ' ????';
       end; 
+      *)
    end;
 end;   
-end.      
 
-
+end.

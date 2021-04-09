@@ -1,19 +1,19 @@
-ifeq ($(OS),Windows_NT)
-	TARGET = compile.exe
-else
-	TARGET = compile
-endif
+all:	compile print
 
-$(TARGET):	utils.p symbols.p scanners.p ops.p nodes.p parsers.p \
-        formats.p compile.p
+compile:	utils.p symbols.p scanners.p ops.p nodes.p parsers.p \
+        bindings.p types.p compile.p 
 	fpc -Sh -Px86_64 -O3 compile
-	strip $(TARGET)
+	strip compile
+
+print:	utils.p symbols.p scanners.p ops.p nodes.p parsers.p \
+        formats.p print.p
+	fpc -Sh -Px86_64 -O3 print
+	strip print
 
 clean:
-	rm -f $(TARGET)
+	rm -f compile
+	rm -f print
 	rm -f *.o
 	rm -f *.s
 	rm -f ppas.sh
 	rm -f *.ppu
-
-
