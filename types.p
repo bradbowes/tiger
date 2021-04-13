@@ -37,7 +37,7 @@ const
 
    
 function make_record_type(): spec;
-procedure append_field(rec: spec; name: symbol; ty: spec);
+procedure add_field(rec: spec; name: symbol; ty: spec);
 function lookup_field(rec: spec; name: symbol): spec;
 function make_array_type(base: spec): spec;
    
@@ -64,7 +64,7 @@ begin
       append(list^.next, f);
 end;       
 
-procedure append_field(rec: spec; name: symbol; ty: spec);
+procedure add_field(rec: spec; name: symbol; ty: spec);
 var f: field;
 begin
    begin

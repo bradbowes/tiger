@@ -133,6 +133,7 @@ begin
       else if bal < -1 then item := rotate_left(item);
       bal := balance(item);
    end;
+
    insert := item;
 end;
 
@@ -147,7 +148,7 @@ var
    ty: spec;
 begin
    table := env^.bindings;
-   if table <> nil then
+   if table = nil then
       lookup := nil
    else
       begin
