@@ -1,12 +1,12 @@
 all:	compile print
 
-compile:	utils.p symbols.p scanners.p ops.p nodes.p parsers.p \
-        bindings.p types.p compile.p 
+compile:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
+        parsers.pas bindings.pas types.pas compile.pas 
 	fpc -Sh -Px86_64 -O3 compile
 	strip compile
 
-print:	utils.p symbols.p scanners.p ops.p nodes.p parsers.p \
-        formats.p print.p
+print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas parsers.pas \
+        formats.pas print.pas
 	fpc -Sh -Px86_64 -O3 print
 	strip print
 
