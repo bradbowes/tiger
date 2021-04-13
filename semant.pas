@@ -11,7 +11,11 @@ implementation
 uses utils, ops;
 
 function type_check(n: node; env, tenv: frame): spec;
-var ty1, ty2 : spec; op: op_tag;
+var
+   ty1, ty2 : spec;
+   op: op_tag;
+   it: node_list_item;
+   
 begin
    case n^.tag of
       assign_node: begin
@@ -25,7 +29,7 @@ begin
          format :=  n^.call^.id + '(' + format_list(n^.args, ', ', false) + ')';
 }
       simple_var_node:
-         type_check := lookup(env, n^.name);
+         type_check := lookup(env, n^.name, n^.line, n^.col);
 {
 
       field_var_node:
@@ -44,10 +48,25 @@ begin
 
       nil_node:
          type_check := nil_type;
-{
-      type_decl_node:
-         format := newline + 'type ' + n^.type_name^.id + ' = ' + format(n^.type_spec);
-}
+
+      type_decl_node: begin
+         case n^.type_spec^.tag of
+            array_desc_node:
+               ty1 := make_array_type(lookup(tenv, n^.type_spec^.base, n^.type_spec^.line, n^.type_spec^.col));
+            record_desc_node: begin
+               ty1 := make_record_type(nil);
+               it := n^.type_spec^.field_list^.first;
+               while it <> nil do
+                  begin
+                     add_field(ty1, it^.node^.field_desc_name, lookup(tenv, it^.node^.field_type, it^.node^.line, it^.node^.col));
+                     it := it^.next;
+                  end;
+            end;
+         end;
+         bind(tenv, n^.type_name, ty1, n^.line, n^.col);
+         type_check := void_type;
+      end;
+
       var_decl_node: begin
          ty1 := type_check(n^.initial_value, env, tenv);
          if n^.var_type = nil then
@@ -57,11 +76,11 @@ begin
             end
          else
             begin
-               ty2 := lookup(tenv, n^.var_type);
+               ty2 := lookup(tenv, n^.var_type, n^.line, n^.col);
                if ty1 <> ty2 then
                   err('initializer doesn''t match type spec', n^.line, n^.col);
             end;
-         bind(env, n^.var_name, ty1);
+         bind(env, n^.var_name, ty1, n^.line, n^.col);
          type_check := void_type;
       end;
 (*
@@ -76,11 +95,7 @@ begin
          dedent;
          format := s;
       end;
-      record_desc_node:
-         format := '{' + format_list(n^.field_list, ',', true) + newline + '}';
-      array_desc_node:
-         format := 'array of ' + n^.base^.id;
-*)         
+*)
       unary_op_node: begin
          { minus is the only unary op }
          if type_check(n^.unary_exp, env, tenv) <> int_type then
@@ -115,8 +130,6 @@ begin
 (*
       field_node:
          format := n^.field_name^.id + ' = ' + format(n^.field_value);
-      field_desc_node:
-         format := n^.field_desc_name^.id + ': ' + n^.field_type^.id;
 *)
       if_else_node: begin
          if type_check(n^.if_else_condition, env, tenv) <> bool_type then
@@ -144,7 +157,7 @@ begin
       end;
 
       for_node: begin
-         bind(env, n^.iter, int_type);
+         bind(env, n^.iter, int_type, n^.line, n^.col);
          if type_check(n^.start, env, tenv) <> int_type then
             err('for start value must be integer type', n^.start^.line, n^.start^.col);
          if type_check(n^.finish, env, tenv) <> int_type then

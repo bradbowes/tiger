@@ -24,8 +24,8 @@ const
    global_tenv: frame = @_global_tenv;
 
 function add_frame(env: frame): frame;
-procedure bind(env: frame; key: symbol; ty: spec);
-function lookup(env: frame; key: symbol): spec;
+procedure bind(env: frame; key: symbol; ty: spec; line, col: longint);
+function lookup(env: frame; key: symbol; line, col: longint): spec;
 
 implementation
 
@@ -113,9 +113,6 @@ var
    item: binding;
    bal: Integer;
 begin
-   if find(table, key) <> nil then
-      err(key^.id + ' already defined in scope', 0, 0);
-
    if table = nil then
       item := make_binding(key, ty, nil, nil)
    else if key < table^.key then
@@ -137,24 +134,29 @@ begin
    insert := item;
 end;
 
-procedure bind(env: frame; key: symbol; ty: spec);
+procedure bind(env: frame; key: symbol; ty: spec; line, col: longint);
+var table: binding;
 begin
-   env^.bindings := insert(env^.bindings, key, ty);
+   table := env^.bindings;
+   if find(table, key) <> nil then
+      err(key^.id + ' already defined in scope', line, col);
+
+   env^.bindings := insert(table, key, ty);
 end;
 
-function lookup(env: frame; key: symbol): spec;
+function lookup(env: frame; key: symbol; line, col: longint): spec;
 var
    table: binding;
    ty: spec;
 begin
    table := env^.bindings;
    if table = nil then
-      lookup := nil
+      err('identifier ''' + key^.id + ''' is not bound', line, col)
    else
       begin
          ty := find(table, key);
          if ty = nil then
-            lookup := lookup(env^.next, key)
+            lookup := lookup(env^.next, key, line, col)
          else
             lookup := ty;
       end;
