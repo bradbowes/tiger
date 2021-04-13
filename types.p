@@ -23,23 +23,23 @@ type
          array_type: (base: spec);
    end;
 
-   const
-      _void_type: spec_t = (tag: primitive_type; base: nil);
-      void_type: spec = @_void_type;
-      _nil_type: spec_t = (tag: primitive_type; base: nil);
-      nil_type: spec = @_nil_type;
-      _int_type: spec_t = (tag: primitive_type; base: nil);
-      int_type: spec = @_int_type;
-      _bool_type: spec_t = (tag: primitive_type; base: nil);
-      bool_type: spec = @_bool_type;
-      _string_type: spec_t = (tag: primitive_type; base: nil);
-      string_type: spec = @string_type;
+const
+   _void_type: spec_t = (tag: primitive_type; base: nil);
+   void_type: spec = @_void_type;
+   _nil_type: spec_t = (tag: primitive_type; base: nil);
+   nil_type: spec = @_nil_type;
+   _int_type: spec_t = (tag: primitive_type; base: nil);
+   int_type: spec = @_int_type;
+   _bool_type: spec_t = (tag: primitive_type; base: nil);
+   bool_type: spec = @_bool_type;
+   _string_type: spec_t = (tag: primitive_type; base: nil);
+   string_type: spec = @string_type;
 
    
-   function make_record_type(): spec;
-   procedure append_field(rec: spec; name: symbol; ty: spec);
-   function lookup_field(rec: spec; name: symbol): spec;
-   function make_array_type(base: spec): spec;
+function make_record_type(): spec;
+procedure append_field(rec: spec; name: symbol; ty: spec);
+function lookup_field(rec: spec; name: symbol): spec;
+function make_array_type(base: spec): spec;
    
 implementation
 

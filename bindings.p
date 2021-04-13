@@ -11,17 +11,42 @@ type
       left, right: binding;
    end;
 
-function bind(table: binding; key: symbol; ty: spec): binding;
-function lookup(table: binding; key: symbol): spec;
+   frame = ^frame_t;
+   frame_t = record
+      bindings: binding;
+      next: frame;
+   end;
+
+const
+   _global_env: frame_t = (bindings: nil; next: nil);
+   global_env: frame = @_global_env;
+   _global_tenv: frame_t = (bindings: nil; next: nil);
+   global_tenv: frame = @_global_tenv;
+
+function add_frame(env: frame): frame;
+procedure bind(env: frame; key: symbol; ty: spec);
+function lookup(env: frame; key: symbol): spec;
 
 implementation
+
+uses utils;
+
+function add_frame(env: frame): frame;
+var
+   f: frame;
+begin
+   new(f);
+   f^.bindings := nil;
+   f^.next := env;
+   add_frame := f;   
+end;
 
 function make_binding(
    key: symbol; ty: spec; left, right: binding): binding;
 var
    b: binding;
 begin
-   new (b);
+   new(b);
    b^.key := key;
    b^.ty := ty;
    b^.left := left;
@@ -71,43 +96,67 @@ begin
    dispose(table);
 end;
 
-function bind(table: binding; key: symbol; ty: spec) : binding;
-var
-   Item : binding;
-   Bal : Integer;
+function find(table: binding; key: symbol): spec;
 begin
    if table = nil then
-      Item := make_binding(key, ty, nil, nil)
+      find := nil
    else if key < table^.key then
-      Item := make_binding(table^.key, table^.ty,
-                          bind(table^.left, key, ty),
-                          table^.right)
+      find := find(table^.left, key)
    else if key > table^.key then
-      Item := make_binding(table^.key, table^.ty,
-                          table^.left,
-                          bind(table^.right, key, ty))
+      find := find(table^.right, key)
    else
-      Item := make_binding(key, ty, table^.left, table^.right);
-
-   Bal := balance(Item);
-   while (Bal < -1) or (Bal > 1) do begin
-      if Bal > 1 then Item := rotate_right(Item)
-      else if Bal < -1 then Item := rotate_left(Item);
-      Bal := balance(Item);
-   end;
-   bind := Item;
+      find := table^.ty;
 end;
 
-function lookup(table: binding; key: symbol): spec;
+function insert(table: binding; key: symbol; ty: spec): binding;
+var
+   item: binding;
+   bal: Integer;
 begin
+   if find(table, key) <> nil then
+      err(key^.id + ' already defined in scope', 0, 0);
+
    if table = nil then
-      lookup := nil
+      item := make_binding(key, ty, nil, nil)
    else if key < table^.key then
-      lookup := lookup(table^.left, key)
+      item := make_binding(table^.key, table^.ty,
+                           insert(table^.left, key, ty),
+                           table^.right)
    else if key > table^.key then
-      lookup := lookup (table^.right, key)
+      item := make_binding(table^.key, table^.ty,
+                           table^.left,
+                           insert(table^.right, key, ty));
+
+   bal := balance(item);
+   while (bal < -1) or (bal > 1) do begin
+      if bal > 1 then item := rotate_right(item)
+      else if bal < -1 then item := rotate_left(item);
+      bal := balance(item);
+   end;
+   insert := item;
+end;
+
+procedure bind(env: frame; key: symbol; ty: spec);
+begin
+   env^.bindings := insert(env^.bindings, key, ty);
+end;
+
+function lookup(env: frame; key: symbol): spec;
+var
+   table: binding;
+   ty: spec;
+begin
+   table := env^.bindings;
+   if table <> nil then
+      lookup := nil
    else
-      lookup := table^.ty;
+      begin
+         ty := find(table, key);
+         if ty = nil then
+            lookup := lookup(env^.next, key)
+         else
+            lookup := ty;
+      end;
 end;
 
 end.

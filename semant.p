@@ -4,13 +4,13 @@ interface
 
 uses bindings, types, nodes;
 
-function type_check(n: node; env, tenv: binding): spec;
+function type_check(n: node; env, tenv: frame): spec;
 
 implementation
 
 uses utils, ops;
 
-function type_check(n: node; env, tenv: binding): spec;
+function type_check(n: node; env, tenv: frame): spec;
 var ty1, ty2 : spec; op: op_tag;
 begin
    case n^.tag of
