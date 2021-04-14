@@ -1,4 +1,4 @@
-program compile;
+program print;
 uses
    formats, parsers;
 
