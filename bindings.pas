@@ -139,14 +139,13 @@ var table: binding;
 begin
    table := env^.bindings;
    if find(table, key) <> nil then
-      err('identifire ''' + key^.id + ''' was previously defined in scope', line, col);
+      err('identifier ''' + key^.id + ''' was previously defined in scope', line, col);
    env^.bindings := insert(table, key, ty);
 end;
 
 function lookup(env: frame; key: symbol; line, col: longint): spec;
 var
    ty: spec;
-   next: frame;
 begin
    if env = nil then
       err('identifier ''' + key^.id + ''' is not defined', line, col);

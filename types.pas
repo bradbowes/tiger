@@ -35,8 +35,8 @@ const
    string_type: spec = @string_type;
 
    
-procedure add_field(rec: spec; name: symbol; ty: spec);
-function get_field(rec: spec; name: symbol): spec;
+procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
+function get_field(rec: spec; name: symbol; line, col: longint): spec;
 function make_array_type(base: spec): spec;
 function make_record_type(fields: field): spec;
 function make_function_type(params: field; return: spec): spec;
@@ -65,17 +65,17 @@ begin
    make_function_type := s;
 end;
 
-procedure append(list: field; f: field);
+procedure append(list: field; f: field; line, col: longint);
 begin
    if list^.name = f^.name then
-      err('field ''' + f^.name^.id + ''' specified more than once', 0, 0)
+      err('field ''' + f^.name^.id + ''' specified more than once', line, col)
    else if list^.next = nil then
       list^.next := f
    else
-      append(list^.next, f);
+      append(list^.next, f, line, col);
 end;       
 
-procedure add_field(rec: spec; name: symbol; ty: spec);
+procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
 var f: field;
 begin
    begin
@@ -86,7 +86,7 @@ begin
       if rec^.fields = nil then 
          rec^.fields := f
       else
-         append(rec^.fields, f);
+         append(rec^.fields, f, line, col);
      end;
 end;
 
@@ -100,9 +100,13 @@ begin
       lookup := lookup(list^.next, name);
 end;
 
-function get_field(rec: spec; name: symbol): spec;
+function get_field(rec: spec; name: symbol; line, col: longint): spec;
+var ty: spec;
 begin
-   get_field := lookup(rec^.fields, name);
+   ty := lookup(rec^.fields, name);
+   if ty = nil then
+      err('object has no field ''' + name^.id + '''', line, col);
+   get_field := ty;
 end;
 
 function make_array_type(base: spec): spec;
