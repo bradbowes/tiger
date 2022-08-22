@@ -6,9 +6,9 @@ let
       let
          var i := 0
          function isdigit(s: string) : int =
-            ord(buffer) >= ord("0") & ord(buffer) <= ord("9")
+            ord(buffer) >= ord("0") and ord(buffer) <= ord("9")
       in (
-         while buffer = " " | buffer = "\n" do
+         while buffer = " " or buffer = "\n" do
             buffer := getchar();
          any.any := isdigit(buffer);
          while isdigit(buffer) do (

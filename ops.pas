@@ -14,7 +14,7 @@ const
    boolean_ops = [and_op, or_op];
 
    op_display: array[plus_op..or_op] of string = 
-      ('+', '-', '*', '/', 'mod', '=', '<>', '<', '<=', '>', '>=', '&', '|');
+      ('+', '-', '*', '/', 'mod', '=', '<>', '<', '<=', '>', '>=', 'and', 'or');
 
 implementation
 

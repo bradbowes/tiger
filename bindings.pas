@@ -119,7 +119,7 @@ end;
 
 function insert(table: binding; key: symbol; ty: spec; stack_index: longint) : binding;
 var
-   item: binding;
+   item: binding = nil;
    { bal: Integer; }
 begin
    if table = nil then

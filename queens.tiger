@@ -22,7 +22,7 @@ let
          print_board()
       else
          for r := 0 to n - 1 do
-            if row[r] = 0 & diag1[r + c] = 0 & diag2[r + 7 -c] = 0 then (
+            if row[r] = 0 and diag1[r + c] = 0 and diag2[r + 7 -c] = 0 then (
                row[r] := 1;
                diag1[r + c] := 0;
                diag2[r + 7 - c] := 1;
