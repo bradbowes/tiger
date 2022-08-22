@@ -423,20 +423,19 @@ var
       get_var_declaration := nil;
       line := token.line;
       col := token.col;
-      next;
       name := get_identifier;
       if token.tag = colon_token then
          begin
             next;
             ty := get_identifier;
          end;
-      if token.tag = assign_token then
+      if token.tag = eq_token then
          begin
             next;
             exp := get_expression;
          end
       else
-         err('Expected '':'' or '':='', got ''' + token.value + '''',
+         err('Expected '':'' or ''='', got ''' + token.value + '''',
              token.line, token.col);
       get_var_declaration := make_var_decl_node(name, ty, exp, line, col);
    end;
@@ -544,7 +543,7 @@ var
    begin
       get_declaration := nil;
       case token.tag of
-         var_token: get_declaration := get_var_declaration;
+         id_token: get_declaration := get_var_declaration;
          function_token: get_declaration := get_function_declaration;
          type_token: get_declaration := get_type_declaration;
       else
@@ -559,7 +558,7 @@ var
       decls: node_list;
    begin
       decls := make_list();
-      while token.tag in [var_token, function_token, type_token] do
+      while token.tag in [id_token, function_token, type_token] do
          append(decls, get_declaration);
       get_declaration_list := decls
    end; { get_declaration_list }

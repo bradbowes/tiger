@@ -74,10 +74,10 @@ begin
       type_decl_node:
          format := newline + 'type ' + n^.type_name^.id + ' = ' + format(n^.type_spec);
       var_decl_node: begin
-         s := 'var ' + n^.var_name^.id; 
+         s := n^.var_name^.id; 
          if n^.var_type <> nil then
             s := s + ': ' + n^.var_type^.id;
-         format := s + ' := ' + format( n^.initial_value);
+         format := s + ' = ' + format( n^.initial_value);
       end;
       fun_decl_node: begin
          s := newline + 'function ' + n^.fun_name^.id + 

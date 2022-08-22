@@ -4,10 +4,11 @@ test_code () {
    echo $1 > tt.t
    ../compile tt.t
    cc -o test test.c output.s
+   echo $1 '=>' $2
    if [ "$(./test)" = "$2" ]; then
-      echo '\e[0;32mOK\e[0m' $1 '=>' $2
+      echo '\e[0;32mOK\e[0m' 
    else
-      echo '\e[0;31mFAIL\e[0m' $1
+      echo '\e[0;31mFAIL\e[0m'
    fi
    rm output.s
    rm test
@@ -64,10 +65,12 @@ test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
 END COMMENT
 
-test_code "let var a := 10 in a" "10"
-test_code "let var a := 15 + 29
-     var b :=  6
-     in
-     a + b + 9" "59"
+test_code "let a = 10 in a" "10"
+test_code "
+let
+   a = 15 + 29
+   b =  6
+in
+   a + b + 9" "59"
 
 

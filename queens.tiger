@@ -1,12 +1,12 @@
 let
-   var n := 8
+   n = 8
 
    type int_array = array of int
 
-   var row := int_array [n] of 0
-   var col := int_array [n] of 0
-   var diag1 := int_array [n + n - 1] of 0
-   var diag2 := int_array [n + n - 1] of 0
+   row = int_array [n] of 0
+   col = int_array [n] of 0
+   diag1 = int_array [n + n - 1] of 0
+   diag2 = int_array [n + n - 1] of 0
 
    function print_board() = (
       for i := 0 to n - 1 do (

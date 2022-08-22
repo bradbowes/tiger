@@ -49,7 +49,6 @@ type
                 to_token,
                 true_token,
                 type_token,
-                var_token,
                 while_token);
 
    token_t = record
@@ -193,7 +192,6 @@ procedure scan(s: scanner);
          'to': token.tag := to_token;
          'true': token.tag := true_token;
          'type': token.tag := type_token;
-         'var': token.tag := var_token;
          'while': token.tag := while_token;
       else
          token.tag := id_token;
@@ -318,6 +316,5 @@ begin
    token_display[to_token] := 'to';
    token_display[true_token] := 'true';
    token_display[type_token] := 'type';
-   token_display[var_token] := 'var';
    token_display[while_token] := 'while';
 end.
