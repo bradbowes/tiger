@@ -8,24 +8,26 @@ type
    binding_t = record
       key: symbol;
       ty: spec;
+      stack_index: longint;
       left, right: binding;
    end;
 
    frame = ^frame_t;
    frame_t = record
       bindings: binding;
+      stack_index: longint;
       next: frame;
    end;
 
 const
-   _global_env: frame_t = (bindings: nil; next: nil);
+   _global_env: frame_t = (bindings: nil; stack_index: 0; next: nil);
    global_env: frame = @_global_env;
-   _global_tenv: frame_t = (bindings: nil; next: nil);
+   _global_tenv: frame_t = (bindings: nil; stack_index: 0; next: nil);
    global_tenv: frame = @_global_tenv;
 
 function add_frame(env: frame): frame;
-procedure bind(env: frame; key: symbol; ty: spec; line, col: longint);
-function lookup(env: frame; key: symbol; line, col: longint): spec;
+procedure bind(env: frame; key: symbol; ty: spec; stack_index, line, col: longint);
+function lookup(env: frame; key: symbol; line, col: longint): binding;
 
 implementation
 
@@ -42,18 +44,20 @@ begin
 end;
 
 function make_binding(
-   key: symbol; ty: spec; left, right: binding): binding;
+   key: symbol; ty: spec; stack_index: longint; left, right: binding): binding;
 var
    b: binding;
 begin
    new(b);
    b^.key := key;
    b^.ty := ty;
+   b^.stack_index := stack_index;
    b^.left := left;
    b^.right := right;
    make_binding := b;
 end;
 
+(*
 function height(table: binding): Integer;
 var
    l, r: integer;
@@ -76,10 +80,12 @@ function rotate_left(table: binding): binding;
 begin
    rotate_left := make_binding(table^.right^.key,
                                table^.right^.ty,
+                               table^.right^.stack_index,
                                make_binding(table^.key,
                                             table^.ty,
+                                            table^.stack_index,
                                             table^.left,
-                                         table^.right^.left),
+                                            table^.right^.left),
                                table^.right^.right);
    dispose(table);
 end;
@@ -88,15 +94,18 @@ function rotate_right(table: binding): binding;
 begin
    rotate_right := make_binding(table^.left^.key,
                                 table^.left^.ty,
+                                table^.left^.stack_index,
                                 table^.left^.left,
                                 make_binding(table^.key,
                                              table^.ty,
+                                             table^.stack_index,
                                              table^.left^.right,
                                              table^.right));
    dispose(table);
 end;
+*)
 
-function find(table: binding; key: symbol): spec;
+function find(table: binding; key: symbol): binding;
 begin
    if table = nil then
       find := nil
@@ -105,55 +114,59 @@ begin
    else if key > table^.key then
       find := find(table^.right, key)
    else
-      find := table^.ty;
+      find := table;
 end;
 
-function insert(table: binding; key: symbol; ty: spec): binding;
+function insert(table: binding; key: symbol; ty: spec; stack_index: longint) : binding;
 var
    item: binding;
-   bal: Integer;
+   { bal: Integer; }
 begin
    if table = nil then
-      item := make_binding(key, ty, nil, nil)
+      item := make_binding(key, ty, stack_index, nil, nil)
    else if key < table^.key then
-      item := make_binding(table^.key, table^.ty,
-                           insert(table^.left, key, ty),
+      item := make_binding(table^.key, table^.ty, table^.stack_index,
+                           insert(table^.left, key, ty, stack_index),
                            table^.right)
    else if key > table^.key then
-      item := make_binding(table^.key, table^.ty,
+      item := make_binding(table^.key, table^.ty, table^.stack_index,
                            table^.left,
-                           insert(table^.right, key, ty));
-
+                           insert(table^.right, key, ty, stack_index));
+(*
    bal := balance(item);
    while (bal < -1) or (bal > 1) do begin
       if bal > 1 then item := rotate_right(item)
       else if bal < -1 then item := rotate_left(item);
       bal := balance(item);
    end;
-
+*)
    insert := item;
 end;
 
-procedure bind(env: frame; key: symbol; ty: spec; line, col: longint);
+procedure bind(env: frame; key: symbol; ty: spec; stack_index, line, col: longint);
 var table: binding;
 begin
    table := env^.bindings;
    if find(table, key) <> nil then
       err('identifier ''' + key^.id + ''' was previously defined in scope', line, col);
-   env^.bindings := insert(table, key, ty);
+   env^.bindings := insert(table, key, ty, stack_index);
 end;
 
-function lookup(env: frame; key: symbol; line, col: longint): spec;
+function lookup(env: frame; key: symbol; line, col: longint): binding;
 var
-   ty: spec;
+   b: binding;
 begin
    if env = nil then
       err('identifier ''' + key^.id + ''' is not defined', line, col);
-   ty := find(env^.bindings, key);
-   if ty = nil then
+   b := find(env^.bindings, key);
+   if b = nil then
       lookup := lookup(env^.next, key, line, col)
    else
-      lookup := ty;
+      lookup := b;
 end;
 
+begin
+   bind(global_tenv, intern('integer'), int_type, 0, 0, 0);
+   bind(global_tenv, intern('string'), string_type, 0, 0, 0);
+   bind(global_tenv, intern('boolean'), bool_type, 0, 0, 0);
 end.

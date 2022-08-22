@@ -189,7 +189,14 @@ var
          lparen_token:
             begin
                next;
-               factor := make_sequence_node(get_expression_list(semicolon_token), line, col);
+	       list := get_expression_list(semicolon_token);
+	       if list^.first = list^.last then
+	          begin
+		     factor := list^.first^.node;
+		     dispose(list);
+		  end
+	       else
+                  factor := make_sequence_node(list, line, col);
                advance(rparen_token);
             end;
          else
@@ -218,6 +225,7 @@ var
          case token.tag of
             mul_token: helper := helper(make_node(mul_op));
             div_token: helper := helper(make_node(div_op));
+	    mod_token: helper := helper(make_node(mod_op));
             else helper := left;
          end;
       end;

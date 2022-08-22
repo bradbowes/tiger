@@ -2,7 +2,7 @@ unit nodes;
 
 interface
 
-uses symbols, ops;
+uses symbols, ops, bindings;
 
 type
    node_tag = (assign_node, call_node,
@@ -34,7 +34,7 @@ type
       case tag: node_tag of
          assign_node:      (variable, expression: node);
          call_node:        (call: symbol; args: node_list);
-         simple_var_node:  (name: symbol);
+         simple_var_node:  (name: symbol; binding: binding);
          field_var_node:   (obj: node; field: symbol);
          indexed_var_node: (arr, index: node);
          integer_node:     (int_val: longint);
@@ -42,7 +42,7 @@ type
          boolean_node:     (bool_val: boolean);
          nil_node:         ();
          type_decl_node:   (type_name: symbol; type_spec: node);
-         var_decl_node:    (var_name, var_type: symbol; initial_value: node);
+         var_decl_node:    (var_name, var_type: symbol; stack_index: longint; initial_value: node);
          fun_decl_node:    (fun_name: symbol; params: node_list; return_type: symbol; fun_body: node); 
          record_desc_node: (field_list: node_list);
          array_desc_node:  (base: symbol);
@@ -54,7 +54,7 @@ type
          if_node:          (if_condition, if_consequent: node);
          while_node:       (while_condition, while_body: node);
          for_node:         (iter: symbol; start, finish, for_body: node);
-         let_node:         (decls: node_list; let_body: node);
+         let_node:         (decls: node_list; let_body: node; env: frame);
          sequence_node:    (sequence: node_list);
          record_node:      (record_type: symbol; fields: node_list);
          array_node:       (array_type: symbol; size, default_value: node);

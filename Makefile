@@ -13,6 +13,7 @@ print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas parsers.pas \
 clean:
 	rm -f compile
 	rm -f print
+	rm -f test
 	rm -f *.o
 	rm -f *.s
 	rm -f ppas.sh

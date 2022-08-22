@@ -32,6 +32,7 @@ type
                 lparen_token,
                 lt_token,
                 minus_token,
+                mod_token,
                 mul_token,
                 neq_token,
                 nil_token,
@@ -174,6 +175,7 @@ procedure scan(s: scanner);
       while s^.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
          push_char;
       case token.value of
+         'and': token.tag := and_token;
          'array': token.tag := array_token;
          'do': token.tag := do_token;
          'else': token.tag := else_token;
@@ -183,8 +185,10 @@ procedure scan(s: scanner);
          'if': token.tag := if_token;
          'in': token.tag := in_token;
          'let': token.tag := let_token;
+         'mod': token.tag := mod_token;
          'nil': token.tag := nil_token;
          'of': token.tag := of_token;
+         'or': token.tag := or_token;
          'then': token.tag := then_token;
          'to': token.tag := to_token;
          'true': token.tag := true_token;
@@ -221,8 +225,6 @@ begin
          '+': recognize(plus_token);
          '-': recognize(minus_token);
          '*': recognize(mul_token);
-         '&': recognize(and_token);
-         '|': recognize(or_token);
          '/': begin
             push_char;
             if s^.ch = '*' then skip_comment
@@ -273,7 +275,7 @@ end;
 
 
 begin
-   token_display[and_token] := '&';
+   token_display[and_token] := 'and';
    token_display[array_token] := 'array';
    token_display[assign_token] := ':=';
    token_display[colon_token] := ':';
@@ -299,12 +301,13 @@ begin
    token_display[lparen_token] := '(';
    token_display[lt_token] := '<';
    token_display[minus_token] := '-';
+   token_display[mod_token] := 'mod';
    token_display[mul_token] := '*';
    token_display[neq_token] := '<>';
    token_display[nil_token] := 'nil';
    token_display[number_token] := '<number>';
    token_display[of_token] := 'of';
-   token_display[or_token] := '|';
+   token_display[or_token] := 'or';
    token_display[plus_token] := '+';
    token_display[rbrace_token] := '}';
    token_display[rbracket_token] := ']';
