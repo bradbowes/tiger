@@ -1,19 +1,27 @@
 #!/bin/zsh
 
+count=1
+
+rm -f test*.s test*.tiger
 test_code () {
-   echo $1 > tt.t
-   ../compile tt.t
-   cc -o test test.c output.s
+   src=test$count.tiger
+   output=test$count.s
+   echo
+   echo '\e[0;33mtesting' \#$count ...'\e[0m'
+   echo $1 > $src
+   ../compile $src
+   mv output.s $output
+   cc test.c $output
    echo $1 '=>' $2
-   if [ "$(./test)" = "$2" ]; then
+   if [ "$(./a.out)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m' 
    else
       echo '\e[0;31mFAIL\e[0m'
    fi
-   rm output.s
-   rm test
-   rm tt.t
+   rm -f a.out
+   let count+=1
 }
+
 : <<'END COMMENT'
 test_code "12345" "12345"
 test_code "65536" "65536"
@@ -65,12 +73,19 @@ test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
 END COMMENT
 
-test_code "let a = 10 in a" "10"
-test_code "
-let
+test_code "let
    a = 15 + 29
    b =  6
 in
    a + b + 9" "59"
 
+test_code "let a = 10 in
+   let b = a * 2 in
+      a + b" "30"
+
+test_code "let
+   a = 10
+   b = a * 2
+in
+   a + b" "30"
 

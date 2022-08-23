@@ -1,10 +1,10 @@
 let
    type any = { any: int }
-   var buffer = getchar()
+   buffer = getchar()
 
    function readint(any: any) : int =
       let
-         var i = 0
+         i = 0
          function isdigit(s: string) : int =
             ord(buffer) >= ord("0") and ord(buffer) <= ord("9")
       in (
@@ -22,8 +22,8 @@ let
    
    function readlist() : list =
       let
-         var any = any{ any = 0 }
-         var i = readint(any)
+         any = any { any = 0 }
+         i = readint(any)
       in
          if any.any then
             list{ first = i, rest = readlist() }

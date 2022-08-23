@@ -17,3 +17,6 @@ clean:
 	rm -f *.s
 	rm -f ppas.sh
 	rm -f *.ppu
+	rm -f test/*.s
+	rm -f test/*.tiger
+	
