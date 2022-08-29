@@ -103,6 +103,17 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       check_simple_var := b^.ty;
    end;
 
+   function check_if_else(): spec;
+   var ty: spec;
+   begin
+      if type_check(n^.if_else_condition, si, env, tenv) <> bool_type then
+         err('if condition is not a boolean value', n^.line, n^.col);
+      ty := type_check(n^.if_else_consequent, si, env, tenv);
+      if ty <> type_check(n^.if_else_alternative, si, env, tenv) then
+         err('if and else clauses incompatible types', n^.line, n^.col);
+      check_if_else := ty;
+   end;
+
 (*
    function check_assign(): spec;
    var ty: spec;
@@ -140,17 +151,6 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       end;
       bind(tenv, n^.type_name, ty, n^.line, n^.col);
       check_type_decl := void_type;
-   end;
-
-   function check_if_else(): spec;
-   var ty: spec;
-   begin
-      if type_check(n^.if_else_condition, env, tenv) <> bool_type then
-         err('if condition is not a boolean value', n^.line, n^.col);
-      ty := type_check(n^.if_else_consequent, env, tenv);
-      if ty <> type_check(n^.if_else_alternative, env, tenv) then
-         err('if and else clauses incompatible types', n^.line, n^.col);
-      check_if_else := ty;
    end;
 
    function check_if(): spec;
@@ -312,6 +312,8 @@ begin
          type_check := int_type;
       boolean_node:
          type_check := bool_type;
+      string_node:
+         type_check := string_type;
       unary_op_node:
          type_check := check_unary_op();
       binary_op_node:
@@ -322,6 +324,9 @@ begin
          type_check := check_simple_var();
       var_decl_node:
          type_check := check_var_decl();
+      if_else_node:
+         type_check := check_if_else();
+
          
       else begin
          writeln(n^.tag);
@@ -330,12 +335,8 @@ begin
 (*
       assign_node:
          type_check := check_assign();
-      string_node:
-         type_check := string_type;
       type_decl_node:
          type_check := check_type_decl();
-      if_else_node:
-         type_check := check_if_else();
       if_node:
          type_check := check_if();
       while_node:

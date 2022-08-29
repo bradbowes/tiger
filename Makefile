@@ -1,7 +1,7 @@
 all:	compile print
 
 compile:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
-        parsers.pas bindings.pas types.pas compile.pas 
+        parsers.pas bindings.pas types.pas semant.pas compile.pas 
 	fpc -Sh -Px86_64 -O3 compile
 	strip compile
 
@@ -17,6 +17,6 @@ clean:
 	rm -f *.s
 	rm -f ppas.sh
 	rm -f *.ppu
-	rm -f test/*.s
-	rm -f test/*.tiger
+	rm -f test/test*.s
+	rm -f test/test*.tiger
 	

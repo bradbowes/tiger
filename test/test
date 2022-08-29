@@ -1,8 +1,8 @@
 #!/bin/zsh
 
 count=1
-
 rm -f test*.s test*.tiger
+
 test_code () {
    src=test$count.tiger
    output=test$count.s
@@ -11,7 +11,7 @@ test_code () {
    echo $1 > $src
    ../compile $src
    mv output.s $output
-   cc test.c $output
+   cc $harness $output
    echo $1 '=>' $2
    if [ "$(./a.out)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m' 
@@ -21,6 +21,8 @@ test_code () {
    rm -f a.out
    let count+=1
 }
+
+harness=test_int.c
 
 : <<'END COMMENT'
 test_code "12345" "12345"
@@ -71,6 +73,7 @@ test_code "2 + 2 = 4 = true" "1"
 test_code "nil" "0"
 test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
+
 END COMMENT
 
 test_code "let
@@ -88,4 +91,23 @@ test_code "let
    b = a * 2
 in
    a + b" "30"
+
+test_code "if 1 = 1 then 7 else 9" "7"
+test_code "if 1 < 1 then 7 else 9" "9"
+test_code "if false then 7 else 9" "9"
+test_code "if true then 7 else 9" "7"
+test_code "let
+   a = 10
+   b = let a = 20 b = 30 in a + b
+in
+   a + b" "60"
+
+harness=test_string.c
+
+test_code "\"abcdef\"" "6  abcdef"
+test_code "\"this is \"\"line 1\"\"
+this is line 2\"" "31  this is \"line 1\"
+this is line 2"
+
+test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
