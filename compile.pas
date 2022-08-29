@@ -1,6 +1,20 @@
 program compile;
+{$mode objfpc}
 
 uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant;
+
+const prologue = 
+   '.text' + lineending +
+   '.globl _tiger_entry' + lineending +
+   '_tiger_entry:' + lineending +
+   '    pushq %%r15' + lineending +
+   '    movq %%rdi, %%r15' + lineending;
+
+
+const epilogue = 
+   '    popq %%r15' + lineending +
+   '    ret' + lineending;
+
 
 type
    string_list = ^string_list_t;
@@ -9,7 +23,8 @@ type
       sym: symbol;
       id: integer;
       next: string_list;
-   end;  
+   end;
+
 
 var
    f: textfile;
@@ -17,8 +32,7 @@ var
    strings: string_list = nil;
    next_string_id: integer = 1;
    next_label_id: integer = 1;
-   sl: string_list;
-   s: string;
+
 
 function add_string(s: symbol): string_list;
 var
@@ -40,103 +54,44 @@ begin
    add_string := sl;
 end;
 
+
 function new_label(): string;
 begin
    new_label := format('L%.5d', [next_label_id]);
    next_label_id := next_label_id + 1;
 end;
    
-procedure lbl(s: string);
+
+procedure emit(fmt: string; args: array of const);
 begin
-   writeln(f, s, ':');
+   writeln(f, format(fmt, args));
 end;
 
-procedure c_fn(s: string);
+
+procedure emit_data();
+var
+   sl: string_list;
+   s: string;
+   l: longint;
 begin
-   writeln(f, '.globl _', s, #10'.align 3'#10'_', s, ':');
+   emit('.data', []);
+   sl := strings;
+   while sl <> nil do begin
+      s := sl^.sym^.id;
+      l := length(s);
+      s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
+      emit('    .align 3' + lineending +
+           'string_%d:' + lineending +
+           '    .int %d' + lineending +
+           '    .asciz "%s"', [sl^.id, l, s]);
+      sl := sl^.next;
+   end;
 end;
 
-procedure ret();
-begin
-   writeln(f, #9'ret');
-end;
 
-procedure push(src: string);
-begin
-   writeln(f, #9'push ', src);
-end;
-
-procedure pop(src: string);
-begin
-   writeln(f, #9'pop ', src);
-end;
-
-procedure emit(n: node; si: longint);
+procedure emit_expression(n: node; si: longint);
 var
    tmp: string;
-
-const
-   ax = '%rax';
-   dx = '%rdx';
-
-
-   procedure mov(src, dest: string);
-   begin
-      writeln(f, #9'movq ', src, ', ', dest);
-   end;
-
-   procedure lit(n: longint);
-   begin
-      mov('$' + inttostr(n), ax);
-   end;
-
-   procedure neg(dest: string);
-   begin
-      writeln(f, #9'negq ', dest);
-   end;
-
-   procedure add(src, dest: string);
-   begin
-      writeln(f, #9'addq ', src, ', ', dest);
-   end;
-
-   procedure subtract(src, dest: string);
-   begin
-      writeln(f, #9'subq ', src, ', ', dest);
-   end;
-
-   procedure multiply(src, dest: string);
-   begin
-      writeln(f, #9'imulq ', src, ', ', dest);
-   end;
-
-   procedure divide(src: string);
-   begin
-      writeln(f, #9'cltd');
-      writeln(f, #9'idivq ', src);
-   end;
-
-   procedure zero_ax();
-   begin
-      writeln(f, #9'xorq %rax, %rax');
-   end;
-
-   procedure compare(src, dest, cond: string);
-   begin
-      writeln(f, #9'cmpq ', src, ', ', dest);
-      writeln(f, #9'set', cond, ' %al');
-      writeln(f, #9'andq $1, %rax');
-   end;
-
-   procedure logical_and(src, dest: string);
-   begin
-      writeln(f, #9'andq ', src, ', ', dest);
-   end;
-
-   procedure logical_or(src, dest: string);
-   begin
-      writeln(f, #9'orq ', src, ', ', dest);
-   end;
 
    procedure emit_let(n: node; si: longint);
    var
@@ -146,10 +101,10 @@ const
       stack_index := n^.env^.stack_index * -8;
       it := n^.decls^.first;
       while it <> nil do begin
-         emit(it^.node, stack_index);
+         emit_expression(it^.node, stack_index);
          it := it^.next;
       end;
-      emit(n^.let_body, stack_index);
+      emit_expression(n^.let_body, stack_index);
    end;
 
    procedure emit_if_else(n: node; si: longint);
@@ -158,92 +113,103 @@ const
    begin
       label_1 := new_label();
       label_2 := new_label();
-      emit(n^.if_else_condition, si);
+      emit_expression(n^.if_else_condition, si);
       writeln(f, #9'jz ', label_1);
-      emit(n^.if_else_consequent, si);
+      emit_expression(n^.if_else_consequent, si);
       writeln(f, #9'jmp ', label_2);
-      lbl(label_1);
-      emit(n^.if_else_alternative, si); 
-      lbl(label_2); 
+      emit('%s:', [label_1]);
+      emit_expression(n^.if_else_alternative, si); 
+      emit('%s:', [label_2]); 
    end;
 
    procedure emit_string(n: node);
    var
       slabel: string;
+      sl: string_list;
    begin
       sl := add_string(n^.string_val);
       slabel := 'string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
-      writeln(f, #9'movq ', slabel, ', %rax');
+      emit('    movq %s, %%rax', [slabel]);
    end;
 
 begin
    case n^.tag of
       integer_node:
-         lit(n^.int_val);
+         emit('    movq $%d, %%rax', [n^.int_val]);
       unary_op_node: begin
-         emit(n^.unary_exp, si);
-         neg(ax);
+         emit_expression(n^.unary_exp, si);
+         emit('    negq %%rax', []);
       end;
       binary_op_node: begin
          tmp := inttostr(si) + '(%rsp)';
-         emit(n^.right, si);
-         mov(ax, tmp);
-         emit(n^.left, si - 8);
+         emit_expression(n^.right, si);
+         emit('    movq %%rax, %s', [tmp]);
+         emit_expression(n^.left, si - 8);
          case n^.binary_op of
             plus_op:
-               add(tmp, ax);
+               emit('    addq %s, %%rax', [tmp]);
             minus_op:
-               subtract(tmp, ax);
+               emit('    subq %s, %%rax', [tmp]);
             mul_op:
-               multiply(tmp, ax);
+               emit('    imulq %s, %%rax', [tmp]);
             div_op:
-               divide(tmp);
-            mod_op: begin
-               divide(tmp);
-               mov(dx, ax);
-            end;
+               emit('    cltd' + lineending +
+                    '    idivq %s', [tmp]);
+            mod_op:
+               emit('    cltd' + lineending +
+                    '    idivq %s' + lineending +
+                    '    movq %%rdx, %%rax', [tmp]);
             eq_op:
-               compare(tmp, ax, 'e');   
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    sete %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         neq_op:
-	            compare(tmp, ax, 'ne');
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    setne %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         lt_op:
-	            compare(tmp, ax, 'l');
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    setl %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         leq_op:
-	            compare(tmp, ax, 'le');
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    setle %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         gt_op:
-	            compare(tmp, ax, 'g');
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    setg %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         geq_op:
-	            compare(tmp, ax, 'ge');
+               emit('    cmpq %s, %%rax' + lineending +
+                    '    setge %%al' + lineending +
+                    '    andq $1, %%rax', [tmp]);
 	         and_op:
-	            logical_and(tmp, ax);
+	            emit('    andq %s, %%rax', [tmp]);
 	         or_op:
-	            logical_or(tmp, ax);
+	            emit('    orq %s, %%rax', [tmp]);
             else begin
                writeln(n^.binary_op);
                err('emit: operator not implemented yet!', n^.line, n^.col);
             end;
          end;
       end;
-      boolean_node:
+      boolean_node: begin
+         emit('    xorq %%rax, %%rax', []);
          if n^.bool_val then
-            begin
-               zero_ax();
-               writeln(f, #9'incq %rax');
-            end
-         else
-            zero_ax();
+            emit('    incq %%rax', []);
+      end;
       string_node:
          emit_string(n);
       nil_node:
-         lit(0);
+         emit('    xorq %%rax, %%rax', []);
       let_node:
          emit_let(n, si);
       var_decl_node: begin
-         emit(n^.initial_value, si);
-         mov(ax, inttostr(n^.stack_index * -8) + '(%rsp)');
+         emit_expression(n^.initial_value, si);
+         emit('    movq %%rax, %d(%%rsp)', [n^.stack_index * -8]);
       end;
       simple_var_node:
-         mov(inttostr(n^.binding^.stack_index * -8) + '(%rsp)', ax);
+         emit('    movq %d(%%rsp), %%rax', [n^.binding^.stack_index * -8]);
       if_else_node:
          emit_if_else(n, si);
       else begin
@@ -253,28 +219,15 @@ begin
    end;
 end;
 
+
 begin
    ast := parse(paramstr(1));
    type_check(ast, 1, global_env, global_tenv);
    assign(f, 'output.s');
    rewrite(f);
-   writeln(f, '.text');
-   c_fn('entry');
-   push('%r15');
-   writeln(f, #9'movq %rdi, %r15');
-   emit(ast, -8);
-   pop('%r15');
-   ret;
-   writeln(f, '.data');
-   sl := strings;
-   while sl <> nil do begin
-      lbl('string_' + inttostr(sl^.id));
-      s := sl^.sym^.id;
-      writeln(f, #9'.align 3');
-      writeln(f, #9'.int ', length(s));
-      writeln(f, #9'.asciz "', stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]), '"');
-      sl := sl^.next;
-   end;
+   emit(prologue, []);
+   emit_expression(ast, -8);
+   emit(epilogue, []);
+   emit_data();
    close(f);
 end.
-

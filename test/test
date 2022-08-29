@@ -20,11 +20,11 @@ test_code () {
    fi
    rm -f a.out
    let count+=1
+   sleep .5
 }
 
 harness=test_int.c
 
-: <<'END COMMENT'
 test_code "12345" "12345"
 test_code "65536" "65536"
 test_code "-36545" "-36545"
@@ -74,8 +74,6 @@ test_code "nil" "0"
 test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
 
-END COMMENT
-
 test_code "let
    a = 15 + 29
    b =  6
@@ -101,6 +99,7 @@ test_code "let
    b = let a = 20 b = 30 in a + b
 in
    a + b" "60"
+
 
 harness=test_string.c
 

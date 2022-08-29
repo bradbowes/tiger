@@ -1,6 +1,7 @@
 *~
 *.o
 *.ppu
+a.out
 ppas.sh
 compile
 print
