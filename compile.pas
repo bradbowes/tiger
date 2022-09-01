@@ -1,7 +1,7 @@
 program compile;
 {$mode objfpc}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant;
+uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant, primitives;
 
 const prologue = 
    '.text' + lineending +
@@ -221,6 +221,7 @@ end;
 
 
 begin
+   load_primitives(global_env, global_tenv);
    ast := parse(paramstr(1));
    type_check(ast, 1, global_env, global_tenv);
    assign(f, 'output.s');

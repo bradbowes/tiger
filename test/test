@@ -110,3 +110,4 @@ this is line 2"
 
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
+test_code "let function square(n: integer): integer = n * n in \"test\"" "test"

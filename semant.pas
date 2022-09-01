@@ -23,6 +23,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    function check_binary_op(): spec;
    var op: op_tag; ty1, ty2: spec;
    begin
+      check_binary_op := void_type;
       op := n^.binary_op;
       ty1 := type_check(n^.left, si + 1, env, tenv);
       ty2 := type_check(n^.right, si, env, tenv);
@@ -76,12 +77,13 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    begin
       stack_index := si;
       it := n^.decls^.first;
-      while it <> nil do
-         begin
+      while it <> nil do begin
+         if it^.node^.tag = var_decl_node then begin
             it^.node^.stack_index := stack_index;
             stack_index := stack_index + 1;
-            it := it^.next;
          end;
+         it := it^.next;
+      end;
             
       it := n^.decls^.first;
       new_env := add_frame(env);
@@ -112,6 +114,42 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       if ty <> type_check(n^.if_else_alternative, si, env, tenv) then
          err('if and else clauses incompatible types', n^.line, n^.col);
       check_if_else := ty;
+   end;
+
+   function check_fun_decl(): spec;
+   var
+      ty, body_type, param_type, return_type: spec;
+      fenv: frame;
+      it: node_list_item;
+      param: node;
+      key: symbol;
+      stack_index, line, col: longint;
+   begin
+      return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
+
+      ty := make_function_type(nil, return_type);
+      fenv := add_frame(env);
+      it := n^.params^.first;
+      stack_index := 1;
+      while it <> nil do
+         begin
+            param := it^.node;
+            key := param^.field_desc_name;
+            line := param^.line;
+            col := param^.col;
+            param_type := lookup(tenv, param^.field_type, line, col)^.ty;
+            add_field(ty, key, param_type, line, col);
+            bind(fenv, key, param_type, stack_index, line, col);
+            it := it^.next;
+            stack_index := stack_index + 1;
+         end;
+      bind(env, n^.fun_name, ty, si, n^.line, n^.col);
+      if n^.fun_body <> nil then begin
+         body_type := type_check(n^.fun_body, stack_index, fenv, tenv);
+         if ty^.base <> body_type then
+            err('function return type doesn''t match declaration', n^.line, n^.col);
+      end;
+      check_fun_decl := void_type;
    end;
 
 (*
@@ -181,39 +219,6 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       if type_check(n^.for_body, env, tenv) <> void_type then
          err('for body cannot return a vaule', n^.for_body^.line, n^.for_body^.col);
       check_for := void_type;
-   end;
-
-   function check_fun_decl(): spec;
-   var
-      ty, body_type, param_type: spec;
-      fenv: frame;
-      it: node_list_item;
-      param: node;
-      key: symbol;
-      line, col: longint;
-   begin
-      ty := make_function_type(nil, nil);
-      ty^.base := lookup(tenv, n^.return_type, n^.line, n^.col);
-
-      fenv := add_frame(env);
-      it := n^.params^.first;
-      while it <> nil do
-         begin
-            param := it^.node;
-            key := param^.field_desc_name;
-            line := param^.line;
-            col := param^.col;
-            param_type := lookup(tenv, param^.field_type, line, col);
-            add_field(ty, key, param_type, line, col);
-            bind(fenv, key, param_type, line, col);
-            it := it^.next;
-         end;
-
-      bind(env, n^.fun_name, ty, n^.line, n^.col);
-      body_type := type_check(n^.fun_body, fenv, tenv);
-      if ty^.base <> body_type then
-         err('function return type doesn''t match declaration', n^.line, n^.col);
-      check_fun_decl := void_type;
    end;
 
    function check_call(): spec;
@@ -305,6 +310,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    end;
 *)
 begin
+   type_check := void_type;
    case n^.tag of
       nil_node:
          type_check := nil_type;
@@ -326,6 +332,8 @@ begin
          type_check := check_var_decl();
       if_else_node:
          type_check := check_if_else();
+      fun_decl_node:
+         type_check := check_fun_decl();
 
          
       else begin
@@ -343,8 +351,6 @@ begin
          type_check := check_while();
       for_node:
          type_check := check_for();
-      fun_decl_node:
-         type_check := check_fun_decl();
       call_node:
          type_check := check_call();
       field_var_node:
