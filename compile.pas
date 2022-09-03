@@ -1,19 +1,24 @@
 program compile;
 {$mode objfpc}
+{$H+}
 
 uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant, primitives;
+
+
+procedure emit_expression(n: node; si: longint); forward;
+
 
 const prologue = 
    '.text' + lineending +
    '.globl _tiger_entry' + lineending +
    '_tiger_entry:' + lineending +
    '    pushq %%r15' + lineending +
-   '    movq %%rdi, %%r15' + lineending;
+   '    movq %%rdi, %%r15';
 
 
 const epilogue = 
    '    popq %%r15' + lineending +
-   '    ret' + lineending;
+   '    ret';
 
 
 type
@@ -25,11 +30,19 @@ type
       next: string_list;
    end;
 
+   function_list = ^function_list_t;
+
+   function_list_t = record
+      fun: node;
+      next: function_list;
+   end;
+
 
 var
    f: textfile;
    ast: node;
    strings: string_list = nil;
+   functions: function_list = nil;
    next_string_id: integer = 1;
    next_label_id: integer = 1;
 
@@ -55,6 +68,17 @@ begin
 end;
 
 
+procedure add_function(f: node);
+var
+   fl: function_list;
+begin
+   new(fl);
+   fl^.fun := f;
+   fl^.next := functions;
+   functions := fl;
+end;   
+      
+     
 function new_label(): string;
 begin
    new_label := format('L%.5d', [next_label_id]);
@@ -74,13 +98,14 @@ var
    s: string;
    l: longint;
 begin
-   emit('.data', []);
+   emit(lineending + '.data', []);
    sl := strings;
    while sl <> nil do begin
       s := sl^.sym^.id;
       l := length(s);
       s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
-      emit('    .align 3' + lineending +
+      emit(lineending +
+           '    .align 3' + lineending +
            'string_%d:' + lineending +
            '    .int %d' + lineending +
            '    .asciz "%s"', [sl^.id, l, s]);
@@ -88,6 +113,24 @@ begin
    end;
 end;
 
+
+procedure emit_functions();
+var
+   fl: function_list;
+   f: node;
+begin
+   fl := functions;
+   while fl <> nil do begin
+      f := fl^.fun;
+      emit(lineending +
+           '    .align 3' + lineending +
+           'tiger_%s:', [f^.fun_name^.id]);
+      emit_expression(f^.fun_body, -8);
+      emit('    ret', []);
+      fl := fl^.next;
+   end;
+end;
+           
 
 procedure emit_expression(n: node; si: longint);
 var
@@ -131,6 +174,7 @@ var
       slabel := 'string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('    movq %s, %%rax', [slabel]);
    end;
+   
 
 begin
    case n^.tag of
@@ -208,6 +252,9 @@ begin
          emit_expression(n^.initial_value, si);
          emit('    movq %%rax, %d(%%rsp)', [n^.stack_index * -8]);
       end;
+      fun_decl_node:
+         if n^.fun_body <> nil then
+            add_function(n);
       simple_var_node:
          emit('    movq %d(%%rsp), %%rax', [n^.binding^.stack_index * -8]);
       if_else_node:
@@ -229,6 +276,7 @@ begin
    emit(prologue, []);
    emit_expression(ast, -8);
    emit(epilogue, []);
+   emit_functions();
    emit_data();
    close(f);
 end.

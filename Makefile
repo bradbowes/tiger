@@ -11,6 +11,9 @@ print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas parsers.pas \
 	fpc -Sh -Px86_64 -O3 print
 	strip print
 
+test:	compile
+	cd tests; ./run_tests.sh; cd ..
+
 clean:
 	rm -f compile
 	rm -f print
@@ -18,6 +21,7 @@ clean:
 	rm -f *.s
 	rm -f ppas.sh
 	rm -f *.ppu
-	rm -f test/test*.s
-	rm -f test/test*.tiger
-	
+	rm -f tests/test*.s
+	rm -f tests/test*.tiger
+
+

@@ -9,4 +9,4 @@ _entry:
    call tiger_read
    movq %r15, %rsp
    popq %r15
-   xret
+   ret

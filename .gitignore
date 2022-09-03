@@ -5,6 +5,6 @@ a.out
 ppas.sh
 compile
 print
-test/*.tiger
-test/*.s
+tests/*.tiger
+tests/*.s
 

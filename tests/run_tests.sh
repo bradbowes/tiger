@@ -23,6 +23,8 @@ test_code () {
    sleep .5
 }
 
+: << END_COMMENT
+
 harness=test_int.c
 
 test_code "12345" "12345"
@@ -110,4 +112,7 @@ this is line 2"
 
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
-test_code "let function square(n: integer): integer = n * n in \"test\"" "test"
+END_COMMENT
+
+harness=test_string.c
+test_code "let function square(n: integer): integer = n * n in \"test\"" "4  test"

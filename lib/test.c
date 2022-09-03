@@ -11,5 +11,6 @@ int main(void) {
    free(heap);
    free(istack);
    free(pstack);
+   return 0;
 }
 
