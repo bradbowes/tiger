@@ -7,10 +7,10 @@ SYS_close = 0x02000006
 SYS_wait4 = 0x02000007
 
 .text
-.globl tiger_read
+.globl tiger$_read
 .align 3
 
-tiger_read:
+tiger$_read:
    movq $0, %rdi                             // stdin descriptor
    movq read_buffer@GOTPCREL(%rip), %rsi     // read buffer
    movq $8192, %rdx                          // buffer length
@@ -18,7 +18,7 @@ tiger_read:
    syscall
 
 
-   
+
 
 // test write using syscall
 /*
@@ -30,7 +30,7 @@ tiger_read:
    syscall
 */
 // test write using puts
-
+/*
    movq %rsi, %rdi
 
    pushq %r15
@@ -39,7 +39,7 @@ tiger_read:
    call _puts
    movq %r15, %rsp
    popq %r15
-
+*/
    
    ret
 

@@ -11,7 +11,7 @@ test_code () {
    echo $1 > $src
    ../compile $src
    mv output.s $output
-   cc $harness $output
+   cc ../lib/lib.s $harness $output
    echo $1 '=>' $2
    if [ "$(./a.out)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m' 
@@ -23,7 +23,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 harness=test_int.c
 
@@ -112,8 +112,6 @@ this is line 2"
 
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
-# END_COMMENT
-
 harness=test_int.c
 test_code "let function square(n: integer): integer = n * n in square(5)" "25"
 test_code "let function sum(m: integer, n: integer): integer = m * m + n * n in sum(3, 4)" "25"
@@ -135,3 +133,26 @@ test_code "let
    function fac(n: integer): integer = if n = 1 then 1 else n * fac(n - 1)
 in
    fac(5)"  "120"
+
+test_code "let
+   function  square(n: integer): integer = n * n
+   a = square(5)
+ in
+   square(a)" "625"
+
+test_code "let
+   function  square(n: integer): integer = n * n
+ in
+   square(square(5))" "625"
+
+harness=test_int.c
+test_code "let
+   function odd(n: integer): boolean = if n = 0 then false else even(n - 1)
+   function even(n: integer): boolean = if n = 0 then true else odd(n - 1)
+in
+   even(100)" "1"
+END_COMMENT
+
+
+harness=test_string.c
+test_code "let a = read() in a" ""

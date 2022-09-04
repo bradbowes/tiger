@@ -1,8 +1,0 @@
-* added 'mod' operator.
-* '&' operator changed to 'and'
-* '|' operator changed to 'or'
-* added boolean data type. Relational operators return booleans, 'true' and 'false' are keyword literals.
-* let in clause is a single expression. No 'end' token. Sequence expression can be used for side effects.
-* variable declarations: var keyword not used, format is '<id> = <exp>' (uses '=' instead of ':=')
-* strings are vb style (for now)
-
