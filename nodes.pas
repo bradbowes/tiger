@@ -26,7 +26,8 @@ type
 
    node_list_t = record
       first: node_list_item;
-      last:  node_list_item
+      last:  node_list_item;
+      length: longint;
    end;
 
    node_t = record
@@ -97,6 +98,7 @@ begin
    new(list);
    list^.first := nil;
    list^.last := nil;
+   list^.length := 0;
    make_list := list;
 end;
 
@@ -118,6 +120,7 @@ begin
    else
       list^.last^.next := item;
   list^.last := item;
+  list^.length := list^.length + 1;
 end;
 
 function make_node(tag: node_tag; line, col: longint): node;

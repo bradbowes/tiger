@@ -106,7 +106,7 @@ begin
       s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
       emit(lineending +
            '    .align 3' + lineending +
-           'string_%d:' + lineending +
+           'tiger$_string_%d:' + lineending +
            '    .int %d' + lineending +
            '    .asciz "%s"', [sl^.id, l, s]);
       sl := sl^.next;
@@ -124,7 +124,7 @@ begin
       f := fl^.fun;
       emit(lineending +
            '    .align 3' + lineending +
-           'tiger_%s:', [f^.fun_name^.id]);
+           'tiger$_%s:', [f^.fun_name^.id]);
       emit_expression(f^.fun_body, -8);
       emit('    ret', []);
       fl := fl^.next;
@@ -150,6 +150,7 @@ var
       emit_expression(n^.let_body, stack_index);
    end;
 
+
    procedure emit_if_else(n: node; si: longint);
    var
       label_1, label_2: string;
@@ -157,13 +158,14 @@ var
       label_1 := new_label();
       label_2 := new_label();
       emit_expression(n^.if_else_condition, si);
-      writeln(f, #9'jz ', label_1);
+      emit('    jz %s', [label_1]);
       emit_expression(n^.if_else_consequent, si);
-      writeln(f, #9'jmp ', label_2);
+      emit('    jmp %s', [label_2]);
       emit('%s:', [label_1]);
       emit_expression(n^.if_else_alternative, si); 
       emit('%s:', [label_2]); 
    end;
+   
 
    procedure emit_string(n: node);
    var
@@ -171,8 +173,31 @@ var
       sl: string_list;
    begin
       sl := add_string(n^.string_val);
-      slabel := 'string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
+      slabel := 'tiger$_string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('    movq %s, %%rax', [slabel]);
+   end;
+
+
+   procedure emit_call(n: node; si: longint);
+   var
+      stack_size: longint;
+      arg: node_list_item;
+      pos: longint;
+   begin
+      stack_size := ((8 * n^.args^.length) - si + 15);
+      stack_size := stack_size - (stack_size mod 16);
+      pos := -stack_size;
+      arg := n^.args^.first;
+      while arg <> nil do begin
+         emit_expression(arg^.node, -(stack_size + 8));
+         emit('    movq %%rax, %d(%%rsp)', [pos]);
+         pos := pos + 8;
+         arg := arg^.next;
+      end;
+      emit('    movq %%rsp, %d(%%rsp)', [pos]);
+      emit('    subq $%d, %%rsp', [stack_size]);
+      emit('    call tiger$_%s', [n^.call^.id]);
+      emit('    addq $%d, %%rsp', [stack_size]);
    end;
    
 
@@ -257,6 +282,9 @@ begin
             add_function(n);
       simple_var_node:
          emit('    movq %d(%%rsp), %%rax', [n^.binding^.stack_index * -8]);
+      call_node:
+         emit_call(n, si);
+         
       if_else_node:
          emit_if_else(n, si);
       else begin

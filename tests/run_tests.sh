@@ -23,7 +23,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 harness=test_int.c
 
@@ -112,7 +112,26 @@ this is line 2"
 
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
-END_COMMENT
+# END_COMMENT
 
-harness=test_string.c
-test_code "let function square(n: integer): integer = n * n in \"test\"" "4  test"
+harness=test_int.c
+test_code "let function square(n: integer): integer = n * n in square(5)" "25"
+test_code "let function sum(m: integer, n: integer): integer = m * m + n * n in sum(3, 4)" "25"
+test_code "let
+   a = 3
+   b = 4
+   function sum(m: integer, n: integer): integer = m * m + n * n
+in
+   sum(a, b)" "25"
+
+test_code "let
+   a = 1
+   b = 2
+   function sum(m: integer, n: integer): integer = m * m + n * n
+in
+   sum(a + b, a + a + a + a + a + a + a + a)" "73"
+
+test_code "let
+   function fac(n: integer): integer = if n = 1 then 1 else n * fac(n - 1)
+in
+   fac(5)"  "120"

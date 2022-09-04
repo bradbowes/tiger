@@ -127,10 +127,10 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    begin
       return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
 
-      ty := make_function_type(nil, return_type);
+      ty := make_function_type(return_type);
       fenv := add_frame(env);
       it := n^.params^.first;
-      stack_index := 1;
+      stack_index := -1;
       while it <> nil do
          begin
             param := it^.node;
@@ -141,7 +141,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
             add_field(ty, key, param_type, line, col);
             bind(fenv, key, param_type, stack_index, line, col);
             it := it^.next;
-            stack_index := stack_index + 1;
+            stack_index := stack_index - 1;
          end;
       bind(env, n^.fun_name, ty, si, n^.line, n^.col);
       if n^.fun_body <> nil then begin
@@ -150,6 +150,35 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
       check_fun_decl := void_type;
+   end;
+
+   function check_call(): spec;
+   var
+      fname: string;
+      f: spec;
+      it: node_list_item;
+      arg: node;
+      param: field;
+   begin
+      fname := '''' + n^.call^.id + '''';
+      f := lookup(env, n^.call, n^.line, n^.col)^.ty;
+      if f^.tag <> function_type then
+         err(fname + ' is not a function', n^.line, n^.col);
+      it := n^.args^.first;
+      param := f^.fields;
+      while it <> nil do
+         begin
+            if param = nil then
+               err('too many arguments to ' + fname, n^.line, n^.col);
+            arg := it^.node;
+            if type_check(arg, si, env, tenv) <> param^.ty then
+               err('argument is wrong type', arg^.line, arg^.col);
+            param := param^.next;
+            it := it^.next;
+         end;
+      if param <> nil then
+         err('not enough arguments to ' + fname, n^.line, n^.col);
+      check_call := f^.base;
    end;
 
 (*
@@ -219,35 +248,6 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       if type_check(n^.for_body, env, tenv) <> void_type then
          err('for body cannot return a vaule', n^.for_body^.line, n^.for_body^.col);
       check_for := void_type;
-   end;
-
-   function check_call(): spec;
-   var
-      fname: string;
-      f: spec;
-      it: node_list_item;
-      arg: node;
-      param: field;
-   begin
-      fname := '''' + n^.call^.id + '''';
-      f := lookup(env, n^.call, n^.line, n^.col);
-      if f^.tag <> function_type then
-         err(fname + ' is not a function', n^.line, n^.col);
-      it := n^.args^.first;
-      param := f^.fields;
-      while it <> nil do
-         begin
-            if param = nil then
-               err('too many arguments to ' + fname, n^.line, n^.col);
-            arg := it^.node;
-            if type_check(arg, env, tenv) <> param^.ty then
-               err('argument is wrong type', arg^.line, arg^.col);
-            param := param^.next;
-            it := it^.next;
-         end;
-      if param <> nil then
-         err('not enough arguments to ' + fname, n^.line, n^.col);
-      check_call := f^.base;
    end;
 
    function check_field_var(): spec;
@@ -334,6 +334,8 @@ begin
          type_check := check_if_else();
       fun_decl_node:
          type_check := check_fun_decl();
+      call_node:
+         type_check := check_call();
 
          
       else begin
@@ -351,8 +353,6 @@ begin
          type_check := check_while();
       for_node:
          type_check := check_for();
-      call_node:
-         type_check := check_call();
       field_var_node:
          type_check := check_field_var();
       indexed_var_node:
