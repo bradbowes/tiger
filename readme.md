@@ -1,4 +1,9 @@
-* Differences from Tiger book
+# Tiger compiler
+
+- compiler for the Andrew Appel's Tiger language with a few tweaks.
+- written in Free Pascal, roughly following the C book
+
+# Differences from Tiger book
 
 - added 'mod' operator.
 - '&' operator changed to 'and'
@@ -9,7 +14,7 @@
 - function declarations: function keyword not used. format is '<id>(<id>: <type> ...) = <exp>'
 - strings are VB style (for now)
 
-* To do
+# To do
 
 - assignments
 - sequences
