@@ -8,7 +8,7 @@ let
    diag1 = int_array [n + n - 1] of 0
    diag2 = int_array [n + n - 1] of 0
 
-   function print_board() = (
+   print_board() = (
       for i := 0 to n - 1 do (
          for j := 0 to n - 1 do
             print(if col[i] = j then " O" else " .");
@@ -17,7 +17,7 @@ let
       print("\n")
    )
 
-   function try(c: int) =
+   try(c: int) =
       if c = n then
          print_board()
       else

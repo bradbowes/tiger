@@ -1,7 +1,11 @@
 # Tiger compiler
 
 - compiler for the Andrew Appel's Tiger language with a few tweaks.
-- written in Free Pascal, roughly following the C book
+- written in Free Pascal, not following the tiger book very closely.
+- partially compiles to as assembly language for Mac OS X86_64.
+- compilation strategy similar Abdulaziz Ghuloum's scheme compiler article http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf
+- compiles to assembly from type checked AST with no IR.
+- plan to implement IR and optimization passes down the road.
 
 # Differences from Tiger book
 

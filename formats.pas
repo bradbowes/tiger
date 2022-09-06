@@ -80,7 +80,7 @@ begin
          format := s + ' = ' + format( n^.initial_value);
       end;
       fun_decl_node: begin
-         s := newline + 'function ' + n^.fun_name^.id + 
+         s := newline + n^.fun_name^.id + 
               '(' + format_list(n^.params, ', ', false) + ')';
          if n^.return_type <> nil then
             s := s + ': ' + n^.return_type^.id;
