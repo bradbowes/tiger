@@ -4,13 +4,13 @@ interface
 
 uses bindings, types, nodes;
 
-function type_check(n: node; si: longint; env, tenv: frame): spec;
+function type_check(n: node; si: longint; env, tenv: scope): spec;
 
 implementation
 
 uses utils, ops, symbols;
 
-function type_check(n: node; si: longint; env, tenv: frame): spec;
+function type_check(n: node; si: longint; env, tenv: scope): spec;
 
    function check_unary_op(): spec;
    begin
@@ -72,7 +72,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    function check_let(): spec;
    var
       it: node_list_item;
-      new_env: frame;
+      new_env: scope;
       stack_index: longint;
    begin
       stack_index := si;
@@ -86,7 +86,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       end;
             
       it := n^.decls^.first;
-      new_env := add_frame(env);
+      new_env := add_scope(env, 0);
       while it <> nil do
          begin
             type_check(it^.node, stack_index, new_env, tenv);
@@ -119,7 +119,7 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
    function check_fun_decl(): spec;
    var
       ty, body_type, param_type, return_type: spec;
-      fenv: frame;
+      fenv: scope;
       it: node_list_item;
       param: node;
       key: symbol;
@@ -128,9 +128,9 @@ function type_check(n: node; si: longint; env, tenv: frame): spec;
       return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
 
       ty := make_function_type(return_type);
-      fenv := add_frame(env);
+      fenv := add_scope(env, 0);
       it := n^.params^.first;
-      stack_index := -1;
+      stack_index := -2;
       while it <> nil do
          begin
             param := it^.node;

@@ -187,6 +187,8 @@ var
       stack_size := ((8 * n^.args^.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
+      emit('    movq %%rsp, %d(%%rsp)', [pos]);
+      pos := pos + 8;
       arg := n^.args^.first;
       while arg <> nil do begin
          emit_expression(arg^.node, -(stack_size + 8));
@@ -194,7 +196,6 @@ var
          pos := pos + 8;
          arg := arg^.next;
       end;
-      emit('    movq %%rsp, %d(%%rsp)', [pos]);
       emit('    subq $%d, %%rsp', [stack_size]);
       emit('    call tiger$_%s', [n^.call^.id]);
       emit('    addq $%d, %%rsp', [stack_size]);
@@ -296,7 +297,7 @@ end;
 
 
 begin
-   load_primitives(global_env, global_tenv);
+   load_primitives();
    ast := parse(paramstr(1));
    type_check(ast, 1, global_env, global_tenv);
    assign(f, 'output.s');

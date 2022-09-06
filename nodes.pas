@@ -55,7 +55,7 @@ type
          if_node:          (if_condition, if_consequent: node);
          while_node:       (while_condition, while_body: node);
          for_node:         (iter: symbol; start, finish, for_body: node);
-         let_node:         (decls: node_list; let_body: node; env: frame);
+         let_node:         (decls: node_list; let_body: node; env: scope);
          sequence_node:    (sequence: node_list);
          record_node:      (record_type: symbol; fields: node_list);
          array_node:       (array_type: symbol; size, default_value: node);

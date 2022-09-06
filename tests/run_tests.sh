@@ -23,7 +23,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 harness=test_int.c
 
@@ -145,14 +145,30 @@ test_code "let
  in
    square(square(5))" "625"
 
-harness=test_int.c
-test_code "let
-   function odd(n: integer): boolean = if n = 0 then false else even(n - 1)
-   function even(n: integer): boolean = if n = 0 then true else odd(n - 1)
-in
-   even(100)" "1"
-END_COMMENT
-
+# END_COMMENT
 
 harness=test_string.c
+
 test_code "let a = read() in a" ""
+
+harness=test_int.c
+
+# test_code "let
+#    function odd(n: integer): boolean = if n = 0 then false else even(n - 1)
+#    function even(n: integer): boolean = if n = 0 then true else odd(n - 1)
+# in
+#    even(100)" "1"
+
+test_code "let
+   function fib(n: integer): integer = 
+      if n < 2 then n
+      else fib(n - 1) + fib(n - 2)
+in fib(40)" "102334155"
+
+test_code "let
+   a = 10
+   b = 20
+in
+   let function nest(): integer = a + b
+in
+   nest()" "30"

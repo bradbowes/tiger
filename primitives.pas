@@ -4,18 +4,17 @@ interface
 
 uses bindings;
 
-procedure load_primitives(env, tenv: frame);
+procedure load_primitives();
 
 implementation
 
 uses symbols, nodes, semant;
 
-procedure load_primitives(env, tenv: frame);
+procedure load_primitives();
 var n: node;
 begin
    n := make_fun_decl_node(intern('read'), make_list(), intern('string'), nil, 0, 0);
-   type_check(n, 1, env, tenv);
-
+   type_check(n, 1, global_env, global_tenv);
 end;
 
 end.   

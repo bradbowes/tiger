@@ -9,42 +9,62 @@ type
       key: symbol;
       ty: spec;
       stack_index: longint;
-      left, right: binding;
    end;
 
-   frame = ^frame_t;
-   frame_t = record
-      bindings: binding;
+   tree = ^tree_t;
+   tree_t = record
+      binding: binding;
+      left, right: tree;
+   end;
+
+   scope = ^scope_t;
+   scope_t = record
+      bindings: tree;
       stack_index: longint;
-      next: frame;
+      frame_id: longint;
+      next: scope;
    end;
 
 const
-   _global_env: frame_t = (bindings: nil; stack_index: 0; next: nil);
-   global_env: frame = @_global_env;
-   _global_tenv: frame_t = (bindings: nil; stack_index: 0; next: nil);
-   global_tenv: frame = @_global_tenv;
+   _global_env: scope_t = (bindings: nil; stack_index: 0; frame_id: 0; next: nil);
+   global_env: scope = @_global_env;
+   _global_tenv: scope_t = (bindings: nil; stack_index: 0; frame_id: 0; next: nil);
+   global_tenv: scope = @_global_tenv;
 
-function add_frame(env: frame): frame;
-procedure bind(env: frame; key: symbol; ty: spec; stack_index, line, col: longint);
-function lookup(env: frame; key: symbol; line, col: longint): binding;
+function add_scope(env: scope; frame_id: longint): scope;
+procedure bind(env: scope; key: symbol; ty: spec; stack_index, line, col: longint);
+function lookup(env: scope; key: symbol; line, col: longint): binding;
 
 implementation
 
 uses utils;
 
-function add_frame(env: frame): frame;
+
+function add_scope(env: scope; frame_id: longint): scope;
 var
-   f: frame;
+   f: scope;
 begin
    new(f);
    f^.bindings := nil;
    f^.next := env;
-   add_frame := f;   
+   f^.frame_id := frame_id;
+   add_scope := f;
 end;
 
-function make_binding(
-   key: symbol; ty: spec; stack_index: longint; left, right: binding): binding;
+
+function make_tree(binding: binding; left, right: tree): tree;
+var
+   t: tree;
+begin
+   new(t);
+   t^.binding := binding;
+   t^.left := left;
+   t^.right := right;
+   make_tree := t;
+end;
+
+
+function make_binding(key: symbol; ty: spec; stack_index: longint): binding;
 var
    b: binding;
 begin
@@ -52,13 +72,10 @@ begin
    b^.key := key;
    b^.ty := ty;
    b^.stack_index := stack_index;
-   b^.left := left;
-   b^.right := right;
    make_binding := b;
 end;
 
-(*
-function height(table: binding): Integer;
+function height(table: tree): Integer;
 var
    l, r: integer;
 begin
@@ -70,89 +87,86 @@ begin
    if l > r then height := l else height := r
 end;
 
-function balance(table: binding): Integer;
+
+function balance(table: tree): Integer;
 begin
    if table = nil then balance := 0
    else balance := height (table^.left) - height (table^.right);
 end;
 
-function rotate_left(table: binding): binding;
+
+function rotate_left(table: tree): tree;
 begin
-   rotate_left := make_binding(table^.right^.key,
-                               table^.right^.ty,
-                               table^.right^.stack_index,
-                               make_binding(table^.key,
-                                            table^.ty,
-                                            table^.stack_index,
-                                            table^.left,
-                                            table^.right^.left),
-                               table^.right^.right);
+   rotate_left := make_tree(table^.right^.binding,
+                            make_tree(table^.binding,
+                                      table^.left,
+                                      table^.right^.left),
+                            table^.right^.right);
    dispose(table);
 end;
 
-function rotate_right(table: binding): binding;
+
+function rotate_right(table: tree): tree;
 begin
-   rotate_right := make_binding(table^.left^.key,
-                                table^.left^.ty,
-                                table^.left^.stack_index,
-                                table^.left^.left,
-                                make_binding(table^.key,
-                                             table^.ty,
-                                             table^.stack_index,
-                                             table^.left^.right,
-                                             table^.right));
+   rotate_right := make_tree(table^.left^.binding,
+                             table^.left^.left,
+                             make_tree(table^.binding,
+                                       table^.left^.right,
+                                       table^.right));
    dispose(table);
 end;
-*)
 
-function find(table: binding; key: symbol): binding;
+
+function find(table: tree; key: symbol): binding;
 begin
    if table = nil then
       find := nil
-   else if key < table^.key then
+   else if key < table^.binding^.key then
       find := find(table^.left, key)
-   else if key > table^.key then
+   else if key > table^.binding^.key then
       find := find(table^.right, key)
    else
-      find := table;
+      find := table^.binding;
 end;
 
-function insert(table: binding; key: symbol; ty: spec; stack_index: longint) : binding;
+
+function insert(table: tree; a_binding: binding) : tree;
 var
-   item: binding = nil;
-   { bal: Integer; }
+   a_tree: tree = nil;
+   bal: Integer;
 begin
    if table = nil then
-      item := make_binding(key, ty, stack_index, nil, nil)
-   else if key < table^.key then
-      item := make_binding(table^.key, table^.ty, table^.stack_index,
-                           insert(table^.left, key, ty, stack_index),
-                           table^.right)
-   else if key > table^.key then
-      item := make_binding(table^.key, table^.ty, table^.stack_index,
-                           table^.left,
-                           insert(table^.right, key, ty, stack_index));
-(*
-   bal := balance(item);
+      a_tree := make_tree(a_binding, nil, nil)
+   else if a_binding^.key < table^.binding^.key then
+      a_tree := make_tree(table^.binding,
+                          insert(table^.left, a_binding),
+                          table^.right)
+   else
+      a_tree := make_tree(table^.binding,
+                          table^.left,
+                          insert(table^.right, a_binding));
+
+   bal := balance(a_tree);
    while (bal < -1) or (bal > 1) do begin
-      if bal > 1 then item := rotate_right(item)
-      else if bal < -1 then item := rotate_left(item);
-      bal := balance(item);
+      if bal > 1 then a_tree := rotate_right(a_tree)
+      else if bal < -1 then a_tree := rotate_left(a_tree);
+      bal := balance(a_tree);
    end;
-*)
-   insert := item;
+
+   insert := a_tree;
 end;
 
-procedure bind(env: frame; key: symbol; ty: spec; stack_index, line, col: longint);
-var table: binding;
+procedure bind(env: scope; key: symbol; ty: spec; stack_index, line, col: longint);
+var
+   a_tree: tree;
 begin
-   table := env^.bindings;
-   if find(table, key) <> nil then
+   a_tree := env^.bindings;
+   if find(a_tree, key) <> nil then
       err('identifier ''' + key^.id + ''' was previously defined in scope', line, col);
-   env^.bindings := insert(table, key, ty, stack_index);
+   env^.bindings := insert(a_tree, make_binding(key, ty, stack_index));
 end;
 
-function lookup(env: frame; key: symbol; line, col: longint): binding;
+function lookup(env: scope; key: symbol; line, col: longint): binding;
 var
    b: binding;
 begin
@@ -164,6 +178,7 @@ begin
    else
       lookup := b;
 end;
+
 
 begin
    bind(global_tenv, intern('integer'), int_type, 0, 0, 0);

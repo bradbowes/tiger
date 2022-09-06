@@ -2,7 +2,7 @@ all:	compile print
 
 compile:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
         parsers.pas bindings.pas types.pas semant.pas primitives.pas \
-        compile.pas 
+        compile.pas
 	fpc -Sh -Px86_64 -O3 compile
 	strip compile
 
