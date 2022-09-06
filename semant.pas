@@ -4,18 +4,18 @@ interface
 
 uses bindings, types, nodes;
 
-function type_check(n: node; si: longint; env, tenv: scope): spec;
+function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
 implementation
 
 uses utils, ops, symbols;
 
-function type_check(n: node; si: longint; env, tenv: scope): spec;
+function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
    function check_unary_op(): spec;
    begin
       { minus is the only unary op }
-      if type_check(n^.unary_exp, si, env, tenv) <> int_type then
+      if type_check(n^.unary_exp, si, nest, env, tenv) <> int_type then
          err('sign operator incompatible type', n^.line, n^.col);
       check_unary_op := int_type;
    end;
@@ -25,8 +25,8 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    begin
       check_binary_op := void_type;
       op := n^.binary_op;
-      ty1 := type_check(n^.left, si + 1, env, tenv);
-      ty2 := type_check(n^.right, si, env, tenv);
+      ty1 := type_check(n^.left, si + 1, nest, env, tenv);
+      ty2 := type_check(n^.right, si, nest, env, tenv);
       if ty1 <> ty2 then
          err('operator incompatible types', n^.line, n^.col);
       if op in numeric_ops then
@@ -52,7 +52,7 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    var
       ty1, ty2: spec;
    begin
-      ty1 := type_check(n^.initial_value, si, env, tenv);
+      ty1 := type_check(n^.initial_value, si, nest, env, tenv);
       if n^.var_type = nil then
          begin
             if ty1 = nil_type then
@@ -64,7 +64,7 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
             if ty1 <> ty2 then
                err('initializer doesn''t match type spec', n^.line, n^.col);
          end;
-      bind(env, n^.var_name, ty1, n^.stack_index, n^.line, n^.col);
+      bind(env, n^.var_name, ty1, n^.stack_index, nest, n^.line, n^.col);
       n^.binding := lookup(env, n^.var_name, n^.line, n^.col);
       check_var_decl := void_type;
    end;
@@ -86,15 +86,15 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
       end;
             
       it := n^.decls^.first;
-      new_env := add_scope(env, 0);
+      new_env := add_scope(env);
       while it <> nil do
          begin
-            type_check(it^.node, stack_index, new_env, tenv);
+            type_check(it^.node, stack_index, nest, new_env, tenv);
             it := it^.next;
          end;
       new_env^.stack_index := stack_index;
       n^.env := new_env;
-      check_let := type_check(n^.let_body, stack_index, new_env, tenv);
+      check_let := type_check(n^.let_body, stack_index, nest, new_env, tenv);
    end;
 
    function check_simple_var(): spec;
@@ -108,10 +108,10 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    function check_if_else(): spec;
    var ty: spec;
    begin
-      if type_check(n^.if_else_condition, si, env, tenv) <> bool_type then
+      if type_check(n^.if_else_condition, si, nest, env, tenv) <> bool_type then
          err('if condition is not a boolean value', n^.line, n^.col);
-      ty := type_check(n^.if_else_consequent, si, env, tenv);
-      if ty <> type_check(n^.if_else_alternative, si, env, tenv) then
+      ty := type_check(n^.if_else_consequent, si, nest, env, tenv);
+      if ty <> type_check(n^.if_else_alternative, si, nest, env, tenv) then
          err('if and else clauses incompatible types', n^.line, n^.col);
       check_if_else := ty;
    end;
@@ -128,9 +128,9 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
       return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
 
       ty := make_function_type(return_type);
-      fenv := add_scope(env, 0);
+      fenv := add_scope(env);
       it := n^.params^.first;
-      stack_index := -2;
+      stack_index := -2; { args go up from sp; leave space for link address and return address }
       while it <> nil do
          begin
             param := it^.node;
@@ -139,13 +139,13 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
             col := param^.col;
             param_type := lookup(tenv, param^.field_type, line, col)^.ty;
             add_field(ty, key, param_type, line, col);
-            bind(fenv, key, param_type, stack_index, line, col);
+            bind(fenv, key, param_type, stack_index, nest + 1, line, col);
             it := it^.next;
             stack_index := stack_index - 1;
          end;
-      bind(env, n^.fun_name, ty, si, n^.line, n^.col);
+      bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
       if n^.fun_body <> nil then begin
-         body_type := type_check(n^.fun_body, stack_index, fenv, tenv);
+         body_type := type_check(n^.fun_body, stack_index, nest + 1, fenv, tenv);
          if ty^.base <> body_type then
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
@@ -171,7 +171,7 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
             if param = nil then
                err('too many arguments to ' + fname, n^.line, n^.col);
             arg := it^.node;
-            if type_check(arg, si, env, tenv) <> param^.ty then
+            if type_check(arg, si, nest, env, tenv) <> param^.ty then
                err('argument is wrong type', arg^.line, arg^.col);
             param := param^.next;
             it := it^.next;
@@ -185,8 +185,8 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    function check_assign(): spec;
    var ty: spec;
    begin
-      ty := type_check(n^.variable, env, tenv);
-      if ty <> type_check(n^.expression, env, tenv) then
+      ty := type_check(n^.variable, si, nest, env, tenv);
+      if ty <> type_check(n^.expression, si, nest, env, tenv) then
          err('assignment type mismatch', n^.line, n^.col);
       check_assign := ty;
    end;
@@ -216,36 +216,36 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
                end;
             end;
       end;
-      bind(tenv, n^.type_name, ty, n^.line, n^.col);
+      bind(tenv, n^.type_name, ty, 0, tnest, n^.line, n^.col);
       check_type_decl := void_type;
    end;
 
    function check_if(): spec;
    begin
-      if type_check(n^.if_condition, env, tenv) <> bool_type then
+      if type_check(n^.if_condition, si, nest, env, tenv) <> bool_type then
          err('if condition is not a boolean value', n^.line, n^.col);
-      if type_check(n^.if_consequent, env, tenv) <> void_type then
+      if type_check(n^.if_consequent, si, nest, env, tenv) <> void_type then
          err('if clause without else cannot return a value', n^.line, n^.col);
       check_if := void_type;
    end;
 
    function check_while(): spec;
    begin
-      if type_check(n^.while_condition, env, tenv) <> bool_type then
+      if type_check(n^.while_condition, si, nest, env, tenv) <> bool_type then
          err('while condition is not a boolean value', n^.while_condition^.line, n^.while_condition^.col);
-      if type_check(n^.while_body, env, tenv) <> void_type then
+      if type_check(n^.while_body, si, nest, env, tenv) <> void_type then
          err('while expression cannot return a value', n^.while_body^.line, n^.while_body^.col);
       check_while := void_type;
    end;
 
    function check_for(): spec;
    begin
-      bind(env, n^.iter, int_type, n^.line, n^.col);
-      if type_check(n^.start, env, tenv) <> int_type then
+      bind(env, n^.iter, int_type, si, nest, n^.line, n^.col);
+      if type_check(n^.start, si, nest, env, tenv) <> int_type then
          err('for start value must be integer type', n^.start^.line, n^.start^.col);
-      if type_check(n^.finish, env, tenv) <> int_type then
+      if type_check(n^.finish, si, nest, env, tenv) <> int_type then
          err('for to value must be integer type', n^.finish^.line, n^.finish^.col);
-      if type_check(n^.for_body, env, tenv) <> void_type then
+      if type_check(n^.for_body, si, nest, env, tenv) <> void_type then
          err('for body cannot return a vaule', n^.for_body^.line, n^.for_body^.col);
       check_for := void_type;
    end;
@@ -253,7 +253,7 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    function check_field_var(): spec;
    var ty: spec;
    begin
-      ty := type_check(n^.obj, env, tenv);
+      ty := type_check(n^.obj, si, nest, env, tenv);
       if ty^.tag <> record_type then
          err('object is not a record.', n^.obj^.line, n^.obj^.col);
       check_field_var := get_field(ty, n^.field, n^.line, n^.col);
@@ -262,7 +262,7 @@ function type_check(n: node; si: longint; env, tenv: scope): spec;
    function check_indexed_var(): spec;
    var ty: spec;
    begin
-      ty := type_check(n^.arr, env, tenv);
+      ty := type_check(n^.arr, si, nest, env, tenv);
       if ty^.tag <> array_type then
          err('object is not an array.', n^.arr^.line, n^.arr^.col);
       check_indexed_var := ty^.base;
