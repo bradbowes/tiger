@@ -48,7 +48,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          check_binary_op := bool_type { equality_ops }
    end;
 
-   function check_var_decl(): spec;
+   procedure check_var_decl(n: node; si: longint; env: scope);
    var
       ty1, ty2: spec;
    begin
@@ -66,59 +66,12 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
       bind(env, n^.var_name, ty1, n^.stack_index, nest, n^.line, n^.col);
       n^.binding := lookup(env, n^.var_name, n^.line, n^.col);
-      check_var_decl := void_type;
    end;
 
-   function check_let(): spec;
+
+   procedure check_fun_decl(n: node; si: longint; env: scope);
    var
-      it: node_list_item;
-      new_env: scope;
-      stack_index: longint;
-   begin
-      stack_index := si;
-      it := n^.decls^.first;
-      while it <> nil do begin
-         if it^.node^.tag = var_decl_node then begin
-            it^.node^.stack_index := stack_index;
-            stack_index := stack_index + 1;
-         end;
-         it := it^.next;
-      end;
-            
-      it := n^.decls^.first;
-      new_env := add_scope(env);
-      while it <> nil do
-         begin
-            type_check(it^.node, stack_index, nest, new_env, tenv);
-            it := it^.next;
-         end;
-      new_env^.stack_index := stack_index;
-      n^.env := new_env;
-      check_let := type_check(n^.let_body, stack_index, nest, new_env, tenv);
-   end;
-
-   function check_simple_var(): spec;
-   var b: binding;
-   begin
-      b := lookup(env, n^.name, n^.line, n^.col);
-      n^.binding := b;
-      check_simple_var := b^.ty;
-   end;
-
-   function check_if_else(): spec;
-   var ty: spec;
-   begin
-      if type_check(n^.if_else_condition, si, nest, env, tenv) <> bool_type then
-         err('if condition is not a boolean value', n^.line, n^.col);
-      ty := type_check(n^.if_else_consequent, si, nest, env, tenv);
-      if ty <> type_check(n^.if_else_alternative, si, nest, env, tenv) then
-         err('if and else clauses incompatible types', n^.line, n^.col);
-      check_if_else := ty;
-   end;
-
-   function check_fun_decl(): spec;
-   var
-      ty, body_type, param_type, return_type: spec;
+      ty, param_type, return_type: spec;
       fenv: scope;
       it: node_list_item;
       param: node;
@@ -144,13 +97,80 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             stack_index := stack_index - 1;
          end;
       bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
+      n^.fenv := fenv;
+   end;
+
+
+   procedure check_fun_body(n: node; si: longint; env: scope);
+   var
+      ty, body_type: spec;
+   begin
+      ty := lookup(env, n^.fun_name, n^.line, n^.col)^.ty;
       if n^.fun_body <> nil then begin
-         body_type := type_check(n^.fun_body, stack_index, nest + 1, fenv, tenv);
+         body_type := type_check(n^.fun_body, si, nest + 1, n^.fenv, tenv);
          if ty^.base <> body_type then
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
-      check_fun_decl := void_type;
+   end;   
+
+
+   function check_let(): spec;
+   var
+      it: node_list_item;
+      new_env: scope;
+      stack_index: longint;
+   begin
+      stack_index := si;
+      it := n^.decls^.first;
+      while it <> nil do begin
+         if it^.node^.tag = var_decl_node then begin
+            it^.node^.stack_index := stack_index;
+            stack_index := stack_index + 1;
+         end;
+         it := it^.next;
+      end;
+
+      it := n^.decls^.first;
+      new_env := add_scope(env);
+      while it <> nil do begin
+         case it^.node^.tag of
+            var_decl_node: check_var_decl(it^.node, stack_index, new_env);
+            fun_decl_node: check_fun_decl(it^.node, stack_index, new_env);
+         end;               
+         it := it^.next;
+      end;
+
+      it := n^.decls^.first;
+      while it <> nil do begin
+         if it^.node^.tag = fun_decl_node then
+            check_fun_body(it^.node, stack_index, new_env);
+         it := it^.next;
+      end;
+      
+      new_env^.stack_index := stack_index;
+      n^.env := new_env;
+      check_let := type_check(n^.let_body, stack_index, nest, new_env, tenv);
    end;
+
+   function check_simple_var(): spec;
+   var b: binding;
+   begin
+      b := lookup(env, n^.name, n^.line, n^.col);
+      n^.binding := b;
+      check_simple_var := b^.ty;
+   end;
+
+   function check_if_else(): spec;
+   var ty: spec;
+   begin
+      if type_check(n^.if_else_condition, si, nest, env, tenv) <> bool_type then
+         err('if condition is not a boolean value', n^.line, n^.col);
+      ty := type_check(n^.if_else_consequent, si, nest, env, tenv);
+      if ty <> type_check(n^.if_else_alternative, si, nest, env, tenv) then
+         err('if and else clauses incompatible types', n^.line, n^.col);
+      check_if_else := ty;
+   end;
+
 
    function check_call(): spec;
    var
@@ -328,12 +348,8 @@ begin
          type_check := check_let();
       simple_var_node:
          type_check := check_simple_var();
-      var_decl_node:
-         type_check := check_var_decl();
       if_else_node:
          type_check := check_if_else();
-      fun_decl_node:
-         type_check := check_fun_decl();
       call_node:
          type_check := check_call();
 

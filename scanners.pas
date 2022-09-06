@@ -19,7 +19,6 @@ type
                 eq_token,
                 false_token,
                 for_token,
-                function_token,
                 geq_token,
                 gt_token,
                 id_token,
@@ -180,7 +179,6 @@ procedure scan(s: scanner);
          'else': token.tag := else_token;
          'false': token.tag := false_token;
          'for': token.tag := for_token;
-         'function': token.tag := function_token;
          'if': token.tag := if_token;
          'in': token.tag := in_token;
          'let': token.tag := let_token;
@@ -287,7 +285,6 @@ begin
    token_display[eof_token] := '<eof>';
    token_display[eq_token] := '=';
    token_display[false_token] := 'false';
-   token_display[function_token] := 'function';
    token_display[geq_token] := '>=';
    token_display[gt_token] := '>';
    token_display[id_token] := '';

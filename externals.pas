@@ -6,18 +6,23 @@ procedure load_externals();
 
 implementation
 
-uses bindings, symbols, nodes, semant;
+uses bindings, symbols, types;
 
-procedure make_external(name: string; args: node_list; returns: string);
-var n: node;
-begin
-   n := make_fun_decl_node(intern(name), args, intern(returns), nil, 0, 0);
-   type_check(n, 1, 0, global_env, global_tenv);
-end;
 
 procedure load_externals();
+var s: spec;
 begin
-   make_external('read', make_list(), 'string');
+
+   (* read *)
+   s := make_function_type(string_type);
+   bind(global_env, intern('read'), s, 0, 0, 0, 0);
+
+   (* concat *)
+   s:= make_function_type(string_type);
+   add_field(s, intern('s1'), string_type, 0, 0);
+   add_field(s, intern('s2'), string_type, 0, 0);
+   bind(global_env, intern('concat'), s, 0, 0, 0, 0);
+   
 end;
 
 end.   

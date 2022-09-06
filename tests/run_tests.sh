@@ -23,9 +23,9 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
-
 harness=test_int.c
+
+: << END_COMMENT
 
 test_code "12345" "12345"
 test_code "65536" "65536"
@@ -76,6 +76,8 @@ test_code "nil" "0"
 test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
 
+END_COMMENT
+
 test_code "let
    a = 15 + 29
    b =  6
@@ -113,39 +115,39 @@ this is line 2"
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
 harness=test_int.c
-test_code "let function square(n: integer): integer = n * n in square(5)" "25"
-test_code "let function sum(m: integer, n: integer): integer = m * m + n * n in sum(3, 4)" "25"
+test_code "let square(n: integer): integer = n * n in square(5)" "25"
+test_code "let sum(m: integer, n: integer): integer = m * m + n * n in sum(3, 4)" "25"
 test_code "let
    a = 3
    b = 4
-   function sum(m: integer, n: integer): integer = m * m + n * n
+   sum(m: integer, n: integer): integer = m * m + n * n
 in
    sum(a, b)" "25"
 
 test_code "let
    a = 1
    b = 2
-   function sum(m: integer, n: integer): integer = m * m + n * n
+   sum(m: integer, n: integer): integer = m * m + n * n
 in
    sum(a + b, a + a + a + a + a + a + a + a)" "73"
 
+
 test_code "let
-   function fac(n: integer): integer = if n = 1 then 1 else n * fac(n - 1)
+   fac(n: integer): integer = if n = 1 then 1 else n * fac(n - 1)
 in
    fac(5)"  "120"
 
 test_code "let
-   function  square(n: integer): integer = n * n
-   a = square(5)
- in
+    square(n: integer): integer = n * n
+    a = square(5)
+in
    square(a)" "625"
 
 test_code "let
-   function  square(n: integer): integer = n * n
- in
+   square(n: integer): integer = n * n
+in
    square(square(5))" "625"
 
-# END_COMMENT
 
 harness=test_string.c
 
@@ -153,14 +155,14 @@ test_code "let a = read() in a" ""
 
 harness=test_int.c
 
-# test_code "let
-#    function odd(n: integer): boolean = if n = 0 then false else even(n - 1)
-#    function even(n: integer): boolean = if n = 0 then true else odd(n - 1)
-# in
-#    even(100)" "1"
+test_code "let
+   odd(n: integer): boolean = if n = 0 then false else even(n - 1)
+   even(n: integer): boolean = if n = 0 then true else odd(n - 1)
+in
+   even(100)" "1"
 
 test_code "let
-   function fib(n: integer): integer = 
+   fib(n: integer): integer = 
       if n < 2 then n
       else fib(n - 1) + fib(n - 2)
 in fib(40)" "102334155"
@@ -169,6 +171,6 @@ test_code "let
    a = 10
    b = 20
 in
-   let function nest(): integer = a + b
+   let nest(): integer = a + b
 in
    nest()" "30"
