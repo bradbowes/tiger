@@ -76,8 +76,6 @@ test_code "nil" "0"
 test_code "nil = nil" "1"
 test_code "nil <> nil" "0"
 
-END_COMMENT
-
 test_code "let
    a = 15 + 29
    b =  6
@@ -161,6 +159,8 @@ test_code "let
 in
    even(100)" "1"
 
+END_COMMENT
+
 test_code "let
    fib(n: integer): integer = 
       if n < 2 then n
@@ -174,3 +174,20 @@ in
    let nest(): integer = a + b
 in
    nest()" "30"
+
+test_code "let w = 3 a(x: integer): integer =
+  let b(y: integer): integer = 
+     let c(z: integer): integer = w + x + y + z in c(15)
+  in b(10)
+in a(5)" "33"
+
+test_code "let
+   outer(n: integer): integer =
+      let
+         inner1(): integer = inner2()
+         inner2(): integer = n
+      in
+         inner1()
+in
+      outer(5)" "5"
+

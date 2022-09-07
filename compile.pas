@@ -5,19 +5,22 @@ program compile;
 uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant, externals;
 
 
-procedure emit_expression(n: node; si: longint); forward;
+procedure emit_expression(n: node; si, nest: longint); forward;
 
 
 const prologue = 
    '.text' + lineending +
+   '.align 3' + lineending +
    '.globl _tiger_entry' + lineending +
    '_tiger_entry:' + lineending +
+   '    pushq %%rbp' + lineending +
    '    pushq %%r15' + lineending +
    '    movq %%rdi, %%r15';
 
 
 const epilogue = 
    '    popq %%r15' + lineending +
+   '    popq %%rbp' + lineending +
    '    ret';
 
 
@@ -70,13 +73,20 @@ end;
 
 procedure add_function(f: node);
 var
-   fl: function_list;
+   fl, next: function_list;
 begin
    new(fl);
    fl^.fun := f;
-   fl^.next := functions;
-   functions := fl;
-end;   
+   fl^.next := nil;
+   if functions = nil then
+      functions := fl
+   else begin
+      next := functions;
+      while next^.next <> nil do
+         next := next^.next;
+      next^.next := fl;
+   end;
+end;
       
      
 function new_label(): string;
@@ -125,18 +135,18 @@ begin
       emit(lineending +
            '    .align 3' + lineending +
            'tiger$_%s:', [f^.fun_name^.id]);
-      emit_expression(f^.fun_body, -8);
+      emit_expression(f^.fun_body, -8, f^.nest);
       emit('    ret', []);
       fl := fl^.next;
    end;
 end;
            
 
-procedure emit_expression(n: node; si: longint);
+procedure emit_expression(n: node; si, nest: longint);
 var
    tmp: string;
 
-   procedure emit_let(n: node; si: longint);
+   procedure emit_let();
    var
       it: node_list_item;
       stack_index: longint;
@@ -144,30 +154,30 @@ var
       stack_index := n^.env^.stack_index * -8;
       it := n^.decls^.first;
       while it <> nil do begin
-         emit_expression(it^.node, stack_index);
+         emit_expression(it^.node, stack_index, nest);
          it := it^.next;
       end;
-      emit_expression(n^.let_body, stack_index);
+      emit_expression(n^.let_body, stack_index, nest);
    end;
 
 
-   procedure emit_if_else(n: node; si: longint);
+   procedure emit_if_else();
    var
       label_1, label_2: string;
    begin
       label_1 := new_label();
       label_2 := new_label();
-      emit_expression(n^.if_else_condition, si);
+      emit_expression(n^.if_else_condition, si, nest);
       emit('    jz %s', [label_1]);
-      emit_expression(n^.if_else_consequent, si);
+      emit_expression(n^.if_else_consequent, si, nest);
       emit('    jmp %s', [label_2]);
       emit('%s:', [label_1]);
-      emit_expression(n^.if_else_alternative, si); 
+      emit_expression(n^.if_else_alternative, si, nest); 
       emit('%s:', [label_2]); 
    end;
    
 
-   procedure emit_string(n: node);
+   procedure emit_string();
    var
       slabel: string;
       sl: string_list;
@@ -176,22 +186,48 @@ var
       slabel := 'tiger$_string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('    movq %s, %%rax', [slabel]);
    end;
+   
 
-
-   procedure emit_call(n: node; si: longint);
+   procedure emit_var();
    var
-      stack_size: longint;
+      offset: longint;
+      i: integer;
+   begin
+      offset := n^.binding^.stack_index * -8;
+      if n^.binding^.nesting_level = nest then
+         emit('    movq %d(%%rsp), %%rax', [offset])
+      else begin
+         emit('    movq 8(%%rsp), %%rbp', []);
+         for i := nest - 2 downto n^.binding^.nesting_level do
+            emit('    movq 8(%%rbp), %%rbp', []);
+         emit('    movq %d(%%rbp), %%rax', [offset]);
+      end;
+   end;
+
+
+   procedure emit_call();
+   var
+      stack_size, target, i: longint;
       arg: node_list_item;
       pos: longint;
    begin
+      target := n^.target^.nesting_level;
       stack_size := ((8 * n^.args^.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
-      emit('    movq %%rsp, %d(%%rsp)', [pos]);
+      { link }
+      if target = nest then
+         emit('    movq %%rsp, %d(%%rsp)', [pos])
+      else begin
+         emit('    movq 8(%%rsp), %%rbp', []);
+         for i := nest - 2 downto target do
+            emit('   movq 8(%%rbp), %%rbp', []);
+         emit('    movq %%rbp, %d(%%rsp)', [pos]);
+      end;
       pos := pos + 8;
       arg := n^.args^.first;
       while arg <> nil do begin
-         emit_expression(arg^.node, -(stack_size + 8));
+         emit_expression(arg^.node, -(stack_size + 8), nest);
          emit('    movq %%rax, %d(%%rsp)', [pos]);
          pos := pos + 8;
          arg := arg^.next;
@@ -207,14 +243,14 @@ begin
       integer_node:
          emit('    movq $%d, %%rax', [n^.int_val]);
       unary_op_node: begin
-         emit_expression(n^.unary_exp, si);
+         emit_expression(n^.unary_exp, si, nest);
          emit('    negq %%rax', []);
       end;
       binary_op_node: begin
          tmp := inttostr(si) + '(%rsp)';
-         emit_expression(n^.right, si);
+         emit_expression(n^.right, si, nest);
          emit('    movq %%rax, %s', [tmp]);
-         emit_expression(n^.left, si - 8);
+         emit_expression(n^.left, si - 8, nest);
          case n^.binary_op of
             plus_op:
                emit('    addq %s, %%rax', [tmp]);
@@ -269,25 +305,24 @@ begin
             emit('    incq %%rax', []);
       end;
       string_node:
-         emit_string(n);
+         emit_string();
       nil_node:
          emit('    xorq %%rax, %%rax', []);
       let_node:
-         emit_let(n, si);
+         emit_let();
       var_decl_node: begin
-         emit_expression(n^.initial_value, si);
+         emit_expression(n^.initial_value, si, nest);
          emit('    movq %%rax, %d(%%rsp)', [n^.stack_index * -8]);
       end;
       fun_decl_node:
          if n^.fun_body <> nil then
             add_function(n);
       simple_var_node:
-         emit('    movq %d(%%rsp), %%rax', [n^.binding^.stack_index * -8]);
+         emit_var();
       call_node:
-         emit_call(n, si);
-         
+         emit_call();
       if_else_node:
-         emit_if_else(n, si);
+         emit_if_else();
       else begin
          writeln(n^.tag);
          err('emit: feature not supported yet!', n^.line, n^.col);
@@ -303,7 +338,7 @@ begin
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);
-   emit_expression(ast, -8);
+   emit_expression(ast, -8, 0);
    emit(epilogue, []);
    emit_functions();
    emit_data();

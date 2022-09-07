@@ -98,6 +98,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
       bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
       n^.fenv := fenv;
+      n^.nest := nest + 1;
    end;
 
 
@@ -175,13 +176,15 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    function check_call(): spec;
    var
       fname: string;
+      b: binding;
       f: spec;
       it: node_list_item;
       arg: node;
       param: field;
    begin
       fname := '''' + n^.call^.id + '''';
-      f := lookup(env, n^.call, n^.line, n^.col)^.ty;
+      b := lookup(env, n^.call, n^.line, n^.col);
+      f := b^.ty;
       if f^.tag <> function_type then
          err(fname + ' is not a function', n^.line, n^.col);
       it := n^.args^.first;
@@ -198,6 +201,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
       if param <> nil then
          err('not enough arguments to ' + fname, n^.line, n^.col);
+      n^.target := b;
       check_call := f^.base;
    end;
 
