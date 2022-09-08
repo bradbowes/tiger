@@ -153,16 +153,16 @@ test_code "let a = read() in a" ""
 
 harness=test_int.c
 
+END_COMMENT
+
 test_code "let
    odd(n: integer): boolean = if n = 0 then false else even(n - 1)
    even(n: integer): boolean = if n = 0 then true else odd(n - 1)
 in
    even(100)" "1"
 
-END_COMMENT
-
 test_code "let
-   fib(n: integer): integer = 
+   fib(n: integer): integer =
       if n < 2 then n
       else fib(n - 1) + fib(n - 2)
 in fib(40)" "102334155"
@@ -176,7 +176,7 @@ in
    nest()" "30"
 
 test_code "let w = 3 a(x: integer): integer =
-  let b(y: integer): integer = 
+  let b(y: integer): integer =
      let c(z: integer): integer = w + x + y + z in c(15)
   in b(10)
 in a(5)" "33"
@@ -191,3 +191,9 @@ test_code "let
 in
       outer(5)" "5"
 
+test_code "(72; 42)" "42"
+
+test_code "let
+   a = 0
+in
+   (a := 5; a)" "5"

@@ -205,6 +205,28 @@ var
    end;
 
 
+   procedure emit_assign();
+   var
+      offset: longint;
+      i: integer;
+      b: binding;
+   begin
+      emit_expression(n^.expression, si, nest);
+      b := n^.variable^.binding;
+      offset := b^.stack_index * -8;
+      writeln('offset: ', offset);
+      if b^.nesting_level = nest then
+         emit('    movq %%rax, %d(%%rsp)', [offset])
+      else begin
+         emit('    movq 8(%%rsp), %%rbp', []);
+         for i := nest - 2 downto n^.binding^.nesting_level do
+            emit('    movq 8(%%rbp), %%rbp', []);
+         emit('    movq %%rax, %d(%%rbp)', [offset]);
+      end;
+      emit ('    xorq %%rax, %%rax', []);
+   end;
+
+
    procedure emit_call();
    var
       stack_size, target, i: longint;
@@ -235,6 +257,18 @@ var
       emit('    subq $%d, %%rsp', [stack_size]);
       emit('    call tiger$_%s', [n^.call^.id]);
       emit('    addq $%d, %%rsp', [stack_size]);
+   end;
+
+
+   procedure emit_sequence();
+   var
+      it: node_list_item;
+   begin
+      it := n^.sequence^.first;
+      while it <> nil do begin
+         emit_expression(it^.node, si, nest);
+         it := it^.next;
+      end;
    end;
    
 
@@ -323,6 +357,10 @@ begin
          emit_call();
       if_else_node:
          emit_if_else();
+      sequence_node:
+         emit_sequence();
+      assign_node:
+         emit_assign();
       else begin
          writeln(n^.tag);
          err('emit: feature not supported yet!', n^.line, n^.col);

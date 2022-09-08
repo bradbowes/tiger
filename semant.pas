@@ -78,7 +78,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       key: symbol;
       stack_index, line, col: longint;
    begin
-      return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
+      if n^.return_type = nil then
+         return_type := void_type
+      else
+         return_type := lookup(tenv, n^.return_type, n^.line, n^.col)^.ty;
 
       ty := make_function_type(return_type);
       fenv := add_scope(env);
@@ -153,6 +156,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_let := type_check(n^.let_body, stack_index, nest, new_env, tenv);
    end;
 
+
    function check_simple_var(): spec;
    var b: binding;
    begin
@@ -160,6 +164,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       n^.binding := b;
       check_simple_var := b^.ty;
    end;
+
 
    function check_if_else(): spec;
    var ty: spec;
@@ -205,9 +210,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_call := f^.base;
    end;
 
-(*
+
    function check_assign(): spec;
-   var ty: spec;
+   var
+      ty: spec;
    begin
       ty := type_check(n^.variable, si, nest, env, tenv);
       if ty <> type_check(n^.expression, si, nest, env, tenv) then
@@ -215,6 +221,22 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_assign := ty;
    end;
 
+
+   function check_sequence(): spec;
+   var
+      ty: spec;
+      it: node_list_item;
+   begin
+      it := n^.sequence^.first;
+      while it <> nil do begin
+         ty := type_check(it^.node, si, nest, env, tenv);
+         it := it^.next;
+      end;
+      check_sequence := ty;
+   end;
+   
+
+(*
    function check_type_decl(): spec;
    var
       ty, field_ty: spec;
@@ -356,15 +378,16 @@ begin
          type_check := check_if_else();
       call_node:
          type_check := check_call();
-
+      assign_node:
+         type_check := check_assign();
+      sequence_node:
+         type_check := check_sequence();
          
       else begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);
       end;
 (*
-      assign_node:
-         type_check := check_assign();
       type_decl_node:
          type_check := check_type_decl();
       if_node:
