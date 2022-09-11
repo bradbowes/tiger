@@ -35,10 +35,11 @@ type
 
    node_t = record
       line, col: longint;
+      binding: binding;
       case tag: node_tag of
          assign_node:      (variable, expression: node);
-         call_node:        (call: symbol; args: node_list; target: binding);
-         simple_var_node:  (name: symbol; binding: binding);
+         call_node:        (call: symbol; args: node_list);
+         simple_var_node:  (name: symbol);
          field_var_node:   (obj: node; field: symbol);
          indexed_var_node: (arr, index: node);
          integer_node:     (int_val: longint);

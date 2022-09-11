@@ -21,7 +21,6 @@
 
 # To do
 
-- unique function labels (same function can be declared in different scopes)
 - builtin library functions
 - builtin inline functions (abs, ord, etc)
 - records and arrays
@@ -39,16 +38,16 @@
 
 ## Conversion
 
-- int2str(i: integer): string
-- str2int(s: string): integer
+- int2str(i: int): string
+- str2int(s: string): int
 
 ## Strings
 
 - uppercase(s: string): string
 - lowercase(s: string): string
-- string_length(s: string): integer
-- string_compare(s1: string, s2: string): integer
+- string_length(s: string): int
+- string_compare(s1: string, s2: string): int
 - string_concat(s1: string, s2: string): string
-- substring(s: string, start: integer, len: integer): string
-- string_find(src: string, find: string): integer
+- substring(s: string, start: int, len: int): string
+- string_find(src: string, find: string): int
 

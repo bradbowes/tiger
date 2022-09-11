@@ -134,7 +134,7 @@ begin
       f := fl^.fun;
       emit(lineending +
            '    .align 3' + lineending +
-           'tiger$_%s:', [f^.fun_name^.id]);
+           'f%d$_%s:', [f^.binding^.id, f^.fun_name^.id]);
       emit_expression(f^.fun_body, -8, f^.nest);
       emit('    ret', []);
       fl := fl^.next;
@@ -214,7 +214,6 @@ var
       emit_expression(n^.expression, si, nest);
       b := n^.variable^.binding;
       offset := b^.stack_index * -8;
-      writeln('offset: ', offset);
       if b^.nesting_level = nest then
          emit('    movq %%rax, %d(%%rsp)', [offset])
       else begin
@@ -233,7 +232,7 @@ var
       arg: node_list_item;
       pos: longint;
    begin
-      target := n^.target^.nesting_level;
+      target := n^.binding^.nesting_level;
       stack_size := ((8 * n^.args^.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
@@ -255,7 +254,7 @@ var
          arg := arg^.next;
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
-      emit('    call tiger$_%s', [n^.call^.id]);
+      emit('    call f%d$_%s', [n^.binding^.id, n^.call^.id]);
       emit('    addq $%d, %%rsp', [stack_size]);
    end;
 
@@ -372,11 +371,11 @@ end;
 begin
    load_externals();
    ast := parse(paramstr(1));
-   type_check(ast, 1, 0, global_env, global_tenv);
+   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);
-   emit_expression(ast, -8, 0);
+   emit_expression(ast, -8, 1);
    emit(epilogue, []);
    emit_functions();
    emit_data();

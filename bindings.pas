@@ -8,6 +8,7 @@ type
    binding_t = record
       key: symbol;
       ty: spec;
+      id: longint;
       stack_index: longint;
       nesting_level: longint;
    end;
@@ -40,6 +41,10 @@ implementation
 uses utils;
 
 
+var
+   next_id: longint = 1;
+   
+
 function add_scope(env: scope): scope;
 var
    s: scope;
@@ -60,19 +65,6 @@ begin
    t^.left := left;
    t^.right := right;
    make_tree := t;
-end;
-
-
-function make_binding(key: symbol; ty: spec; stack_index, nesting_level: longint): binding;
-var
-   b: binding;
-begin
-   new(b);
-   b^.key := key;
-   b^.ty := ty;
-   b^.stack_index := stack_index;
-   b^.nesting_level := nesting_level;
-   make_binding := b;
 end;
 
 
@@ -163,14 +155,16 @@ var
    t: tree;
    b: binding;
 begin
-   new(b);
-   b^.key := key;
-   b^.ty := ty;
-   b^.stack_index := stack_index;
-   b^.nesting_level := nesting_level;
    t := env^.bindings;
    if find(t, key) <> nil then
       err('identifier ''' + key^.id + ''' was previously defined in scope', line, col);
+   new(b);
+   b^.key := key;
+   b^.ty := ty;
+   b^.id := next_id;
+   next_id := next_id + 1;
+   b^.stack_index := stack_index;
+   b^.nesting_level := nesting_level;
    env^.bindings := insert(t, b);
 end;
 
@@ -190,7 +184,7 @@ end;
 
 
 begin
-   bind(global_tenv, intern('integer'), int_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('int'), int_type, 0, 0, 0, 0);
    bind(global_tenv, intern('string'), string_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('boolean'), bool_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('bool'), bool_type, 0, 0, 0, 0);
 end.

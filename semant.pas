@@ -102,6 +102,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
       n^.fenv := fenv;
       n^.nest := nest + 1;
+      n^.binding := lookup(env, n^.fun_name, n^.line, n^.col);
    end;
 
 
@@ -206,7 +207,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
       if param <> nil then
          err('not enough arguments to ' + fname, n^.line, n^.col);
-      n^.target := b;
+      n^.binding := b;
       check_call := f^.base;
    end;
 

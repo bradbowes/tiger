@@ -113,36 +113,36 @@ this is line 2"
 test_code "let path = \"c:\\home\" in path" "7  c:\\home"
 
 harness=test_int.c
-test_code "let square(n: integer): integer = n * n in square(5)" "25"
-test_code "let sum(m: integer, n: integer): integer = m * m + n * n in sum(3, 4)" "25"
+test_code "let square(n: int): int = n * n in square(5)" "25"
+test_code "let sum(m: int, n: int): int = m * m + n * n in sum(3, 4)" "25"
 test_code "let
    a = 3
    b = 4
-   sum(m: integer, n: integer): integer = m * m + n * n
+   sum(m: int, n: int): int = m * m + n * n
 in
    sum(a, b)" "25"
 
 test_code "let
    a = 1
    b = 2
-   sum(m: integer, n: integer): integer = m * m + n * n
+   sum(m: int, n: int): int = m * m + n * n
 in
    sum(a + b, a + a + a + a + a + a + a + a)" "73"
 
 
 test_code "let
-   fac(n: integer): integer = if n = 1 then 1 else n * fac(n - 1)
+   fac(n: int): int = if n = 1 then 1 else n * fac(n - 1)
 in
    fac(5)"  "120"
 
 test_code "let
-    square(n: integer): integer = n * n
+    square(n: int): int = n * n
     a = square(5)
 in
    square(a)" "625"
 
 test_code "let
-   square(n: integer): integer = n * n
+   square(n: int): int = n * n
 in
    square(square(5))" "625"
 
@@ -156,13 +156,13 @@ harness=test_int.c
 END_COMMENT
 
 test_code "let
-   odd(n: integer): boolean = if n = 0 then false else even(n - 1)
-   even(n: integer): boolean = if n = 0 then true else odd(n - 1)
+   odd(n: int): bool = if n = 0 then false else even(n - 1)
+   even(n: int): bool = if n = 0 then true else odd(n - 1)
 in
    even(100)" "1"
 
 test_code "let
-   fib(n: integer): integer =
+   fib(n: int): int =
       if n < 2 then n
       else fib(n - 1) + fib(n - 2)
 in fib(40)" "102334155"
@@ -171,21 +171,21 @@ test_code "let
    a = 10
    b = 20
 in
-   let nest(): integer = a + b
+   let nest(): int = a + b
 in
    nest()" "30"
 
-test_code "let w = 3 a(x: integer): integer =
-  let b(y: integer): integer =
-     let c(z: integer): integer = w + x + y + z in c(15)
+test_code "let w = 3 a(x: int): int =
+  let b(y: int): int =
+     let c(z: int): int = w + x + y + z in c(15)
   in b(10)
 in a(5)" "33"
 
 test_code "let
-   outer(n: integer): integer =
+   outer(n: int): int =
       let
-         inner1(): integer = inner2()
-         inner2(): integer = n
+         inner1(): int = inner2()
+         inner2(): int = n
       in
          inner1()
 in
