@@ -9,6 +9,7 @@ type
       key: symbol;
       ty: spec;
       id: longint;
+      external: boolean;
       stack_index: longint;
       nesting_level: longint;
    end;
@@ -33,7 +34,7 @@ const
    global_tenv: scope = @_global_tenv;
 
 function add_scope(env: scope): scope;
-procedure bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint);
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
 function lookup(env: scope; key: symbol; line, col: longint): binding;
 
 implementation
@@ -150,7 +151,7 @@ begin
 end;
 
 
-procedure bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint);
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
 var
    t: tree;
    b: binding;
@@ -165,7 +166,9 @@ begin
    next_id := next_id + 1;
    b^.stack_index := stack_index;
    b^.nesting_level := nesting_level;
+   b^.external := false;
    env^.bindings := insert(t, b);
+   bind := b;
 end;
 
 
@@ -183,8 +186,4 @@ begin
 end;
 
 
-begin
-   bind(global_tenv, intern('int'), int_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('string'), string_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('bool'), bool_type, 0, 0, 0, 0);
 end.

@@ -254,7 +254,12 @@ var
          arg := arg^.next;
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
-      emit('    call f%d$_%s', [n^.binding^.id, n^.call^.id]);
+      (* REMOVE ME *)
+      writeln(n^.binding^.external);
+      if n^.binding^.external then
+         emit('    call f$_%s', [n^.call^.id])
+      else
+         emit('    call f%d$_%s', [n^.binding^.id, n^.call^.id]);
       emit('    addq $%d, %%rsp', [stack_size]);
    end;
 

@@ -7,15 +7,17 @@ SYS_close = 0x02000006
 SYS_wait4 = 0x02000007
 
 .text
-.globl tiger$_read
+.globl f$_read
 .align 3
 
-tiger$_read:
+f$_read:
    movq $0, %rdi                             // stdin descriptor
-   movq read_buffer@GOTPCREL(%rip), %rsi     // read buffer
+   leaq 4(%r15), %rsi                           // read buffer
    movq $8192, %rdx                          // buffer length
    movq $SYS_read, %rax
    syscall
+   movl %eax, (%r15)
+   movq %r15, %rax 
 
 
 

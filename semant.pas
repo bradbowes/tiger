@@ -64,8 +64,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             if ty1 <> ty2 then
                err('initializer doesn''t match type spec', n^.line, n^.col);
          end;
-      bind(env, n^.var_name, ty1, n^.stack_index, nest, n^.line, n^.col);
-      n^.binding := lookup(env, n^.var_name, n^.line, n^.col);
+      n^.binding := bind(env, n^.var_name, ty1, n^.stack_index, nest, n^.line, n^.col);
    end;
 
 
@@ -99,10 +98,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             it := it^.next;
             stack_index := stack_index - 1;
          end;
-      bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
       n^.fenv := fenv;
       n^.nest := nest + 1;
-      n^.binding := lookup(env, n^.fun_name, n^.line, n^.col);
+      n^.binding := bind(env, n^.fun_name, ty, si, nest, n^.line, n^.col);
+      (* n^.binding^.external := n^.fun_body = nil; *)
    end;
 
 
