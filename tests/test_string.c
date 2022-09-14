@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int* tiger_entry (void *heap);
+extern long* tiger_entry (void *heap);
 
 int main(void) {
    void *heap = malloc(65536);
-   int * result = tiger_entry(heap);
-   printf("%d  %s\n", *result, ((char *)result) + 4);
+   long * result = tiger_entry(heap);
+   printf("%ld  %s\n", *result, ((char *)result) + 8);
    free(heap);
 }
 

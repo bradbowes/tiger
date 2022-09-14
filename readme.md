@@ -33,8 +33,8 @@
 
 ## IO
 
-- read(): string    (read string from stdin)
-- write(s: string)  (write string to stdout)
+- read(): string    (done)
+- write(s: string)  (done)
 
 ## Conversion
 

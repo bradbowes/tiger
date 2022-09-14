@@ -34,6 +34,11 @@ begin
    s := make_function_type(string_type);
    bind_external('read', s);
 
+   (* write *)
+   s := make_function_type(void_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   bind_external('write', s);
+
    (* concat *)
    s:= make_function_type(string_type);
    add_field(s, intern('s1'), string_type, 0, 0);

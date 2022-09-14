@@ -25,7 +25,7 @@ test_code () {
 
 harness=test_int.c
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "12345" "12345"
 test_code "65536" "65536"
@@ -146,13 +146,12 @@ test_code "let
 in
    square(square(5))" "625"
 
-END_COMMENT
+# END_COMMENT
 
-harness=test_string.c
+test_code "let a = read() b = read() in (write(b); write(a); 0)" "0"
+test_code "(write(\"hello, world\"); 0)" "0"
 
-test_code "let a = read() in a" ""
-
-: << END_COMMENT
+# : << END_COMMENT
 
 harness=test_int.c
 
@@ -199,4 +198,4 @@ test_code "let
 in
    (a := 5; a)" "5"
 
-END_COMMENT
+# END_COMMENT

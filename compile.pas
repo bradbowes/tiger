@@ -117,7 +117,7 @@ begin
       emit(lineending +
            '    .align 3' + lineending +
            'tiger$_string_%d:' + lineending +
-           '    .int %d' + lineending +
+           '    .quad %d' + lineending +
            '    .asciz "%s"', [sl^.id, l, s]);
       sl := sl^.next;
    end;
@@ -254,8 +254,6 @@ var
          arg := arg^.next;
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
-      (* REMOVE ME *)
-      writeln(n^.binding^.external);
       if n^.binding^.external then
          emit('    call f$_%s', [n^.call^.id])
       else

@@ -11,42 +11,32 @@ SYS_wait4 = 0x02000007
 .align 3
 
 f$_read:
-   movq $0, %rdi                             // stdin descriptor
-   leaq 4(%r15), %rsi                           // read buffer
-   movq $8192, %rdx                          // buffer length
+   movq $0, %rdi                       // stdin descriptor
+   leaq 8(%r15), %rsi                  // read buffer (top of heap plus space for string length)
+   movq $8192, %rdx                    // buffer length
    movq $SYS_read, %rax
    syscall
-   movl %eax, (%r15)
-   movq %r15, %rax 
-
-
-
-
-// test write using syscall
-/*
-   movq %rax, %rbx
-   movq %rax, %rdx
-   movq $SYS_write, %rax
-   movq $1, %rdi
-   movq read_buffer@GOTPCREL(%rip), %rsi
-   syscall
-*/
-// test write using puts
-/*
-   movq %rsi, %rdi
-
-   pushq %r15
-   movq %rsp, %r15
-   andq $0xfffffffffffffff0, %rsp
-   call _puts
-   movq %r15, %rsp
-   popq %r15
-*/
-   
+   movq %rax, (%r15)                   // string length
+   movq %rax, %rbx                     // save string length
+   movq %r15, %rax                     // return address in RAX
+   addq $15, %rbx                      // add space for length plus alignment
+   addq %rbx, %r15                     // update heap pointer
+   andq $0xfffffffffffffff8, %r15      // align 8 bytes
    ret
 
-.data
+
+.globl f$_write
 .align 3
-read_buffer:
-.skip 8192
+
+f$_write:
+   movq $1, %rdi                        // stdout descriptor
+   movq 16(%rsp), %rbx                  // string parameter
+   movq (%rbx), %rdx                    // string length field
+   leaq 8(%rbx), %rsi                   // start of string
+   movq $SYS_write, %rax
+   syscall
+   ret
+
+
+.data
 
