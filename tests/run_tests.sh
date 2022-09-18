@@ -11,12 +11,15 @@ test_code () {
    echo $1 > $src
    ../compile $src
    mv output.s $output
-   cc ../lib/lib.s $harness $output
+#   cc ../lib/lib.s $harness $output
+   cc ../lib/lib.s $output
    echo $1 '=>' $2
    if [ "$(./a.out)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m' 
    else
       echo '\e[0;31mFAIL\e[0m'
+      echo "$2"
+      echo "$(./a.out)"
    fi
    rm -f a.out
    let count+=1
@@ -25,18 +28,19 @@ test_code () {
 
 harness=test_int.c
 
-# : << END_COMMENT
 
-test_code "12345" "12345"
-test_code "65536" "65536"
-test_code "-36545" "-36545"
-test_code "345 + 678" "1023"
-test_code "789 - 222" "567"
-test_code "2435 - 62346" "-59911"
-test_code "10 - 2 - 2" "6"
-test_code "10 - (2 - 2)" "10"
-test_code "10 - 2 + 2" "10"
-test_code "256*256" "65536"
+test_code "print(str(12345))" "12345"
+test_code "print(str(65536))" "65536"
+test_code "print(str(-36545))" "-36545"
+test_code "print(str(345 + 678))" "1023"
+test_code "print(str(789 - 222))" "567"
+test_code "print(str(2435 - 62346))" "-59911"
+test_code "print(str(10 - 2 - 2))" "6"
+test_code "print(str(10 - (2 - 2)))" "10"
+test_code "print(str(10 - 2 + 2))" "10"
+test_code "print(str(256*256))" "65536"
+
+: << END_COMMENT
 test_code "81 / 9" "9"
 test_code "82 / 9" "9"
 test_code "16 * (12 + 4)" "256"
@@ -146,12 +150,9 @@ test_code "let
 in
    square(square(5))" "625"
 
-# END_COMMENT
-
 test_code "let a = read() b = read() in (write(b); write(a); 0)" "0"
 test_code "(write(\"hello, world\"); 0)" "0"
 
-# : << END_COMMENT
 
 harness=test_int.c
 
@@ -198,4 +199,26 @@ test_code "let
 in
    (a := 5; a)" "5"
 
-# END_COMMENT
+
+test_code "let
+   type person = {name: string, age: int}
+   type people = array of person
+in
+   0" "0"
+
+END_COMMENT
+harness=test_string.c
+
+test_code "print(\"Falsches Üben von Xylophonmusik quält jeden größeren Zwerg\")" "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
+test_code "print(\"Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο\")" "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο"
+
+test_code "print(\"イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
+ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン\")" "イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
+ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン"
+
+
+test_code "let s = str(42) in print(s)" "42"
+
+test_code "print(str(42))" "42"
+
+test_code "print(\"\")" ""

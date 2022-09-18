@@ -39,6 +39,16 @@ begin
    add_field(s, intern('s'), string_type, 0, 0);
    bind_external('write', s);
 
+   (* print *)
+   s := make_function_type(void_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   bind_external('print', s);
+
+   (* str *)
+   s := make_function_type(string_type);
+   add_field(s, intern('n'), int_type, 0, 0);
+   bind_external('str', s);
+
    (* concat *)
    s:= make_function_type(string_type);
    add_field(s, intern('s1'), string_type, 0, 0);

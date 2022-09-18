@@ -12,15 +12,10 @@ const prologue =
    '.text' + lineending +
    '.align 3' + lineending +
    '.globl _tiger_entry' + lineending +
-   '_tiger_entry:' + lineending +
-   '    pushq %%rbp' + lineending +
-   '    pushq %%r15' + lineending +
-   '    movq %%rdi, %%r15';
+   '_tiger_entry:' + lineending;
 
 
 const epilogue = 
-   '    popq %%r15' + lineending +
-   '    popq %%rbp' + lineending +
    '    ret';
 
 
@@ -353,6 +348,8 @@ begin
       fun_decl_node:
          if n^.fun_body <> nil then
             add_function(n);
+      type_decl_node:
+         (* do nothing *);
       simple_var_node:
          emit_var();
       call_node:

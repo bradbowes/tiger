@@ -33,12 +33,13 @@
 
 ## IO
 
-- read(): string    (done)
-- write(s: string)  (done)
+- read(): string                (done)
+- write(s: string)              (done)
+- print(s: string)              (appends newline to string, done)
 
 ## Conversion
 
-- int2str(i: int): string
+- str(i: int): string           (converts int to string, done)
 - str2int(s: string): int
 
 ## Strings
