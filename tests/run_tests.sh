@@ -72,6 +72,8 @@ test_code "print(if true = true then \"true\" else \"false\")" "true"
 test_code "print(if true = false then \"true\" else \"false\")" "false"
 test_code "print(if true <> false then \"true\" else \"false\")" "true"
 test_code "print(if (2 + 2 = 4) = true then \"true\" else \"false\")" "true"
+test_code "print(if 2 + 2 = 4 = true then \"true\" else \"false\")" "true"
+# test_code "print(if true = 2 + 2 = 4 then \"true\" else \"false\")" ""
 test_code "print(if nil = nil then \"true\" else \"false\")" "true"
 test_code "print(if nil <> nil then \"true\" else \"false\")" "false"
 
@@ -137,8 +139,6 @@ test_code "let
 in
    print(str(square(square(5))))" "625"
 
-END_COMMENT
-
 # test_code "let a = read() b = read() in (write(b); write(a))" "0"
 test_code "(print(\"hello, world\"); print(str(0)))" "hello, world
 0"
@@ -187,13 +187,6 @@ test_code "let
 in
    (a := 5; print(str(a)))" "5"
 
-
-test_code "let
-   type person = {name: string, age: int}
-   type people = array of person
-in
-   0" ""
-
 test_code "print(\"Falsches Üben von Xylophonmusik quält jeden größeren Zwerg\")" "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 test_code "print(\"Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο\")" "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο"
 
@@ -201,9 +194,28 @@ test_code "print(\"イロハニホヘト チリヌルヲ ワカヨタレソ ツ�
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン\")" "イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン"
 
-
 test_code "let s = str(42) in print(s)" "42"
 
 test_code "print(str(42))" "42"
 
 test_code "print(\"\")" ""
+
+END_COMMENT
+
+test_code "let
+   type person = {name: string, age: int}
+   type people = array of person
+in
+   0" ""
+
+test_code "let
+   type int_list = {n: int, next: int_list}
+in
+   0" ""
+
+test_code "let
+   type item = {name: string, qty: int, next: item, inv: invoice}
+   type item_list = {it: item, next: item_list}
+   type invoice = {n: int, items: item_list}
+in
+   0" ""

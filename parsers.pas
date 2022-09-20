@@ -262,31 +262,37 @@ var
       get_sum := helper(get_product);
    end; { get_sum }
 
+
    function get_boolean: node;
    var
       line, col: longint;
-      left: node;
 
-      function make_node(op: op_tag): node;
+      function helper(left: node): node;
+
+         function make_node(op: op_tag): node;
+         begin
+            next;
+            make_node := make_binary_op_node(op, left, get_sum, line, col);
+         end;
+         
       begin
-         next;
-         make_node := make_binary_op_node(op, left, get_sum, line, col);
+         case token.tag of
+            eq_token: helper := helper(make_node(eq_op));
+            neq_token: helper := helper(make_node(neq_op));
+            lt_token: helper := helper(make_node(lt_op));
+            leq_token: helper := helper(make_node(leq_op));
+            gt_token: helper := helper(make_node(gt_op));
+            geq_token: helper := helper(make_node(geq_op));
+            else helper := left;
+         end;
       end;
-      
+
    begin
       line := token.line;
       col := token.col;
-      left := get_sum;
-      case token.tag of
-         eq_token: get_boolean := make_node(eq_op);
-         neq_token: get_boolean := make_node(neq_op);
-         lt_token: get_boolean := make_node(lt_op);
-         leq_token: get_boolean := make_node(leq_op);
-         gt_token: get_boolean := make_node(gt_op);
-         geq_token: get_boolean := make_node(geq_op);
-         else get_boolean := left;
-      end;
+      get_boolean := helper(get_sum);
    end;
+
 
    function get_conjunction: node;
    var

@@ -120,32 +120,39 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
    procedure check_type_decl(n: node; tenv: scope);
    var
-      ty, field_ty: spec;
-      tyspec, field: node;
-      it: node_list_item;
-      line, col: longint;
+      ty: spec = nil;
+      tyspec: node;
    begin
       tyspec := n^.type_spec;
-      case n^.type_spec^.tag of
+      case tyspec^.tag of
          array_desc_node:
-            ty := make_array_type(lookup(tenv, tyspec^.base,tyspec^.line, tyspec^.col)^.ty);
-         record_desc_node: begin
-            ty := make_record_type(nil);
-            it := tyspec^.field_list^.first;
-            while it <> nil do
-               begin
-                  field := it^.node;
-                  line := field^.line;
-                  col := field^.col;
-                  field_ty := lookup(tenv, field^.field_type, line, col)^.ty;
-                  add_field(ty, field^.field_desc_name, field_ty, line, col);
-                  it := it^.next;
-               end;
-            end;
+            ty := make_array_type(lookup(tenv, tyspec^.base, tyspec^.line, tyspec^.col)^.ty);
+         record_desc_node:
+            ty := make_record_type();
       end;
       bind(tenv, n^.type_name, ty, 0, 0, n^.line, n^.col);
    end;
 
+
+   procedure check_record_body(n: node; tenv: scope);
+   var
+      it: node_list_item;
+      field: node;
+      line, col: longint;
+      ty, field_ty: spec;
+   begin 
+      ty := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;  
+      it := n^.type_spec^.field_list^.first;
+      while it <> nil do begin
+         field := it^.node;
+         line := field^.line;
+         col := field^.col;
+         field_ty := lookup(tenv, field^.field_type, line, col)^.ty;
+         add_field(ty, field^.field_desc_name, field_ty, line, col);
+         it := it^.next;
+      end;
+   end;
+   
 
    function check_let(): spec;
    var
@@ -185,8 +192,13 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
       it := n^.decls^.first;
       while it <> nil do begin
-         if it^.node^.tag = fun_decl_node then
-            check_fun_body(it^.node, stack_index, new_env, new_tenv);
+         case it^.node^.tag of
+            fun_decl_node:
+               check_fun_body(it^.node, stack_index, new_env, new_tenv);
+            type_decl_node:
+               if it^.node^.type_spec^.tag = record_desc_node then
+                  check_record_body(it^.node, new_tenv);
+         end;
          it := it^.next;
       end;
       

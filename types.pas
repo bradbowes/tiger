@@ -40,21 +40,21 @@ const
 procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
 function get_field(rec: spec; name: symbol; line, col: longint): spec;
 function make_array_type(base: spec): spec;
-function make_record_type(fields: field): spec;
+function make_record_type(): spec;
 function make_function_type(return: spec): spec;
-   
+
 
 implementation
 
 uses utils;
 
 
-function make_record_type(fields: field): spec;
+function make_record_type(): spec;
 var s: spec;
 begin
    new(s);
    s^.tag := record_type;
-   s^.fields := fields;
+   s^.fields := nil;
    s^.base := nil;
    s^.length := 0;
    make_record_type := s;
