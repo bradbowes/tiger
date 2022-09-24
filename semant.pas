@@ -61,8 +61,13 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       else
          begin
             ty2 := lookup(tenv, n^.var_type, n^.line, n^.col)^.ty;
-            if ty1 <> ty2 then
-               err('initializer doesn''t match type spec', n^.line, n^.col);
+            if ty1 = nil_type then begin
+               if ty2^.tag = primitive_type then
+                  err(n^.var_type^.id + ' type can''t be nil', n^.line, n^.col);
+            end
+            else
+               if ty1 <> ty2 then
+                  err('initializer doesn''t match type spec', n^.line, n^.col);
          end;
       n^.binding := bind(env, n^.var_name, ty1, n^.stack_index, nest, n^.line, n^.col);
    end;
@@ -286,6 +291,28 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_sequence := ty;
    end;
    
+   
+   function check_array(): spec;
+   var
+      ty1, base, ty2: spec;
+   begin
+      ty1 := lookup(tenv, n^.array_type, n^.line, n^.col)^.ty;
+      if ty1^.tag <> array_type then
+         err(n^.array_type^.id + ' isn''t an array type.', n^.line, n^.col);
+      if type_check(n^.size, si, nest, env, tenv) <> int_type then
+         err('Array size must be an integer.', n^.line, n^.col);
+      base := ty1^.base;
+      ty2 := type_check(n^.default_value, si, nest, env, tenv);
+      if ty2 = nil_type then begin
+         if base^.tag = primitive_type then
+            err(n^.array_type^.id + ' array type can''t have nil values.', n^.line, n^.col);
+      end
+      else
+         if ty2 <> base then
+            err(n^.array_type^.id + ' array initializer is the wrong type.', n^.line, n^.col);
+      check_array := ty1;
+   end;
+
 
 (*
    function check_if(): spec;
@@ -404,7 +431,8 @@ begin
          type_check := check_assign();
       sequence_node:
          type_check := check_sequence();
-         
+      array_node:
+         type_check := check_array();         
       else begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);
@@ -424,12 +452,8 @@ begin
          type_check := check_indexed_var();
       field_node:
          format := n^.field_name^.id + ' = ' + format(n^.field_value);
-      sequence_node:
-         format := '(' + format_list(n^.sequence, ';', true) + newline + ')';
       record_node:
          format := n^.record_type^.id + ' {' + format_list(n^.fields, ',', true) + newline + '}';
-      array_node:
-         format := n^.array_type^.id + '[' + format(n^.size) + '] of ' + format(n^.default_value);
       else begin
          str(n^.tag, s);
          format := '???? ' + s + ' ????';

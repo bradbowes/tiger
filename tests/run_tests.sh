@@ -219,3 +219,23 @@ test_code "let
    type invoice = {n: int, items: item_list}
 in
    0" ""
+
+test_code "let
+   type person = {name: string, age: int}
+   a: person = nil
+in
+   print(if a = nil then \"nil\" else \"?\")" "nil"
+
+test_code "let
+   type person = {name: string, age: int}
+   a: person = nil
+in
+   print(if a = false then \"nil\" else \"?\")" "nil"
+
+
+
+test_code "let
+   type int_array = array of int
+   a = int_array[5] of 0
+in
+   0" ""
