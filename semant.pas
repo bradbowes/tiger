@@ -314,6 +314,19 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
+   function check_indexed_var(): spec;
+   var
+      ty: spec;
+   begin
+      ty := type_check(n^.arr, si, nest, env, tenv);
+      if ty^.tag <> array_type then
+         err('Object is not an array.', n^.arr^.line, n^.arr^.col);
+      if type_check(n^.index, si, nest, env, tenv) <> int_type then
+         err('Array index must be an integer.', n^.index^.line, n^.index^.col);
+      check_indexed_var := ty^.base;
+   end;
+
+
 (*
    function check_if(): spec;
    begin
@@ -352,15 +365,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if ty^.tag <> record_type then
          err('object is not a record.', n^.obj^.line, n^.obj^.col);
       check_field_var := get_field(ty, n^.field, n^.line, n^.col);
-   end;
-
-   function check_indexed_var(): spec;
-   var ty: spec;
-   begin
-      ty := type_check(n^.arr, si, nest, env, tenv);
-      if ty^.tag <> array_type then
-         err('object is not an array.', n^.arr^.line, n^.arr^.col);
-      check_indexed_var := ty^.base;
    end;
 
    function check_record(): spec;
@@ -432,7 +436,9 @@ begin
       sequence_node:
          type_check := check_sequence();
       array_node:
-         type_check := check_array();         
+         type_check := check_array();
+      indexed_var_node:
+         type_check := check_indexed_var();
       else begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);

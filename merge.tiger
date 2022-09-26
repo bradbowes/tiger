@@ -1,11 +1,11 @@
 let
-   type any = { any: int }
+   type any = { any: bool }
    buffer = getchar()
 
    readint(any: any) : int =
       let
          i = 0
-         isdigit(s: string) : int =
+         isdigit(s: string) : bool =
             ord(buffer) >= ord("0") and ord(buffer) <= ord("9")
       in (
          while buffer = " " or buffer = "\n" do
@@ -22,11 +22,11 @@ let
    
    readlist() : list =
       let
-         any = any { any = 0 }
+         any = any { any = false }
          i = readint(any)
       in
          if any.any then
-            list{ first = i, rest = readlist() }
+            list { first = i, rest = readlist() }
          else
             (buffer := getchar(); nil)
          
@@ -34,9 +34,9 @@ let
       if a = nil then b
       else if b = nil then a
       else if a.first < b.first then
-         list{ first = a.first, rest = merge(a.rest, b) }
+         list { first = a.first, rest = merge(a.rest, b) }
       else
-         list{ first = b.first, rest = merge(a, b.rest) }
+         list { first = b.first, rest = merge(a, b.rest) }
 
    printint(i: int) =
       let

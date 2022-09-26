@@ -200,8 +200,6 @@ test_code "print(str(42))" "42"
 
 test_code "print(\"\")" ""
 
-END_COMMENT
-
 test_code "let
    type person = {name: string, age: int}
    type people = array of person
@@ -226,16 +224,10 @@ test_code "let
 in
    print(if a = nil then \"nil\" else \"?\")" "nil"
 
-test_code "let
-   type person = {name: string, age: int}
-   a: person = nil
-in
-   print(if a = false then \"nil\" else \"?\")" "nil"
-
-
+END_COMMENT
 
 test_code "let
    type int_array = array of int
-   a = int_array[5] of 0
+   a = int_array[3] of 42
 in
-   0" ""
+   (a[0] := 50; print(str(a[0])))" "50"

@@ -12,8 +12,10 @@ heap_size = 16 * 1024 * 1024
 .globl _main
 
 _main:
-   subq $24, %rsp                      // space for global variables
+   subq $40, %rsp                      // space for global variables
    movq %rsp, %r14                     // save global var pointer
+   movq %rdi,  32(%r14)                // argc
+   movq %rsi,  24(%r14)                // argv
    movq $heap_size, %rdi               // allocate heap
    call _malloc
    cmpq $0, %rax                       // check for null
@@ -24,7 +26,7 @@ _main:
    // main code here
    call _tiger_entry
 
-   movq 16(%rsp),  %rdi                // free the heap
+   movq 8(%r14),  %rdi                // free the heap
    call _free
    jmp exit
 

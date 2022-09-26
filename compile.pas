@@ -158,17 +158,17 @@ var
 
    procedure emit_if_else();
    var
-      label_1, label_2: string;
+      lbl1, lbl2: string;
    begin
-      label_1 := new_label();
-      label_2 := new_label();
+      lbl1 := new_label();
+      lbl2 := new_label();
       emit_expression(n^.if_else_condition, si, nest);
-      emit('    jz %s', [label_1]);
+      emit('    jz %s', [lbl1]);
       emit_expression(n^.if_else_consequent, si, nest);
-      emit('    jmp %s', [label_2]);
-      emit('%s:', [label_1]);
+      emit('    jmp %s', [lbl2]);
+      emit('%s:', [lbl1]);
       emit_expression(n^.if_else_alternative, si, nest); 
-      emit('%s:', [label_2]); 
+      emit('%s:', [lbl2]); 
    end;
    
 
@@ -267,6 +267,34 @@ var
          it := it^.next;
       end;
    end;
+
+
+   procedure emit_array();
+   var
+      lbl: string;
+   begin
+      lbl := new_label();
+      emit_expression(n^.size, si, nest);
+      emit('    movq %%rax, %%rcx' + lineending +
+           '    movq %%rcx, (%%r15)', []);
+      emit_expression(n^.default_value, si, nest);
+      emit('%s:' + lineending +
+           '    movq %%rax, (%%r15, %%rcx, 8)' + lineending +
+           '    decq %%rcx' + lineending +
+           '    jg %s' + lineending +
+           '    movq %%r15, %%rax' + lineending +
+           '    movq (%%r15), %%rcx' + lineending +
+           '    leaq 8(%%r15, %%rcx, 8), %%r15', [lbl, lbl]);
+   end;
+   
+
+   procedure emit_indexed_var();
+   begin
+      emit_expression(n^.arr, si, nest);
+      emit('    movq %%rax, %%rsi', []);
+      emit_expression(n^.index, si, nest);
+      emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
+   end;
    
 
 begin
@@ -352,6 +380,10 @@ begin
          (* do nothing *);
       simple_var_node:
          emit_var();
+      array_node:
+         emit_array();
+      indexed_var_node:
+         emit_indexed_var();
       call_node:
          emit_call();
       if_else_node:
