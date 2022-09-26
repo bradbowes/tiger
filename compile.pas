@@ -200,7 +200,7 @@ var
    end;
 
 
-   procedure emit_assign();
+   procedure emit_simple_assign();
    var
       offset: longint;
       i: integer;
@@ -216,6 +216,28 @@ var
          for i := nest - 2 downto n^.binding^.nesting_level do
             emit('    movq 8(%%rbp), %%rbp', []);
          emit('    movq %%rax, %d(%%rbp)', [offset]);
+      end;
+   end;
+
+
+   procedure emit_indexed_assign();
+   begin
+      emit_expression(n^.variable^.arr, si, nest);
+      emit('    movq %%rax, %%rsi', []);
+      emit_expression(n^.variable^.index, si, nest);
+      emit('    movq %%rax, %%rbx', []);
+      emit_expression(n^.expression, si, nest);
+      emit('    movq %%rax, 8(%%rsi, %%rbx, 8)', []);
+   end;
+   
+   
+   procedure emit_assign();
+   begin
+      case n^.variable^.tag of
+         simple_var_node:
+            emit_simple_assign();
+         indexed_var_node:
+            emit_indexed_assign();
       end;
       emit ('    xorq %%rax, %%rax', []);
    end;
