@@ -64,12 +64,16 @@ f$_read:
 .align 3
 .globl f$_write
 f$_write:
+   pushq %rbx
+   pushq %rcx
    movq $1, %rdi                        // stdout descriptor
-   movq 16(%rsp), %rbx                  // string parameter
+   movq 32(%rsp), %rbx                  // string parameter
    movq (%rbx), %rdx                    // string length field
    leaq 8(%rbx), %rsi                   // start of string
    movq $SYS_write, %rax
    syscall
+   popq %rcx
+   popq %rbx
    ret
 
 
@@ -87,9 +91,11 @@ f$_print:
 .globl f$_str
 .align 3
 f$_str:
+   pushq %rbx
+   pushq %rcx
    leaq 8(%r15), %rdi                   // output string
    movq str_fmt@GOTPCREL(%rip), %rsi    // format string
-   movq 16(%rsp), %rdx                  // number
+   movq 32(%rsp), %rdx                  // number
    xorq %rax, %rax                      // no float args
    call _sprintf
    movq %rax, (%r15)
@@ -98,6 +104,8 @@ f$_str:
    addq $15, %rbx
    addq %rbx, %r15
    andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   popq %rcx
+   popq %rbx
    ret
 
 .data

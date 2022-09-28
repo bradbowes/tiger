@@ -16,8 +16,6 @@ type
                record_node, array_node);
 
 
-
-
    node = ^node_t;
    node_list_item = ^node_list_item_t;
    node_list = ^node_list_t;
@@ -48,7 +46,7 @@ type
          nil_node:         ();
          type_decl_node:   (type_name: symbol; type_spec: node);
          var_decl_node:    (var_name, var_type: symbol; stack_index: longint; initial_value: node);
-         fun_decl_node:    (fun_name: symbol; params: node_list; return_type: symbol; fun_body: node; fenv: scope; nest: longint); 
+         fun_decl_node:    (fun_name: symbol; params: node_list; return_type: symbol; fun_body: node; fenv: scope; nest: longint);
          record_desc_node: (field_list: node_list);
          array_desc_node:  (base: symbol);
          unary_op_node:    (unary_op: op_tag; unary_exp: node);

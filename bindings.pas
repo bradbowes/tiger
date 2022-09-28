@@ -33,6 +33,7 @@ const
    _global_tenv: scope_t = (bindings: nil; stack_index: 0; next: nil);
    global_tenv: scope = @_global_tenv;
 
+
 function add_scope(env: scope): scope;
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
 function lookup(env: scope; key: symbol; line, col: longint): binding;
@@ -44,7 +45,7 @@ uses utils;
 
 var
    next_id: longint = 1;
-   
+
 
 function add_scope(env: scope): scope;
 var

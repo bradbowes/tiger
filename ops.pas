@@ -13,7 +13,7 @@ const
    equality_ops = [eq_op, neq_op];
    boolean_ops = [and_op, or_op];
 
-   op_display: array[plus_op..or_op] of string = 
+   op_display: array[plus_op..or_op] of string =
       ('+', '-', '*', '/', 'mod', '=', '<>', '<', '<=', '>', '>=', 'and', 'or');
 
 implementation

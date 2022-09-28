@@ -120,7 +120,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          if ty^.base <> body_type then
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
-   end;   
+   end;
 
 
    procedure check_type_decl(n: node; tenv: scope);
@@ -145,8 +145,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       field: node;
       line, col: longint;
       ty, field_ty: spec;
-   begin 
-      ty := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;  
+   begin
+      ty := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;
       it := n^.type_spec^.field_list^.first;
       while it <> nil do begin
          field := it^.node;
@@ -157,7 +157,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          it := it^.next;
       end;
    end;
-   
+
 
    function check_let(): spec;
    var
@@ -166,7 +166,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       has_type_decls: boolean = false;
       new_env, new_tenv: scope;
       stack_index: longint;
-      
+
    begin
       stack_index := si;
       it := n^.decls^.first;
@@ -191,7 +191,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             var_decl_node: check_var_decl(it^.node, stack_index, new_env, new_tenv);
             fun_decl_node: check_fun_decl(it^.node, stack_index, new_env, new_tenv);
             type_decl_node: check_type_decl(it^.node, new_tenv);
-         end;               
+         end;
          it := it^.next;
       end;
 
@@ -206,7 +206,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
          it := it^.next;
       end;
-      
+
       new_env^.stack_index := stack_index;
       n^.env := new_env;
       check_let := type_check(n^.let_body, stack_index, nest, new_env, new_tenv);
@@ -270,11 +270,16 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    function check_assign(): spec;
    var
       ty: spec;
+      new_si: longint;
    begin
-      ty := type_check(n^.variable, si, nest, env, tenv);
-      if ty <> type_check(n^.expression, si, nest, env, tenv) then
+      if n^.variable^.tag = indexed_var_node then
+         new_si := si + 1
+      else
+         new_si := si;
+      ty := type_check(n^.variable, new_si, nest, env, tenv);
+      if ty <> type_check(n^.expression, new_si, nest, env, tenv) then
          err('assignment type mismatch', n^.line, n^.col);
-      check_assign := ty;
+      check_assign := void_type;
    end;
 
 
@@ -290,8 +295,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       end;
       check_sequence := ty;
    end;
-   
-   
+
+
    function check_array(): spec;
    var
       ty1, base, ty2: spec;
@@ -327,6 +332,22 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
+   function check_for(): spec;
+   var
+      new_env: scope;
+   begin
+      new_env := add_scope(env);
+      n^.binding := bind(new_env, n^.iter, int_type, si + 1, nest, n^.line, n^.col);
+      if type_check(n^.start, si, nest, env, tenv) <> int_type then
+         err('for start value must be integer type', n^.start^.line, n^.start^.col);
+      if type_check(n^.finish, si, nest, env, tenv) <> int_type then
+         err('for to value must be integer type', n^.finish^.line, n^.finish^.col);
+      if type_check(n^.for_body, si + 2, nest, new_env, tenv) <> void_type then
+         err('for body cannot return a vaule', n^.for_body^.line, n^.for_body^.col);
+      check_for := void_type;
+   end;
+
+
 (*
    function check_if(): spec;
    begin
@@ -344,18 +365,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if type_check(n^.while_body, si, nest, env, tenv) <> void_type then
          err('while expression cannot return a value', n^.while_body^.line, n^.while_body^.col);
       check_while := void_type;
-   end;
-
-   function check_for(): spec;
-   begin
-      bind(env, n^.iter, int_type, si, nest, n^.line, n^.col);
-      if type_check(n^.start, si, nest, env, tenv) <> int_type then
-         err('for start value must be integer type', n^.start^.line, n^.start^.col);
-      if type_check(n^.finish, si, nest, env, tenv) <> int_type then
-         err('for to value must be integer type', n^.finish^.line, n^.finish^.col);
-      if type_check(n^.for_body, si, nest, env, tenv) <> void_type then
-         err('for body cannot return a vaule', n^.for_body^.line, n^.for_body^.col);
-      check_for := void_type;
    end;
 
    function check_field_var(): spec;
@@ -402,9 +411,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             add_check(f);
             f := f.next;
          end;
-      
-      
-         
+
          format := n^.record_type^.id + ' ' + format_list(n^.fields, ',', true) + newline + '';
    end;
 *)
@@ -439,6 +446,8 @@ begin
          type_check := check_array();
       indexed_var_node:
          type_check := check_indexed_var();
+      for_node:
+         type_check := check_for();
       else begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);
@@ -450,8 +459,6 @@ begin
          type_check := check_if();
       while_node:
          type_check := check_while();
-      for_node:
-         type_check := check_for();
       field_var_node:
          type_check := check_field_var();
       indexed_var_node:

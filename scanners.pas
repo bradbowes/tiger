@@ -2,8 +2,6 @@ unit scanners;
 
 interface
 
-uses utils;
-
 type
    token_tag = (and_token,
                 array_token,
@@ -73,6 +71,8 @@ var
 
 implementation
 
+uses utils;
+
 procedure scan(s: scanner);
 
    procedure next;
@@ -117,7 +117,7 @@ procedure scan(s: scanner);
    begin
       while s^.ch in [' ', chr(9), chr(13), chr(10)] do
       begin
-         case s^.ch of 
+         case s^.ch of
            ' ', chr(9): next;
            chr(10): newline;
            chr(13): begin

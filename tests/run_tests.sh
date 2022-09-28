@@ -1,26 +1,25 @@
 #!/bin/zsh
 
 count=1
-rm -f test*.s test*.tiger
+rm -f test*.out test*.s test*.tiger
 
 test_code () {
    src=test$count.tiger
    output=test$count.s
+   exe=test$count.out
    echo
    echo '\e[0;33mtesting' \#$count ...'\e[0m'
    echo $1 > $src
    ../compile $src
    mv output.s $output
-   cc ../lib/lib.s $output
+   cc -o $exe ../lib/lib.s $output
    echo $1 '=>' $2
-   if [ "$(./a.out)" = "$2" ]; then
+   if [ "$(./$exe)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m' 
    else
       echo '\e[0;31mFAIL\e[0m'
-      echo "$2"
-      echo "$(./a.out)"
+      echo "$(./$exe)"
    fi
-   rm -f a.out
    let count+=1
    sleep .5
 }
@@ -230,4 +229,25 @@ test_code "let
    type int_array = array of int
    a = int_array[3] of 42
 in
-   (a[0] := 50; print(str(a[0])))" "50"
+   (a[0] := 50; print(str(a[0] + a[1] + a[2])))" "134"
+
+test_code "for i := 1 to 5 do
+   print(str(i))" "1
+2
+3
+4
+5"
+
+test_code "let
+   type int_array = array of int
+   a = int_array[5] of 0
+in (
+   for i := 0 to 4 do
+      a[i] := (i + 1) * 2;
+   for i := 0 to 4 do
+      print(str(a[i]))
+)" "2
+4
+6
+8
+10"

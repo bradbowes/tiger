@@ -8,20 +8,20 @@ uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant, externals;
 procedure emit_expression(n: node; si, nest: longint); forward;
 
 
-const prologue = 
+const prologue =
    '.text' + lineending +
    '.align 3' + lineending +
    '.globl _tiger_entry' + lineending +
    '_tiger_entry:' + lineending;
 
 
-const epilogue = 
+const epilogue =
    '    ret';
 
 
 type
    string_list = ^string_list_t;
-   
+
    string_list_t = record
       sym: symbol;
       id: integer;
@@ -55,7 +55,7 @@ begin
          exit(sl)
       else
          sl := sl^.next;
-   
+
    new(sl);
    sl^.sym := s;
    sl^.id := next_string_id;
@@ -82,14 +82,14 @@ begin
       next^.next := fl;
    end;
 end;
-      
-     
+
+
 function new_label(): string;
 begin
    new_label := format('L%.5d', [next_label_id]);
    next_label_id := next_label_id + 1;
 end;
-   
+
 
 procedure emit(fmt: string; args: array of const);
 begin
@@ -135,7 +135,7 @@ begin
       fl := fl^.next;
    end;
 end;
-           
+
 
 procedure emit_expression(n: node; si, nest: longint);
 var
@@ -167,10 +167,10 @@ var
       emit_expression(n^.if_else_consequent, si, nest);
       emit('    jmp %s', [lbl2]);
       emit('%s:', [lbl1]);
-      emit_expression(n^.if_else_alternative, si, nest); 
-      emit('%s:', [lbl2]); 
+      emit_expression(n^.if_else_alternative, si, nest);
+      emit('%s:', [lbl2]);
    end;
-   
+
 
    procedure emit_string();
    var
@@ -181,7 +181,7 @@ var
       slabel := 'tiger$_string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('    movq %s, %%rax', [slabel]);
    end;
-   
+
 
    procedure emit_var();
    var
@@ -222,15 +222,17 @@ var
 
    procedure emit_indexed_assign();
    begin
-      emit_expression(n^.variable^.arr, si, nest);
+      emit('    movq %%rbx, %d(%%rsp)', [si]);
+      emit_expression(n^.variable^.arr, si - 8, nest);
       emit('    movq %%rax, %%rsi', []);
-      emit_expression(n^.variable^.index, si, nest);
+      emit_expression(n^.variable^.index, si - 8, nest);
       emit('    movq %%rax, %%rbx', []);
-      emit_expression(n^.expression, si, nest);
+      emit_expression(n^.expression, si - 8, nest);
       emit('    movq %%rax, 8(%%rsi, %%rbx, 8)', []);
+      emit('    movq %d(%%rsp), %%rbx',  [si]);
    end;
-   
-   
+
+
    procedure emit_assign();
    begin
       case n^.variable^.tag of
@@ -308,7 +310,7 @@ var
            '    movq (%%r15), %%rcx' + lineending +
            '    leaq 8(%%r15, %%rcx, 8), %%r15', [lbl, lbl]);
    end;
-   
+
 
    procedure emit_indexed_var();
    begin
@@ -317,7 +319,36 @@ var
       emit_expression(n^.index, si, nest);
       emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
    end;
-   
+
+
+   procedure emit_for();
+   var
+      offset, stack_index: longint;
+      lbl1, lbl2: string;
+   begin
+      lbl1 := new_label();
+      lbl2 := new_label();
+      offset := n^.binding^.stack_index * -8;
+      stack_index := offset - 16;
+      emit('    movq %%rcx, %d(%%rsp)', [offset - 8]);
+      emit('    movq %%rbx, %d(%%rsp)', [offset - 16]);
+      emit_expression(n^.start, stack_index, nest);
+      emit('    movq %%rax, %%rcx', []);
+      emit('    movq %%rax, %d(%%rsp)', [offset]);
+      emit_expression(n^.finish, stack_index, nest);
+      emit('    movq %%rax, %%rbx', []);
+      emit('%s:', [lbl1]);
+      emit('    cmpq %%rcx, %%rbx', []);
+      emit('    jl %s', [lbl2]);
+      emit_expression(n^.for_body, stack_index, nest);
+      emit('    incq %%rcx', []);
+      emit('    movq %%rcx, %d(%%rsp)', [offset]);
+      emit('    jmp %s', [lbl1]);
+      emit('%s:', [lbl2]);
+      emit('    movq %d(%%rsp), %%rbx', [offset - 16]);
+      emit('    movq %d(%%rsp), %%rcx', [offset - 8]);
+   end;
+
 
 begin
    case n^.tag of
@@ -414,6 +445,8 @@ begin
          emit_sequence();
       assign_node:
          emit_assign();
+      for_node:
+         emit_for();
       else begin
          writeln(n^.tag);
          err('emit: feature not supported yet!', n^.line, n^.col);
