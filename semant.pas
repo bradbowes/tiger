@@ -48,7 +48,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          check_binary_op := bool_type { equality_ops }
    end;
 
-   procedure check_var_decl(n: node; si: longint; env, tenv: scope);
+   procedure check_var_decl(n: node; si, offset: longint; env, tenv: scope);
    var
       ty1, ty2: spec;
    begin
@@ -69,7 +69,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                if ty1 <> ty2 then
                   err('initializer doesn''t match type spec', n^.line, n^.col);
          end;
-      n^.binding := bind(env, n^.name, ty1, n^.stack_index, nest, n^.line, n^.col);
+      n^.binding := bind(env, n^.name, ty1, offset, nest, n^.line, n^.col);
    end;
 
 
@@ -103,8 +103,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             it := it^.next;
             stack_index := stack_index - 1;
          end;
-      n^.fenv := fenv;
-      n^.nest := nest + 1;
+      n^.env := fenv;
       n^.binding := bind(env, n^.name, ty, si, nest, n^.line, n^.col);
    end;
 
@@ -115,7 +114,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    begin
       ty := lookup(env, n^.name, n^.line, n^.col)^.ty;
       if n^.expr <> nil then begin
-         body_type := type_check(n^.expr, si, nest + 1, n^.fenv, tenv);
+         body_type := type_check(n^.expr, si, nest + 1, n^.env, tenv);
          if ty^.base <> body_type then
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
@@ -164,7 +163,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       has_var_decls: boolean = false;
       has_type_decls: boolean = false;
       new_env, new_tenv: scope;
-      stack_index: longint;
+      stack_index, offset: longint;
 
    begin
       stack_index := si;
@@ -172,7 +171,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       while it <> nil do begin
          case it^.node^.tag of
             var_decl_node: begin
-               it^.node^.stack_index := stack_index;
                stack_index := stack_index + 1;
                has_var_decls := true;
             end;
@@ -185,9 +183,13 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if has_var_decls then new_env := add_scope(env) else new_env := env;
       if has_type_decls then new_tenv := add_scope(tenv) else new_tenv := tenv;
       it := n^.list^.first;
+      offset := si;
       while it <> nil do begin
          case it^.node^.tag of
-            var_decl_node: check_var_decl(it^.node, stack_index, new_env, new_tenv);
+            var_decl_node: begin
+               check_var_decl(it^.node, stack_index, offset, new_env, new_tenv);
+               offset := offset + 1;
+            end;
             fun_decl_node: check_fun_decl(it^.node, stack_index, new_env, new_tenv);
             type_decl_node: check_type_decl(it^.node, new_tenv);
          end;

@@ -130,7 +130,7 @@ begin
       emit(lineending +
            '    .align 3' + lineending +
            'f%d$_%s:', [f^.binding^.id, f^.name^.id]);
-      emit_expression(f^.expr, -8, f^.nest);
+      emit_expression(f^.expr, -8, f^.binding^.nesting_level + 1);
       emit('    ret', []);
       fl := fl^.next;
    end;
@@ -423,8 +423,8 @@ begin
       let_node:
          emit_let();
       var_decl_node: begin
-         emit_expression(n^.expr, si, nest);
-         emit('    movq %%rax, %d(%%rsp)', [n^.stack_index * -8]);
+         emit_expression(n^.expr, si, nest); (* emit(' movq %%rax, %d(%%rsp)', [n^.stack_index * -8]); *) emit(' movq %%rax, %d(%%rsp)', 
+         [n^.binding^.stack_index * -8]);
       end;
       fun_decl_node:
          if n^.expr <> nil then
