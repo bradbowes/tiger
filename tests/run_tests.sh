@@ -143,18 +143,6 @@ test_code "(print(\"hello, world\"); print(str(0)))" "hello, world
 0"
 
 test_code "let
-   odd(n: int): bool = if n = 0 then false else even(n - 1)
-   even(n: int): bool = if n = 0 then true else odd(n - 1)
-in
-   print(if even(100) then \"true\" else \"false\")" "true"
-
-test_code "let
-   fib(n: int): int =
-      if n < 2 then n
-      else fib(n - 1) + fib(n - 2)
-in print(str(fib(40)))" "102334155"
-
-test_code "let
    a = 10
    b = 20
 in
@@ -224,6 +212,18 @@ in
    print(if a = nil then \"nil\" else \"?\")" "nil"
 
 END_COMMENT
+
+test_code "let
+   odd(n: int): bool = if n = 0 then false else even(n - 1)
+   even(n: int): bool = if n = 0 then true else odd(n - 1)
+in
+   print(if even(100) then \"true\" else \"false\")" "true"
+
+test_code "let
+   fib(n: int): int =
+      if n < 2 then n
+      else fib(n - 1) + fib(n - 2)
+in print(str(fib(40)))" "102334155"
 
 test_code "let
    type int_array = array of int

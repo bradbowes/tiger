@@ -129,8 +129,8 @@ begin
       f := fl^.fun;
       emit(lineending +
            '    .align 3' + lineending +
-           'f%d$_%s:', [f^.binding^.id, f^.fun_name^.id]);
-      emit_expression(f^.fun_body, -8, f^.nest);
+           'f%d$_%s:', [f^.binding^.id, f^.name^.id]);
+      emit_expression(f^.expr, -8, f^.nest);
       emit('    ret', []);
       fl := fl^.next;
    end;
@@ -147,12 +147,12 @@ var
       stack_index: longint;
    begin
       stack_index := n^.env^.stack_index * -8;
-      it := n^.decls^.first;
+      it := n^.list^.first;
       while it <> nil do begin
          emit_expression(it^.node, stack_index, nest);
          it := it^.next;
       end;
-      emit_expression(n^.let_body, stack_index, nest);
+      emit_expression(n^.expr, stack_index, nest);
    end;
 
 
@@ -162,12 +162,12 @@ var
    begin
       lbl1 := new_label();
       lbl2 := new_label();
-      emit_expression(n^.if_else_condition, si, nest);
+      emit_expression(n^.cond, si, nest);
       emit('    jz %s', [lbl1]);
-      emit_expression(n^.if_else_consequent, si, nest);
+      emit_expression(n^.expr, si, nest);
       emit('    jmp %s', [lbl2]);
       emit('%s:', [lbl1]);
-      emit_expression(n^.if_else_alternative, si, nest);
+      emit_expression(n^.expr2, si, nest);
       emit('%s:', [lbl2]);
    end;
 
@@ -206,8 +206,8 @@ var
       i: integer;
       b: binding;
    begin
-      emit_expression(n^.expression, si, nest);
-      b := n^.variable^.binding;
+      emit_expression(n^.expr, si, nest);
+      b := n^.expr2^.binding;
       offset := b^.stack_index * -8;
       if b^.nesting_level = nest then
          emit('    movq %%rax, %d(%%rsp)', [offset])
@@ -223,11 +223,11 @@ var
    procedure emit_indexed_assign();
    begin
       emit('    movq %%rbx, %d(%%rsp)', [si]);
-      emit_expression(n^.variable^.arr, si - 8, nest);
+      emit_expression(n^.expr2^.expr2, si - 8, nest);
       emit('    movq %%rax, %%rsi', []);
-      emit_expression(n^.variable^.index, si - 8, nest);
+      emit_expression(n^.expr2^.expr, si - 8, nest);
       emit('    movq %%rax, %%rbx', []);
-      emit_expression(n^.expression, si - 8, nest);
+      emit_expression(n^.expr, si - 8, nest);
       emit('    movq %%rax, 8(%%rsi, %%rbx, 8)', []);
       emit('    movq %d(%%rsp), %%rbx',  [si]);
    end;
@@ -235,7 +235,7 @@ var
 
    procedure emit_assign();
    begin
-      case n^.variable^.tag of
+      case n^.expr2^.tag of
          simple_var_node:
             emit_simple_assign();
          indexed_var_node:
@@ -252,7 +252,7 @@ var
       pos: longint;
    begin
       target := n^.binding^.nesting_level;
-      stack_size := ((8 * n^.args^.length) - si + 15);
+      stack_size := ((8 * n^.list^.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
       { link }
@@ -265,7 +265,7 @@ var
          emit('    movq %%rbp, %d(%%rsp)', [pos]);
       end;
       pos := pos + 8;
-      arg := n^.args^.first;
+      arg := n^.list^.first;
       while arg <> nil do begin
          emit_expression(arg^.node, -(stack_size + 8), nest);
          emit('    movq %%rax, %d(%%rsp)', [pos]);
@@ -274,9 +274,9 @@ var
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
-         emit('    call f$_%s', [n^.call^.id])
+         emit('    call f$_%s', [n^.name^.id])
       else
-         emit('    call f%d$_%s', [n^.binding^.id, n^.call^.id]);
+         emit('    call f%d$_%s', [n^.binding^.id, n^.name^.id]);
       emit('    addq $%d, %%rsp', [stack_size]);
    end;
 
@@ -285,7 +285,7 @@ var
    var
       it: node_list_item;
    begin
-      it := n^.sequence^.first;
+      it := n^.list^.first;
       while it <> nil do begin
          emit_expression(it^.node, si, nest);
          it := it^.next;
@@ -298,10 +298,10 @@ var
       lbl: string;
    begin
       lbl := new_label();
-      emit_expression(n^.size, si, nest);
+      emit_expression(n^.expr2, si, nest);
       emit('    movq %%rax, %%rcx' + lineending +
            '    movq %%rcx, (%%r15)', []);
-      emit_expression(n^.default_value, si, nest);
+      emit_expression(n^.expr, si, nest);
       emit('%s:' + lineending +
            '    movq %%rax, (%%r15, %%rcx, 8)' + lineending +
            '    decq %%rcx' + lineending +
@@ -314,9 +314,9 @@ var
 
    procedure emit_indexed_var();
    begin
-      emit_expression(n^.arr, si, nest);
+      emit_expression(n^.expr2, si, nest);
       emit('    movq %%rax, %%rsi', []);
-      emit_expression(n^.index, si, nest);
+      emit_expression(n^.expr, si, nest);
       emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
    end;
 
@@ -332,15 +332,15 @@ var
       stack_index := offset - 16;
       emit('    movq %%rcx, %d(%%rsp)', [offset - 8]);
       emit('    movq %%rbx, %d(%%rsp)', [offset - 16]);
-      emit_expression(n^.start, stack_index, nest);
+      emit_expression(n^.expr2, stack_index, nest);
       emit('    movq %%rax, %%rcx', []);
       emit('    movq %%rax, %d(%%rsp)', [offset]);
-      emit_expression(n^.finish, stack_index, nest);
+      emit_expression(n^.cond, stack_index, nest);
       emit('    movq %%rax, %%rbx', []);
       emit('%s:', [lbl1]);
       emit('    cmpq %%rcx, %%rbx', []);
       emit('    jl %s', [lbl2]);
-      emit_expression(n^.for_body, stack_index, nest);
+      emit_expression(n^.expr, stack_index, nest);
       emit('    incq %%rcx', []);
       emit('    movq %%rcx, %d(%%rsp)', [offset]);
       emit('    jmp %s', [lbl1]);
@@ -355,15 +355,15 @@ begin
       integer_node:
          emit('    movq $%d, %%rax', [n^.int_val]);
       unary_op_node: begin
-         emit_expression(n^.unary_exp, si, nest);
+         emit_expression(n^.expr, si, nest);
          emit('    negq %%rax', []);
       end;
       binary_op_node: begin
          tmp := inttostr(si) + '(%rsp)';
-         emit_expression(n^.right, si, nest);
+         emit_expression(n^.expr2, si, nest);
          emit('    movq %%rax, %s', [tmp]);
-         emit_expression(n^.left, si - 8, nest);
-         case n^.binary_op of
+         emit_expression(n^.expr, si - 8, nest);
+         case n^.op of
             plus_op:
                emit('    addq %s, %%rax', [tmp]);
             minus_op:
@@ -406,7 +406,7 @@ begin
 	         or_op:
 	            emit('    orq %s, %%rax', [tmp]);
             else begin
-               writeln(n^.binary_op);
+               writeln(n^.op);
                err('emit: operator not implemented yet!', n^.line, n^.col);
             end;
          end;
@@ -423,11 +423,11 @@ begin
       let_node:
          emit_let();
       var_decl_node: begin
-         emit_expression(n^.initial_value, si, nest);
+         emit_expression(n^.expr, si, nest);
          emit('    movq %%rax, %d(%%rsp)', [n^.stack_index * -8]);
       end;
       fun_decl_node:
-         if n^.fun_body <> nil then
+         if n^.expr <> nil then
             add_function(n);
       type_decl_node:
          (* do nothing *);

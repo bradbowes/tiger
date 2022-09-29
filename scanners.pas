@@ -67,7 +67,7 @@ procedure scan(s: scanner);
 
 var
    token: token_t;
-   token_display: array[and_token..while_token] of string;
+
 
 implementation
 
@@ -78,14 +78,12 @@ procedure scan(s: scanner);
    procedure next;
    begin
       if s^.open then
-         if eof(s^.src) then
-         begin
+         if eof(s^.src) then begin
             s^.ch := chr(4);
             close(s^.src);
             s^.open := false;
          end
-         else
-         begin
+         else begin
             read(s^.src, s^.ch);
             s^.x := s^.x + 1;
          end
@@ -93,17 +91,20 @@ procedure scan(s: scanner);
             err('Read past end of file', token.line, token.col);
    end;
 
+
    procedure push_char();
    begin
       token.value := token.value + s^.ch;
       next;
    end;
 
+
    procedure recognize(TType: token_tag);
    begin
       push_char;
       token.tag := TType;
    end;
+
 
    procedure skip_white;
 
@@ -115,8 +116,7 @@ procedure scan(s: scanner);
       end;
 
    begin
-      while s^.ch in [' ', chr(9), chr(13), chr(10)] do
-      begin
+      while s^.ch in [' ', chr(9), chr(13), chr(10)] do begin
          case s^.ch of
            ' ', chr(9): next;
            chr(10): newline;
@@ -127,6 +127,7 @@ procedure scan(s: scanner);
          end;
       end;
    end;
+
 
    procedure skip_comment;
    begin
@@ -143,30 +144,32 @@ procedure scan(s: scanner);
       token.tag := comment_token;
    end;
 
+
    procedure get_string;
    begin
       next;
       repeat
-         if s^.ch = '"' then
-         begin
+         if s^.ch = '"' then begin
             next;
             if s^.ch = '"' then
-               push_char
+               push_char()
             else
                break;
          end
          else
-            push_char;
+            push_char();
       until false;
       token.tag := string_token;
    end;
 
+
    procedure get_number;
    begin
       while s^.ch in ['0'..'9'] do
-         push_char;
+         push_char();
       token.tag := number_token;
    end;
+
 
    procedure get_id;
    begin
@@ -270,48 +273,4 @@ begin
 end;
 
 
-begin
-   token_display[and_token] := 'and';
-   token_display[array_token] := 'array';
-   token_display[assign_token] := ':=';
-   token_display[colon_token] := ':';
-   token_display[comma_token] := ',';
-   token_display[comment_token] := '';
-   token_display[div_token] := '/';
-   token_display[do_token] := 'do';
-   token_display[dot_token] := '.';
-   token_display[for_token] := 'for';
-   token_display[else_token] := 'else';
-   token_display[eof_token] := '<eof>';
-   token_display[eq_token] := '=';
-   token_display[false_token] := 'false';
-   token_display[geq_token] := '>=';
-   token_display[gt_token] := '>';
-   token_display[id_token] := '';
-   token_display[if_token] := 'if';
-   token_display[lbrace_token] := '{';
-   token_display[lbracket_token] := '[';
-   token_display[leq_token] := '<=';
-   token_display[let_token] := 'let';
-   token_display[lparen_token] := '(';
-   token_display[lt_token] := '<';
-   token_display[minus_token] := '-';
-   token_display[mod_token] := 'mod';
-   token_display[mul_token] := '*';
-   token_display[neq_token] := '<>';
-   token_display[nil_token] := 'nil';
-   token_display[number_token] := '<number>';
-   token_display[of_token] := 'of';
-   token_display[or_token] := 'or';
-   token_display[plus_token] := '+';
-   token_display[rbrace_token] := '}';
-   token_display[rbracket_token] := ']';
-   token_display[rparen_token] := ')';
-   token_display[semicolon_token] := ';';
-   token_display[string_token] := '<string>';
-   token_display[then_token] := 'then';
-   token_display[to_token] := 'to';
-   token_display[true_token] := 'true';
-   token_display[type_token] := 'type';
-   token_display[while_token] := 'while';
 end.

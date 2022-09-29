@@ -3,7 +3,7 @@ unit parsers;
 interface
 
 uses utils, scanners, symbols, ops, nodes;
-   
+
 function parse(file_name: string): node;
 
 implementation
@@ -11,16 +11,16 @@ implementation
 function parse(file_name: string): node;
 var
    the_scanner: scanner;
-   
+
    function get_expression: node; forward;
-   
+
    procedure next;
    begin
       scan(the_scanner);
       while token.tag = comment_token do
          scan(the_scanner);
    end;
-   
+
    function get_identifier: symbol;
    var
       value: string;
@@ -36,12 +36,12 @@ var
          err('Expected identifier, got ''' + value + '''', token.line, token.col);
    end;
 
-   procedure advance(t: token_tag);
+   procedure advance(t: token_tag; display: string);
    begin
       if token.tag = t then
          next
       else
-         err('Expected ''' + token_display[t] + ''', got ''' +
+         err('Expected ''' + display + ''', got ''' +
              token.value + '''', token.line, token.col);
    end;
 
@@ -67,7 +67,7 @@ var
       line := token.line;
       col := token.col;
       name := get_identifier;
-      advance(eq_token);
+      advance(eq_token, '=');
       get_field := make_field_node(name, get_expression, line, col);
    end;
 
@@ -87,7 +87,7 @@ var
          end;
       get_field_list := list;
    end;
-      
+
    function get_factor: node;
    var
       line, col : longint;
@@ -101,90 +101,90 @@ var
       value := token.value;
       get_factor := nil;
       case token.tag of
-         number_token: 
+         number_token:
             begin
                next;
                factor := make_integer_node(atoi(value, line, col), line, col);
             end;
-         string_token: 
+         string_token:
             begin
                next;
                factor := make_string_node(intern(value), line, col);
             end;
-         true_token: 
+         true_token:
             begin
                next;
                factor := make_boolean_node(true, line, col);
             end;
-         false_token: 
+         false_token:
             begin
                next;
                factor := make_boolean_node(false, line, col);
             end;
-         nil_token: 
+         nil_token:
             begin
                next;
                factor := make_nil_node(line, col);
             end;
-         minus_token: 
+         minus_token:
             begin
                next;
                factor := make_unary_op_node(minus_op, get_factor(), line, col);
             end;
-         id_token: 
+         id_token:
             begin
                id := get_identifier;
                case token.tag of
-                  lbrace_token: 
+                  lbrace_token:
                      begin
                         next;
                         get_factor := make_record_node(id, get_field_list, line, col);
-                        advance(rbrace_token);
+                        advance(rbrace_token, '}');
                         exit;
                      end;
-                  lparen_token: 
+                  lparen_token:
                      begin
                         next;
                         if token.tag = rparen_token then
                            list := make_list()
                         else
                            list := get_expression_list(comma_token);
-                        advance(rparen_token);
+                        advance(rparen_token, ')');
                         factor := make_call_node(id, list, line, col);
                      end;
                   lbracket_token:
                      begin
                         next;
                         factor := get_expression;
-                        advance(rbracket_token);
+                        advance(rbracket_token, ']');
                         if token.tag = of_token then
                            begin
                               next;
                               get_factor := make_array_node(id, factor, get_expression, line, col);
-                              exit;                        
-                           end                           
+                              exit;
+                           end
                         else
                            factor :=  make_indexed_var_node(make_simple_var_node(id, line, col), factor, line, col);
                      end;
-                  
+
                   else
                      factor := make_simple_var_node(id, line, col);
                end;
 
                while token.tag in [dot_token, lbracket_token] do
                   case token.tag of
-                    dot_token: 
+                    dot_token:
                        begin
                           next;
                           factor := make_field_var_node(factor, get_identifier, line, col);
                        end;
-                    lbracket_token: 
+                    lbracket_token:
                        begin
                           next;
                           factor := make_indexed_var_node(factor, get_expression, line, col);
-                          advance(rbracket_token);
+                          advance(rbracket_token, '}');
                        end;
-                  end;             
+                  end;
             end;
          lparen_token:
             begin
@@ -197,7 +197,7 @@ var
 		  end
 	       else
                   factor := make_sequence_node(list, line, col);
-               advance(rparen_token);
+               advance(rparen_token, ')');
             end;
          else
             begin
@@ -205,22 +205,22 @@ var
                err('Expected value, got ''' + value + '''', line, col);
             end;
       end;
-      
+
       get_factor := factor;
    end;
 
    function get_product: node;
    var
       line, col: longint;
-      
+
       function helper(left: node): node;
-      
+
          function make_node(op: op_tag): node;
          begin
             next;
             make_node := make_binary_op_node(op, left, get_factor, line, col);
          end;
-      
+
       begin
          case token.tag of
             mul_token: helper := helper(make_node(mul_op));
@@ -229,7 +229,7 @@ var
             else helper := left;
          end;
       end;
-      
+
    begin
       line := token.line;
       col := token.col;
@@ -239,15 +239,15 @@ var
    function get_sum: node;
    var
       line, col: longint;
-      
+
       function helper(left: node): node;
-      
+
          function make_node(op: op_tag): node;
          begin
             next;
             make_node := make_binary_op_node(op, left, get_product, line, col);
          end;
-      
+
       begin
          case token.tag of
             plus_token: helper := helper(make_node(plus_op));
@@ -255,7 +255,7 @@ var
             else helper := left;
          end;
       end;
-      
+
    begin
       line := token.line;
       col := token.col;
@@ -274,7 +274,7 @@ var
             next;
             make_node := make_binary_op_node(op, left, get_sum, line, col);
          end;
-         
+
       begin
          case token.tag of
             eq_token: helper := helper(make_node(eq_op));
@@ -297,7 +297,7 @@ var
    function get_conjunction: node;
    var
       line, col: longint;
-      
+
       function helper(left: node): node;
       begin
          if token.tag = and_token then
@@ -309,7 +309,7 @@ var
          else
             helper := left;
       end;
-      
+
    begin
       line := token.line;
       col := token.col;
@@ -319,7 +319,7 @@ var
    function get_disjunction: node;
    var
       line, col: longint;
-      
+
       function helper(left: node): node;
       begin
          if token.tag = or_token then
@@ -331,7 +331,7 @@ var
          else
             helper := left;
       end;
-      
+
    begin
       line := token.line;
       col := token.col;
@@ -342,7 +342,7 @@ var
    var
       line, col: longint;
       left_side: node;
-      
+
    begin
       line := token.line;
       col := token.col;
@@ -372,7 +372,7 @@ var
       col := token.col;
       next;
       condition := get_expression;
-      advance(then_token);
+      advance(then_token, 'then');
       consequent := get_expression;
       if token.tag = else_token then
          begin
@@ -395,7 +395,7 @@ var
       col := token.col;
       next;
       condition := get_expression;
-      advance(do_token);
+      advance(do_token, 'do');
       get_while_expression := make_while_node(condition, get_expression, line, col);
    end;
 
@@ -410,11 +410,11 @@ var
       col := token.col;
       next;
       iter := get_identifier;
-      advance(assign_token);
+      advance(assign_token, ':=');
       start := get_expression;
-      advance(to_token);
+      advance(to_token, 'to');
       finish := get_expression;
-      advance(do_token);
+      advance(do_token, 'do');
       body := get_expression;
       get_for_expression := make_for_node(iter, start, finish, body, line, col);
    end;
@@ -428,11 +428,11 @@ var
       line := token.line;
       col := token.col;
       name := get_identifier;
-      advance(colon_token);
+      advance(colon_token, ':');
       get_field_desc := make_field_desc_node(name, get_identifier, line, col);
    end;
 
-   
+
    function get_field_desc_list: node_list;
    var
       list: node_list;
@@ -446,10 +446,10 @@ var
                   next;
                   append(list, get_field_desc);
                end;
-         end;               
+         end;
       get_field_desc_list := list;
    end;
-  
+
 
    function get_type_spec: node;
    var
@@ -459,16 +459,16 @@ var
       line := token.line;
       col := token.col;
       case token.tag of
-         lbrace_token: 
+         lbrace_token:
             begin
                next;
                desc := make_record_desc_node(get_field_desc_list, line, col);
-               advance(rbrace_token);
+               advance(rbrace_token, '}');
             end;
          array_token:
             begin
                next;
-               advance(of_token);
+               advance(of_token, 'of');
                desc := make_array_desc_node(get_identifier, line, col);
             end;
          else
@@ -490,16 +490,16 @@ var
       get_function_declaration := nil;
       next;
       params := get_field_desc_list;
-      advance(rparen_token);
+      advance(rparen_token, ')');
       if token.tag = colon_token then
          begin
             next;
             ty := get_identifier;
          end;
-      advance(eq_token);
+      advance(eq_token, '=');
       get_function_declaration := make_fun_decl_node(name, params, ty, get_expression, line, col);
    end;
-  
+
 
    function get_var_declaration: node;
    var
@@ -543,10 +543,10 @@ var
       col := token.col;
       next;
       name := get_identifier;
-      advance(eq_token);
+      advance(eq_token, '=');
       get_type_declaration := make_type_decl_node(name, get_type_spec, line, col);
    end;
-               
+
 
    function get_declaration: node;
    begin
@@ -582,12 +582,12 @@ var
       col := token.col;
       next;
       decls := get_declaration_list;
-      advance(in_token);
+      advance(in_token, 'in');
       body := get_expression;
       get_let_expression := make_let_node(decls, body, line, col);
    end;
 
-   
+
    function get_expression: node;
    begin
       case token.tag of
@@ -598,7 +598,7 @@ var
          else get_expression := get_assignment;
       end;
    end;
-   
+
 begin
    the_scanner := make_scanner(file_name);
    next;
