@@ -88,6 +88,7 @@ f$_print:
    jmp f$_write
 
 
+
 .globl f$_str
 .align 3
 f$_str:
@@ -108,6 +109,14 @@ f$_str:
    popq %rbx
    ret
 
+
+.globl f$_toh
+.align 3
+f$_toh:
+   movq %r15, %rax
+   ret
+
+
 .data
 
 .align 3
@@ -115,10 +124,14 @@ newline:
    .quad 1
    .asciz "\n"
 
+
 .align 3
 heap_err_msg:
    .asciz "Could not allocate heap.\n"
 
+
 .align 3
 str_fmt:
    .asciz "%ld"
+
+

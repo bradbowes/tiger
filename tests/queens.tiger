@@ -11,26 +11,35 @@ let
    print_board() = (
       for i := 0 to n - 1 do (
          for j := 0 to n - 1 do
-            print(if col[i] = j then " O" else " .");
-         print("\n")
+            write(if col[i] = j then " O" else " .");
+         print("")
       );
-      print("\n")
+      print("")
    )
 
-   try(c: int) =
+   try(c: int) = (
       if c = n then
          print_board()
       else
-         for r := 0 to n - 1 do
-            if row[r] = 0 and diag1[r + c] = 0 and diag2[r + 7 -c] = 0 then (
+         for r := 0 to n - 1 do (
+            write("c = "); write(str(c));
+            write(" r = "); print(str(r));
+            write("row["); write(str(r)); write("] = "); write(str(row[r]));
+            write(" diag1["); write(str(r + c)); write("] = "); write(str(diag1[r + c]));
+            write(" diag2["); write(str(r + 7 - c)); write("] = "); print(str(diag2[r + 7 - c]));
+            if row[r] = 0 and diag1[r + c] = 0 and diag2[r + 7 - c] = 0 then (
                row[r] := 1;
-               diag1[r + c] := 0;
+               diag1[r + c] := 1;
                diag2[r + 7 - c] := 1;
                col[c] := r;
                try(c + 1);
+               print("**** reset ***");
+               write("r = "); write(str(r)); write(" c = "); print(str(c));
                row[r] := 0;
                diag1[r + c] := 0;
                diag2[r + 7 - c] := 0
             )
+         )
+  )
 in try(0)
                

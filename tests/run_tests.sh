@@ -213,6 +213,7 @@ in
 
 END_COMMENT
 
+
 test_code "let
    odd(n: int): bool = if n = 0 then false else even(n - 1)
    even(n: int): bool = if n = 0 then true else odd(n - 1)
@@ -251,3 +252,38 @@ in (
 6
 8
 10"
+
+test_code "let
+   p(n: int) = let s = str(n) in print(s)
+in
+   p(42)" "42"
+
+test_code "let
+   p(n: int) = let s(n: int): string = str(n) in print(s(n))
+in
+   p(42)" "42"
+
+test_code "let
+   e(x: int): int =
+      let f(y: int): int =
+         x + y
+      in
+         f(3) + f(4)
+in
+   print(str(e(25)))" "57"
+
+test_code "let
+   type int_array = array of int
+   t1 = toh()
+in
+   let
+      a = int_array[5] of 0
+      t2 = toh()
+      b = int_array[5] of 0
+      t3 = toh()
+   in (
+      print(str(t3 - t2));
+      print(str(t2 - t1))
+   )" "48
+48"
+

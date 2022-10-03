@@ -21,7 +21,7 @@ begin
    b := bind(global_env, intern(name), s, 0, 0, 0, 0);
    b^.external := true;
 end;
-   
+
 
 begin
 
@@ -50,11 +50,15 @@ begin
    bind_external('str', s);
 
    (* concat *)
-   s:= make_function_type(string_type);
+   s := make_function_type(string_type);
    add_field(s, intern('s1'), string_type, 0, 0);
    add_field(s, intern('s2'), string_type, 0, 0);
    bind_external('concat', s);
-   
+
+   (* toh *)
+   s := make_function_type(int_type);
+   bind_external('toh', s);
+
 end;
 
 end.   

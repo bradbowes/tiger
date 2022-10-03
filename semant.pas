@@ -235,6 +235,16 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
+   function check_if(): spec;
+   begin
+      if type_check(n^.cond, si, nest, env, tenv) <> bool_type then
+         err('if condition is not a boolean value', n^.line, n^.col);
+      if type_check(n^.expr, si, nest, env, tenv) <> void_type then
+         err('if without else cannot return a value', n^.line, n^.col);
+      check_if := void_type;
+   end;
+
+
    function check_call(): spec;
    var
       fname: string;
@@ -352,15 +362,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
 
 (*
-   function check_if(): spec;
-   begin
-      if type_check(n^.cond, si, nest, env, tenv) <> bool_type then
-         err('if condition is not a boolean value', n^.line, n^.col);
-      if type_check(n^,expr, si, nest, env, tenv) <> void_type then
-         err('if clause without else cannot return a value', n^.line, n^.col);
-      check_if := void_type;
-   end;
-
    function check_while(): spec;
    begin
       if type_check(n^.cond, si, nest, env, tenv) <> bool_type then
@@ -439,6 +440,8 @@ begin
          type_check := check_simple_var();
       if_else_node:
          type_check := check_if_else();
+      if_node:
+         type_check := check_if();
       call_node:
          type_check := check_call();
       assign_node:
@@ -458,8 +461,6 @@ begin
 (*
       type_decl_node:
          type_check := check_type_decl();
-      if_node:
-         type_check := check_if();
       while_node:
          type_check := check_while();
       field_var_node:

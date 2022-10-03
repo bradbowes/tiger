@@ -129,9 +129,11 @@ begin
       f := fl^.fun;
       emit(lineending +
            '    .align 3' + lineending +
-           'f%d$_%s:', [f^.binding^.id, f^.name^.id]);
+           'f%d$_%s:' + lineending +
+           '    pushq %%rbp', [f^.binding^.id, f^.name^.id]);
       emit_expression(f^.expr, -8, f^.binding^.nesting_level + 1);
-      emit('    ret', []);
+      emit('    popq %%rbp' + lineending +
+           '    ret', []);
       fl := fl^.next;
    end;
 end;
@@ -146,7 +148,7 @@ var
       it: node_list_item;
       stack_index: longint;
    begin
-      stack_index := n^.env^.stack_index * -8;
+      stack_index := n^.env^.stack_index * -8 - 8; (* room for pushed %rbp *)
       it := n^.list^.first;
       while it <> nil do begin
          emit_expression(it^.node, stack_index, nest);
@@ -172,6 +174,18 @@ var
    end;
 
 
+   procedure emit_if();
+   var
+      lbl: string;
+   begin
+      lbl := new_label();
+      emit_expression(n^.cond, si, nest);
+      emit('    jz %s', [lbl]);
+      emit_expression(n^.expr, si, nest);
+      emit('%s:', [lbl]);
+   end;
+
+
    procedure emit_string();
    var
       slabel: string;
@@ -189,12 +203,13 @@ var
       i: integer;
    begin
       offset := n^.binding^.stack_index * -8;
+      if offset > 0 then offset := offset + 8; (* space for %rbp pushed *)
       if n^.binding^.nesting_level = nest then
          emit('    movq %d(%%rsp), %%rax', [offset])
       else begin
-         emit('    movq 8(%%rsp), %%rbp', []);
+         emit('    movq 16(%%rsp), %%rbp', []);
          for i := nest - 2 downto n^.binding^.nesting_level do
-            emit('    movq 8(%%rbp), %%rbp', []);
+            emit('    movq 16(%%rbp), %%rbp', []);
          emit('    movq %d(%%rbp), %%rax', [offset]);
       end;
    end;
@@ -209,12 +224,13 @@ var
       emit_expression(n^.expr, si, nest);
       b := n^.expr2^.binding;
       offset := b^.stack_index * -8;
+      if offset > 0 then offset := offset + 8; (* space for pushed %rbp *)
       if b^.nesting_level = nest then
          emit('    movq %%rax, %d(%%rsp)', [offset])
       else begin
-         emit('    movq 8(%%rsp), %%rbp', []);
+         emit('    movq 16(%%rsp), %%rbp', []);
          for i := nest - 2 downto n^.binding^.nesting_level do
-            emit('    movq 8(%%rbp), %%rbp', []);
+            emit('    movq 16(%%rbp), %%rbp', []);
          emit('    movq %%rax, %d(%%rbp)', [offset]);
       end;
    end;
@@ -223,12 +239,14 @@ var
    procedure emit_indexed_assign();
    begin
       emit('    movq %%rbx, %d(%%rsp)', [si]);
-      emit_expression(n^.expr2^.expr2, si - 8, nest);
+      emit('    movq %%rsi, %d(%%rsp)', [si - 8]);
+      emit_expression(n^.expr2^.expr2, si - 16, nest);
       emit('    movq %%rax, %%rsi', []);
-      emit_expression(n^.expr2^.expr, si - 8, nest);
+      emit_expression(n^.expr2^.expr, si - 16, nest);
       emit('    movq %%rax, %%rbx', []);
-      emit_expression(n^.expr, si - 8, nest);
+      emit_expression(n^.expr, si - 16, nest);
       emit('    movq %%rax, 8(%%rsi, %%rbx, 8)', []);
+      emit('    movq %d(%%rsp), %%rsi',  [si - 8]);
       emit('    movq %d(%%rsp), %%rbx',  [si]);
    end;
 
@@ -259,9 +277,9 @@ var
       if target = nest then
          emit('    movq %%rsp, %d(%%rsp)', [pos])
       else begin
-         emit('    movq 8(%%rsp), %%rbp', []);
+         emit('    movq 16(%%rsp), %%rbp', []);
          for i := nest - 2 downto target do
-            emit('   movq 8(%%rbp), %%rbp', []);
+            emit('    movq 16(%%rbp), %%rbp', []);
          emit('    movq %%rbp, %d(%%rsp)', [pos]);
       end;
       pos := pos + 8;
@@ -274,6 +292,7 @@ var
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
+
          emit('    call f$_%s', [n^.name^.id])
       else
          emit('    call f%d$_%s', [n^.binding^.id, n^.name^.id]);
@@ -423,8 +442,8 @@ begin
       let_node:
          emit_let();
       var_decl_node: begin
-         emit_expression(n^.expr, si, nest); (* emit(' movq %%rax, %d(%%rsp)', [n^.stack_index * -8]); *) emit(' movq %%rax, %d(%%rsp)', 
-         [n^.binding^.stack_index * -8]);
+         emit_expression(n^.expr, si, nest);
+         emit('    movq %%rax, %d(%%rsp)', [n^.binding^.stack_index * -8]);
       end;
       fun_decl_node:
          if n^.expr <> nil then
@@ -441,6 +460,8 @@ begin
          emit_call();
       if_else_node:
          emit_if_else();
+      if_node:
+         emit_if();
       sequence_node:
          emit_sequence();
       assign_node:
