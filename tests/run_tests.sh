@@ -211,8 +211,7 @@ test_code "let
 in
    print(if a = nil then \"nil\" else \"?\")" "nil"
 
-END_COMMENT
-
+# END_COMMENT
 
 test_code "let
    odd(n: int): bool = if n = 0 then false else even(n - 1)
@@ -231,6 +230,8 @@ test_code "let
    a = int_array[3] of 42
 in
    (a[0] := 50; print(str(a[0] + a[1] + a[2])))" "134"
+
+END_COMMENT
 
 test_code "for i := 1 to 5 do
    print(str(i))" "1
