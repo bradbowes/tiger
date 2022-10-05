@@ -348,7 +348,7 @@ var
       lbl1 := new_label();
       lbl2 := new_label();
       offset := n^.binding^.stack_index * -8;
-      stack_index := offset - 16;
+      stack_index := offset - 40;
       emit('    movq %%rcx, %d(%%rsp)', [offset - 8]);
       emit('    movq %%rbx, %d(%%rsp)', [offset - 16]);
       emit_expression(n^.expr2, stack_index, nest);
@@ -359,7 +359,11 @@ var
       emit('%s:', [lbl1]);
       emit('    cmpq %%rcx, %%rbx', []);
       emit('    jl %s', [lbl2]);
+      emit('    movq %%rcx, %d(%%rsp)', [offset - 24]);
+      emit('    movq %%rbx, %d(%%rsp)', [offset - 32]);
       emit_expression(n^.expr, stack_index, nest);
+      emit('    movq %d(%%rsp), %%rbx', [offset - 32]);
+      emit('    movq %d(%%rsp), %%rcx', [offset - 24]);
       emit('    incq %%rcx', []);
       emit('    movq %%rcx, %d(%%rsp)', [offset]);
       emit('    jmp %s', [lbl1]);

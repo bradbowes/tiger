@@ -41,8 +41,6 @@ void try(int c) {
       printboard();
    else
       for (r = 0; r < n; r++) {
-         printf("c = %d, r = %d\n", c, r);
-         printf("row[%d] = %d, diag1[%d] = %d, diag2[%d] = %d\n", r, row[r], r + c, diag1[r + c], r + 7 - c, diag2[r + 7 - c]);
          if (row[r] == 0 && diag1[r + c] == 0 && diag2[r + 7 - c] == 0) {
             row[r] = 1;
             diag1[r + c] = 1;

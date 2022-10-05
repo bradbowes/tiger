@@ -78,15 +78,14 @@ f$_write:
 
 
 .align 3
-.globl f$_print
-f$_print:
+.globl f$_writeln
+f$_writeln:
    movq 16(%rsp), %rax
    movq %rax, 8(%rsp)
    call f$_write
    movq newline@GOTPCREL(%rip), %rax
    movq %rax, 16(%rsp)
    jmp f$_write
-
 
 
 .globl f$_str
