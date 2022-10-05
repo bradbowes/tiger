@@ -21,9 +21,9 @@
 
 # To do
 
+- while loops
 - builtin library functions
 - builtin inline functions (abs, ord, etc)
-- arrays (DONE)
 - records
 - lists?
 - escapes in strings
@@ -38,7 +38,7 @@
 
 - read(): string                (done)
 - write(s: string)              (done)
-- print(s: string)              (appends newline to string, done)
+- writeln(s: string)            (appends newline to string, done)
 
 ## Conversion
 
