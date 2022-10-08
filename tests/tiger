@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+
+
+../compile $1
+cc output.s ../lib/lib.s
+./a.out
+
+
+
