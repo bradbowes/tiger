@@ -78,8 +78,8 @@ f$_write:
 
 
 .align 3
-.globl f$_writeln
-f$_writeln:
+.globl f$_print
+f$_print:
    movq 16(%rsp), %rax
    movq %rax, 8(%rsp)
    call f$_write

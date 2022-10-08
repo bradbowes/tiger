@@ -5,7 +5,6 @@
 - compiles to inefficient as assembly language for Mac OS X86_64.
 - compilation strategy similar Abdulaziz Ghuloum's scheme compiler article http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf. Function arguments, local variables and temporaries are on the stack.
 - compiles to assembly from type checked AST with no IR.
-- plan to implement IR and optimization passes down the road. Also plan register allocaion compatible with X86_64 ABI.
 
 # Differences from the Tiger book
 
@@ -17,11 +16,11 @@
 - variable declarations: var keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: function keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings are VB style (for now). Strings can include linebreaks and span multiple lines.
+- no nested comments
 - type aliases are not implemented.
 
 # To do
 
-- while loops
 - builtin library functions
 - builtin inline functions (abs, ord, etc)
 - records
@@ -30,7 +29,8 @@
 - tail calls
 - lambdas, first class functions
 - closures
-- use abi registers, IR and optimization
+- overloads
+- garbage collector
 
 # Library
 
@@ -38,7 +38,7 @@
 
 - read(): string                (done)
 - write(s: string)              (done)
-- writeln(s: string)            (appends newline to string, done)
+- print(s: string)              (appends newline to write output, done)
 
 ## Conversion
 

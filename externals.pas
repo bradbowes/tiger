@@ -39,10 +39,10 @@ begin
    add_field(s, intern('s'), string_type, 0, 0);
    bind_external('write', s);
 
-   (* writeln *)
+   (* print *)
    s := make_function_type(void_type);
    add_field(s, intern('s'), string_type, 0, 0);
-   bind_external('writeln', s);
+   bind_external('print', s);
 
    (* str *)
    s := make_function_type(string_type);

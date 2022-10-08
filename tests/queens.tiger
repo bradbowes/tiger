@@ -12,9 +12,9 @@ let
       for i := 0 to n - 1 do (
          for j := 0 to n - 1 do
             write(if col[i] = j then " Q" else " .");
-         writeln("")
+         print("")
       );
-      writeln("")
+      print("")
    )
 
    try(c: int) =

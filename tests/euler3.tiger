@@ -17,7 +17,7 @@ in
    while i * i <= n do (
       if prime(i) then
          if n mod i = 0 then
-            writeln(str(i));
+            print(str(i));
       i := i + 1
    )
 

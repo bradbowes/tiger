@@ -11,7 +11,7 @@ in (
       m := n;
       n := fib
    );
-   writeln(str(total))
+   print(str(total))
 )   
    
 

@@ -12,7 +12,7 @@ in (
          total := total + n;
       n := n + 5
    );
-   writeln(str(total))
+   print(str(total))
 )
    
    
