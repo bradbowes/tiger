@@ -211,8 +211,6 @@ test_code "let
 in
    writeln(if a = nil then \"nil\" else \"?\")" "nil"
 
-# END_COMMENT
-
 test_code "let
    odd(n: int): bool = if n = 0 then false else even(n - 1)
    even(n: int): bool = if n = 0 then true else odd(n - 1)
@@ -230,8 +228,6 @@ test_code "let
    a = int_array[3] of 42
 in
    (a[0] := 50; writeln(str(a[0] + a[1] + a[2])))" "134"
-
-END_COMMENT
 
 test_code "for i := 1 to 5 do
    writeln(str(i))" "1
@@ -254,6 +250,8 @@ in (
 8
 10"
 
+
+
 test_code "let
    p(n: int) = let s = str(n) in writeln(s)
 in
@@ -273,18 +271,23 @@ test_code "let
 in
    writeln(str(e(25)))" "57"
 
-test_code "let
-   type int_array = array of int
-   t1 = toh()
-in
-   let
-      a = int_array[5] of 0
-      t2 = toh()
-      b = int_array[5] of 0
-      t3 = toh()
-   in (
-      writeln(str(t3 - t2));
-      writeln(str(t2 - t1))
-   )" "48
-48"
+test_code "let n = 1 in while n < 10 do (writeln(str(n)); n := n + 1)" "1
+2
+3
+4
+5
+6
+7
+8
+9"
 
+END_COMMENT
+
+test_code "writeln(str(600851475143 / 2))" "300425737571"
+test_code "let
+   i = 0
+   update() = i := i + 1
+in (
+   update();
+   writeln(str(i))
+)" "1"

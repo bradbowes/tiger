@@ -189,13 +189,12 @@ var
          lparen_token:
             begin
                next;
-	       list := get_expression_list(semicolon_token);
-	       if list^.first = list^.last then
-	          begin
-		     factor := list^.first^.node;
-		     dispose(list);
-		  end
-	       else
+               list := get_expression_list(semicolon_token);
+               if list^.first = list^.last then begin
+                  factor := list^.first^.node;
+                  dispose(list);
+               end
+               else
                   factor := make_sequence_node(list, line, col);
                advance(rparen_token, ')');
             end;
@@ -583,7 +582,7 @@ var
       next;
       decls := get_declaration_list;
       advance(in_token, 'in');
-      body := get_expression;
+      body := get_expression();
       get_let_expression := make_let_node(decls, body, line, col);
    end;
 

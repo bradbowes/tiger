@@ -54,7 +54,7 @@ type
    node_t = record
       tag: node_tag;
       line, col: longint;
-      int_val: longint;
+      int_val: int64;
       string_val: symbol;
       bool_val: boolean;
       binding: binding;
@@ -73,7 +73,7 @@ function make_call_node(name: symbol; args: node_list; line, col: longint): node
 function make_simple_var_node(name: symbol; line, col: longint): node;
 function make_field_var_node(obj: node; field: symbol; line, col: longint): node;
 function make_indexed_var_node(arr, index: node; line, col: longint): node;
-function make_integer_node(val, line, col: longint): node;
+function make_integer_node(val: int64; line, col: longint): node;
 function make_string_node(val: symbol; line, col: longint): node;
 function make_boolean_node(val: boolean; line, col: longint): node;
 function make_nil_node(line, col: longint): node;
@@ -192,7 +192,7 @@ begin
 end;
 
 
-function make_integer_node(val, line, col: longint): node;
+function make_integer_node(val: int64; line, col: longint): node;
 var n: node;
 begin
    n := make_node(integer_node, line, col);

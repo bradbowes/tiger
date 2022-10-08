@@ -24,7 +24,7 @@ _main:
    movq %rax, 8(%r14)                  // save base heap pointer
 
    // main code here
-   call _tiger_entry
+   call f$_tiger_entry
 
    movq 8(%r14),  %rdi                // free the heap
    call _free

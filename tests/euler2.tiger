@@ -1,0 +1,18 @@
+let
+   m = 1
+   n = 1
+   fib = 0
+   total = 0
+in (
+   while fib <= 4000000 do (
+      if fib mod 2 = 0 then
+         total := total + fib;
+      fib := m + n;
+      m := n;
+      n := fib
+   );
+   writeln(str(total))
+)   
+   
+
+   

@@ -48,11 +48,15 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          check_binary_op := bool_type { equality_ops }
    end;
 
+
    procedure check_var_decl(n: node; si, offset: longint; env, tenv: scope);
    var
       ty1, ty2: spec;
    begin
       ty1 := type_check(n^.expr, si, nest, env, tenv);
+      if ty1 = void_type then
+         err(n^.name^.id + ' variable initializer doesn''t produce a value', n^.expr^.line, n^.expr^.col);
+
       if n^.type_name = nil then
          begin
             if ty1 = nil_type then
@@ -361,16 +365,17 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
-(*
    function check_while(): spec;
    begin
       if type_check(n^.cond, si, nest, env, tenv) <> bool_type then
          err('while condition is not a boolean value', n^.cond^.line, n^.cond^.col);
       if type_check(n^.expr, si, nest, env, tenv) <> void_type then
-         err('while expression cannot return a value', n^.expr^.line, n^.expr^.col);
+         err('while body cannot return a value', n^.expr^.line, n^.expr^.col);
       check_while := void_type;
    end;
 
+
+(*
    function check_field_var(): spec;
    var ty: spec;
    begin
@@ -454,19 +459,15 @@ begin
          type_check := check_indexed_var();
       for_node:
          type_check := check_for();
+      while_node:
+         type_check := check_while();
       else begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);
       end;
 (*
-      type_decl_node:
-         type_check := check_type_decl();
-      while_node:
-         type_check := check_while();
       field_var_node:
          type_check := check_field_var();
-      indexed_var_node:
-         type_check := check_indexed_var();
       field_node:
          format := n^.name^.id + ' = ' + format(n^.expr);
       record_node:

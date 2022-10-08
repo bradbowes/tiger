@@ -3,7 +3,7 @@ unit utils;
 interface
 
 procedure err(msg : string; line, col : longint);
-function atoi(s: string; line, col: longint): longint;
+function atoi(s: string; line, col: longint): int64;
 
 implementation
 
@@ -14,9 +14,9 @@ begin
 end;
 
 
-function atoi(s: string; line, col: longint): longint;
+function atoi(s: string; line, col: longint): int64;
 var
-   i: longint; c: word;
+   i: int64; c: word;
 begin
    val(s, i, c);
    if c = 0 then

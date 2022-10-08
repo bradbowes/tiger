@@ -11,8 +11,8 @@ procedure emit_expression(n: node; si, nest: longint); forward;
 const prologue =
    '.text' + lineending +
    '.align 3' + lineending +
-   '.globl _tiger_entry' + lineending +
-   '_tiger_entry:' + lineending;
+   '.globl f$_tiger_entry' + lineending +
+   'f$_tiger_entry:' + lineending;
 
 
 const epilogue =
@@ -165,7 +165,8 @@ var
       lbl1 := new_label();
       lbl2 := new_label();
       emit_expression(n^.cond, si, nest);
-      emit('    jz %s', [lbl1]);
+      emit('    cmpq $0, %%rax' + lineending +
+           '    jz %s', [lbl1]);
       emit_expression(n^.expr, si, nest);
       emit('    jmp %s', [lbl2]);
       emit('%s:', [lbl1]);
@@ -180,7 +181,8 @@ var
    begin
       lbl := new_label();
       emit_expression(n^.cond, si, nest);
-      emit('    jz %s', [lbl]);
+      emit('    cmpq $0, %%rax' + lineending +
+           '    jz %s', [lbl]);
       emit_expression(n^.expr, si, nest);
       emit('%s:', [lbl]);
    end;
@@ -229,7 +231,7 @@ var
          emit('    movq %%rax, %d(%%rsp)', [offset])
       else begin
          emit('    movq 16(%%rsp), %%rbp', []);
-         for i := nest - 2 downto n^.binding^.nesting_level do
+         for i := nest - 2 downto b^.nesting_level do
             emit('    movq 16(%%rbp), %%rbp', []);
          emit('    movq %%rax, %d(%%rbp)', [offset]);
       end;
@@ -373,6 +375,21 @@ var
    end;
 
 
+   procedure emit_while();
+   var
+      lbl1, lbl2: string;
+   begin
+      lbl1 := new_label();
+      lbl2 := new_label();
+      emit('%s:', [lbl1]);
+      emit_expression(n^.cond, si, nest);
+      emit('    cmpq $0, %%rax' + lineending +
+           '    jz %s', [lbl2]);
+      emit_expression(n^.expr, si, nest);
+      emit('    jmp %s' + lineending +
+           '%s:', [lbl1, lbl2]);
+   end;
+
 begin
    case n^.tag of
       integer_node:
@@ -394,10 +411,10 @@ begin
             mul_op:
                emit('    imulq %s, %%rax', [tmp]);
             div_op:
-               emit('    cltd' + lineending +
+               emit('    cqto' + lineending +
                     '    idivq %s', [tmp]);
             mod_op:
-               emit('    cltd' + lineending +
+               emit('    cqto' + lineending +
                     '    idivq %s' + lineending +
                     '    movq %%rdx, %%rax', [tmp]);
             eq_op:
@@ -472,6 +489,8 @@ begin
          emit_assign();
       for_node:
          emit_for();
+      while_node:
+         emit_while();
       else begin
          writeln(n^.tag);
          err('emit: feature not supported yet!', n^.line, n^.col);

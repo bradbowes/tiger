@@ -6,16 +6,16 @@ uses symbols;
 
 type
    type_tag = (primitive_type, record_type, array_type, function_type);
-   
+
    spec = ^spec_t;
    field = ^field_t;
-   
+
    field_t = record
       name: symbol;
       ty: spec;
       next: field
    end;
-   
+
    spec_t = record
       tag: type_tag;
       fields: field;
@@ -36,7 +36,7 @@ const
    _string_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
    string_type: spec = @string_type;
 
-   
+
 procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
 function get_field(rec: spec; name: symbol; line, col: longint): spec;
 function make_array_type(base: spec): spec;
