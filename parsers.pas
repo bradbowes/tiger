@@ -36,6 +36,7 @@ var
          err('Expected identifier, got ''' + value + '''', token.line, token.col);
    end;
 
+
    procedure advance(t: token_tag; display: string);
    begin
       if token.tag = t then
@@ -45,19 +46,37 @@ var
              token.value + '''', token.line, token.col);
    end;
 
-   function get_expression_list(sep : token_tag) : node_list;
+
+   function get_expression_list() : node_list;
    var
       list: node_list;
    begin
       list := make_list();
-      append(list, get_expression);
-      while token.tag = sep do
+      append(list, get_expression());
+      while token.tag = comma_token do
       begin
          next;
-         append(list, get_expression);
+         append(list, get_expression());
       end;
       get_expression_list := list;
    end;
+
+
+   function get_sequence() : node;
+   var
+      line, col: longint;
+      list: node_list;
+   begin
+      line := token.line;
+      col := token.col;
+      list := make_list();
+      append(list, get_expression());
+      while token.tag <> end_token do
+         append(list, get_expression());
+      next;
+      get_sequence := make_sequence_node(list, line, col);
+   end;
+
 
    function get_field: node;
    var
@@ -70,6 +89,7 @@ var
       advance(eq_token, '=');
       get_field := make_field_node(name, get_expression, line, col);
    end;
+
 
    function get_field_list(): node_list;
    var
@@ -148,7 +168,7 @@ var
                         if token.tag = rparen_token then
                            list := make_list()
                         else
-                           list := get_expression_list(comma_token);
+                           list := get_expression_list();
                         advance(rparen_token, ')');
                         factor := make_call_node(id, list, line, col);
                      end;
@@ -189,13 +209,16 @@ var
          lparen_token:
             begin
                next;
-               list := get_expression_list(semicolon_token);
+               (*
+               list := get_expression_list();
                if list^.first = list^.last then begin
                   factor := list^.first^.node;
                   dispose(list);
                end
                else
                   factor := make_sequence_node(list, line, col);
+               *)
+               factor := get_expression();
                advance(rparen_token, ')');
             end;
          else
@@ -395,7 +418,7 @@ var
       next;
       condition := get_expression;
       advance(do_token, 'do');
-      get_while_expression := make_while_node(condition, get_expression, line, col);
+      get_while_expression := make_while_node(condition, get_sequence(), line, col);
    end;
 
 
@@ -414,7 +437,7 @@ var
       advance(to_token, 'to');
       finish := get_expression;
       advance(do_token, 'do');
-      body := get_expression;
+      body := get_sequence();
       get_for_expression := make_for_node(iter, start, finish, body, line, col);
    end;
 
@@ -582,7 +605,7 @@ var
       next;
       decls := get_declaration_list;
       advance(in_token, 'in');
-      body := get_expression();
+      body := get_sequence();
       get_let_expression := make_let_node(decls, body, line, col);
    end;
 
@@ -594,8 +617,10 @@ var
          while_token: get_expression := get_while_expression;
          for_token: get_expression := get_for_expression;
          let_token: get_expression := get_let_expression;
+         begin_token: begin next; get_expression := get_sequence; end
          else get_expression := get_assignment;
       end;
+      if token.tag = semicolon_token then next;
    end;
 
 begin

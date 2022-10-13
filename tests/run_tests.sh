@@ -80,81 +80,95 @@ test_code "let
    a = 15 + 29
    b =  6
 in
-   print(str(a + b + 9))" "59"
+   print(str(a + b + 9))
+end" "59"
 
 test_code "let a = 10 in
    let b = a * 2 in
-      print(str(a + b))" "30"
+      print(str(a + b))
+   end
+end" "30"
 
 test_code "let
    a = 10
    b = a * 2
 in
-   print(str(a + b))" "30"
+   print(str(a + b))
+end" "30"
 
 test_code "let
    a = 10
-   b = let a = 20 b = 30 in a + b
+   b = let a = 20 b = 30 in a + b end
 in
-   print(str(a + b))" "60"
+   print(str(a + b))
+end" "60"
 
 test_code "print(\"abcdef\")" "abcdef"
 test_code "print(\"this is \"\"line 1\"\"
 this is line 2\")" "this is \"line 1\"
 this is line 2"
 
-test_code "let path = \"c:\\home\" in print(path)" "c:\\home"
+test_code "let path = \"c:\\home\" in print(path) end" "c:\\home"
 
-test_code "let square(n: int): int = n * n in print(str(square(5)))" "25"
-test_code "let sum(m: int, n: int): int = m * m + n * n in print(str(sum(3, 4)))" "25"
+test_code "let square(n: int): int = n * n in print(str(square(5))) end" "25"
+test_code "let sum(m: int, n: int): int = m * m + n * n in print(str(sum(3, 4))) end" "25"
 test_code "let
    a = 3
    b = 4
    sum(m: int, n: int): int = m * m + n * n
 in
-   print(str(sum(a, b)))" "25"
+   print(str(sum(a, b)))
+end" "25"
 
 test_code "let
    a = 1
    b = 2
    sum(m: int, n: int): int = m * m + n * n
 in
-   print(str(sum(a + b, a + a + a + a + a + a + a + a)))" "73"
+   print(str(sum(a + b, a + a + a + a + a + a + a + a)))
+end" "73"
 
 
 test_code "let
    fac(n: int): int = if n = 1 then 1 else n * fac(n - 1)
 in
-   print(str(fac(5)))"  "120"
+   print(str(fac(5)))
+end"  "120"
 
 test_code "let
     square(n: int): int = n * n
     a = square(5)
 in
-   print(str(square(a)))" "625"
+   print(str(square(a)))
+end" "625"
 
 test_code "let
    square(n: int): int = n * n
 in
-   print(str(square(square(5))))" "625"
+   print(str(square(square(5))))
+end" "625"
 
-# test_code "let a = read() b = read() in (print(b); print(a))" "0"
-test_code "(print(\"hello, world\"); print(str(0)))" "hello, world
-0"
+# test_code "let a = read() b = read() in (print(b) print(a)) end" "0"
+# test_code "(print(\"hello, world\"); print(str(0)))" "hello, world
+# 0"
 
 test_code "let
    a = 10
    b = 20
 in
    let nest(): int = a + b
-in
-   print(str(nest()))" "30"
+   in
+      print(str(nest()))
+   end
+end" "30"
+
 
 test_code "let w = 3 a(x: int): int =
   let b(y: int): int =
-     let c(z: int): int = w + x + y + z in c(15)
-  in b(10)
-in print(str(a(5)))" "33"
+     let c(z: int): int = w + x + y + z in c(15) end
+  in b(10) end
+in print(str(a(5))) end" "33"
+
 
 test_code "let
    outer(n: int): int =
@@ -163,16 +177,20 @@ test_code "let
          inner2(): int = n
       in
          inner1()
+      end
 in
-   print(str(outer(5)))" "5"
+   print(str(outer(5)))
+end" "5"
 
-test_code "(print(str(72)); print(str(42)))" "72
-42"
+# test_code "(print(str(72)); print(str(42)))" "72
+# 42"
 
 test_code "let
    a = 0
 in
-   (a := 5; print(str(a)))" "5"
+   a := 5
+   print(str(a))
+end" "5"
 
 test_code "print(\"Falsches Üben von Xylophonmusik quält jeden größeren Zwerg\")" "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 test_code "print(\"Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο\")" "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο"
@@ -181,7 +199,7 @@ test_code "print(\"イロハニホヘト チリヌルヲ ワカヨタレソ ツ�
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン\")" "イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン"
 
-test_code "let s = str(42) in print(s)" "42"
+test_code "let s = str(42) in print(s) end" "42"
 
 test_code "print(str(42))" "42"
 
@@ -191,46 +209,55 @@ test_code "let
    type person = {name: string, age: int}
    type people = array of person
 in
-   0" ""
+   0
+end" ""
 
 test_code "let
    type int_list = {n: int, next: int_list}
 in
-   0" ""
+   0
+end" ""
 
 test_code "let
    type item = {name: string, qty: int, next: item, inv: invoice}
    type item_list = {it: item, next: item_list}
    type invoice = {n: int, items: item_list}
 in
-   0" ""
+   0
+end" ""
 
 test_code "let
    type person = {name: string, age: int}
    a: person = nil
 in
-   print(if a = nil then \"nil\" else \"?\")" "nil"
+   print(if a = nil then \"nil\" else \"?\")
+end" "nil"
 
 test_code "let
    odd(n: int): bool = if n = 0 then false else even(n - 1)
    even(n: int): bool = if n = 0 then true else odd(n - 1)
 in
-   print(if even(100) then \"true\" else \"false\")" "true"
+   print(if even(100) then \"true\" else \"false\")
+end" "true"
 
 test_code "let
    fib(n: int): int =
       if n < 2 then n
       else fib(n - 1) + fib(n - 2)
-in print(str(fib(40)))" "102334155"
+in print(str(fib(40)))
+end" "102334155"
 
 test_code "let
    type int_array = array of int
    a = int_array[3] of 42
 in
-   (a[0] := 50; print(str(a[0] + a[1] + a[2])))" "134"
+   a[0] := 50
+   print(str(a[0] + a[1] + a[2]))
+end" "134"
 
 test_code "for i := 1 to 5 do
-   print(str(i))" "1
+   print(str(i))
+end" "1
 2
 3
 4
@@ -239,12 +266,16 @@ test_code "for i := 1 to 5 do
 test_code "let
    type int_array = array of int
    a = int_array[5] of 0
-in (
+in
    for i := 0 to 4 do
-      a[i] := (i + 1) * 2;
+      a[i] := (i + 1) * 2
+   end
+
    for i := 0 to 4 do
       print(str(a[i]))
-)" "2
+   end
+
+end" "2
 4
 6
 8
@@ -253,14 +284,16 @@ in (
 
 
 test_code "let
-   p(n: int) = let s = str(n) in print(s)
+   p(n: int) = let s = str(n) in print(s) end
 in
-   p(42)" "42"
+   p(42)
+end" "42"
 
 test_code "let
-   p(n: int) = let s(n: int): string = str(n) in print(s(n))
+   p(n: int) = let s(n: int): string = str(n) in print(s(n)) end
 in
-   p(42)" "42"
+   p(42)
+end" "42"
 
 test_code "let
    e(x: int): int =
@@ -268,12 +301,12 @@ test_code "let
          x + y
       in
          f(3) + f(4)
+      end
 in
-   print(str(e(25)))" "57"
+   print(str(e(25)))
+end" "57"
 
-END_COMMENT
-
-test_code "let n = 1 in while n < 10 do (print(str(n)); n := n + 1)" "1
+test_code "let n = 1 in while n < 10 do print(str(n)) n := n + 1 end end" "1
 2
 3
 4
@@ -287,7 +320,46 @@ test_code "print(str(600851475143 / 2))" "300425737571"
 test_code "let
    i = 0
    update() = i := i + 1
-in (
-   update();
+in
+   update()
    print(str(i))
-)" "1"
+end" "1"
+
+test_code "let
+   type int_array = array of int
+   type int_matrix = array of int_array
+
+   numbers = int_matrix[3] of int_array[3] of 0
+in
+   print(str(numbers[0][0]))
+end" "0"
+
+END_COMMENT
+
+test_code "let
+   type int_array = array of int
+   type int_matrix = array of int_array
+   numbers = int_matrix[3] of nil
+in
+   for i := 0 to 2 do
+      numbers[i] := int_array[3] of 0
+      for j := 0 to 2 do
+         numbers[i][j] := i * 10 + j
+      end
+   end
+
+   for i := 0 to 2 do
+      for j := 0 to 2 do
+         print(str(numbers[i][j]))
+      end
+   end
+
+end" "0
+1
+2
+10
+11
+12
+20
+21
+22"

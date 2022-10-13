@@ -343,7 +343,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty := type_check(n^.expr2, si, nest, env, tenv);
       if ty^.tag <> array_type then
          err('Object is not an array.', n^.expr2^.line, n^.expr2^.col);
-      if type_check(n^.expr, si, nest, env, tenv) <> int_type then
+      if type_check(n^.expr, si + 1, nest, env, tenv) <> int_type then
          err('Array index must be an integer.', n^.expr^.line, n^.expr^.col);
       check_indexed_var := ty^.base;
    end;

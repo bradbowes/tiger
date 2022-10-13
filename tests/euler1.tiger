@@ -1,18 +1,20 @@
 let
    n = 3
    total = 0
-in (
-   while n < 1000 do (
-      total := total + n;
+in
+   while n < 1000 do
+      total := total + n
       n := n + 3
-   );
-   n := 5;
-   while n < 1000 do (
+   end
+   
+   n := 5
+   while n < 1000 do
       if n mod 15 > 0 then
-         total := total + n;
+         total := total + n
       n := n + 5
-   );
+   end
+   
    print(str(total))
-)
+end
    
    

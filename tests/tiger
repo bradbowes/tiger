@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-
+rm -r output.s a.out
 
 ../compile $1
 cc output.s ../lib/lib.s

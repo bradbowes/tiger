@@ -6,6 +6,7 @@ type
    token_tag = (and_token,
                 array_token,
                 assign_token,
+                begin_token,
                 colon_token,
                 comma_token,
                 comment_token,
@@ -13,6 +14,7 @@ type
                 do_token,
                 dot_token,
                 else_token,
+                end_token,
                 eof_token,
                 eq_token,
                 false_token,
@@ -178,8 +180,10 @@ procedure scan(s: scanner);
       case token.value of
          'and': token.tag := and_token;
          'array': token.tag := array_token;
+         'begin': token.tag := begin_token;
          'do': token.tag := do_token;
          'else': token.tag := else_token;
+         'end': token.tag := end_token;
          'false': token.tag := false_token;
          'for': token.tag := for_token;
          'if': token.tag := if_token;

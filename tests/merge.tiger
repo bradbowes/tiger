@@ -7,16 +7,18 @@ let
          i = 0
          isdigit(s: string) : bool =
             ord(buffer) >= ord("0") and ord(buffer) <= ord("9")
-      in (
+      in
          while buffer = " " or buffer = "\n" do
-            buffer := getchar();
-         any.any := isdigit(buffer);
-         while isdigit(buffer) do (
+            buffer := getchar()
+            
+         any.any := isdigit(buffer)
+         
+         while isdigit(buffer) do
             i := i * 10 + ord(buffer) - ord("0");
             buffer := getchar()
-         );
+         end
          i
-      )
+      end
 
    type list = { first: int, rest: list }
    
@@ -28,7 +30,11 @@ let
          if any.any then
             list { first = i, rest = readlist() }
          else
-            (buffer := getchar(); nil)
+            begin
+               buffer := getchar()
+               nil
+            end
+      end
          
    merge(a: list, b: list) : list =
       if a = nil then b
@@ -41,23 +47,25 @@ let
    printint(i: int) =
       let
          f(i: int) =
-            if i > 0 then (
+            if i > 0 then begin
                f(i / 10);
-               print(chr(i - i / 10 * 10 + ord("0")))
-            )
+               write(chr(i - i / 10 * 10 + ord("0")))
+            end
       in
-         if i < 0 then (
-            print("-");
+         if i < 0 then begin
+            write("-")
             f(-1)
-         ) else if i > 0 then f(i)
-         else print("0")
+         end else if i > 0 then f(i)
+         else write("0")
+      end
 
     printlist(l: list) =
        if l = nil then print("\n")
-       else (
+       else begin
           printint(l.first);
-          print(" ");
+          write(" ");
           printlist(l.rest)
-       )
+       end
 in
    printlist(merge(readlist(), readlist()))
+end

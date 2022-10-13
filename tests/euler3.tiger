@@ -5,20 +5,22 @@ let
    prime(n: int): bool = let
       i = 2
       isprime = true
-   in (
-      while i * i <= n and isprime do (
+   in
+      while i * i <= n and isprime do
          if n mod i = 0 then
-            isprime := false;
+            isprime := false
          i := i + (if i = 2 then 1 else 2)
-      );
+      end
+      
       isprime
-   )   
+   end
 in
-   while i * i <= n do (
+   while i * i <= n do
       if prime(i) then
          if n mod i = 0 then
-            print(str(i));
+            print(str(i))
       i := i + 1
-   )
+   end
+end
 
 

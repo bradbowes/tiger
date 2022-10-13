@@ -8,29 +8,38 @@
 
 # Differences from the Tiger book
 
-- added 'mod' operator.
-- '&' operator changed to 'and'.
-- '|' operator changed to 'or'.
+- added `mod` operator.
+- `&` operator (logical and) changed to `and`.
+- `|` operator (logical or) changed to `or`.
 - added boolean data type. Relational operators return booleans, `true` and `false` are keyword literals.
-- let in clause is a single expression. `let <decls> in <exp>`. (No `end` keyword. The Tiger "sequence expression" can be used for multiple expression let bodies).
-- variable declarations: var keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
-- function declarations: function keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
+- while and for bodies can contain multiple expressions and close with the `end` keyword.
+- sequence expression is enclosed in `begin` and `end` instead of parenthesis.
+- Semicolons between expressions in `while`, `for`, `begin` and `let` bodies are optional.
+- Semicolon may optionally appear after any expression.
+- variable declarations: `var` keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
+- function declarations: `function` keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings are VB style (for now). Strings can include linebreaks and span multiple lines.
 - no nested comments
 - type aliases are not implemented.
+- `break` expression is not implemented.
 
 # To do
 
 - builtin library functions
+- escapes in strings
 - builtin inline functions (abs, ord, etc)
 - records
 - lists?
-- escapes in strings
+- multi-dimensional arrays
+- array literals
 - tail calls
 - lambdas, first class functions
 - closures
 - overloads
 - garbage collector
+- enum
+- case expressions
+- tagged unions
 
 # Library
 

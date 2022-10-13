@@ -336,9 +336,13 @@ var
    procedure emit_indexed_var();
    begin
       emit_expression(n^.expr2, si, nest);
+      emit('    movq %%rsi, %d(%%rsp)', [si]);
       emit('    movq %%rax, %%rsi', []);
-      emit_expression(n^.expr, si, nest);
+      emit('    movq %%rsi, %d(%%rsp)', [si - 8]);
+      emit_expression(n^.expr, si - 16, nest);
+      emit('    movq %d(%%rsp), %%rsi', [si - 8]);
       emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
+      emit('    movq %d(%%rsp), %%rsi', [si]);
    end;
 
 
