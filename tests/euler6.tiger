@@ -1,0 +1,17 @@
+/*
+  Find the difference between the sum of the squares of
+  the first one hundred natural numbers and the square
+  of the sum.
+*/
+
+let
+   sum_squares = 0
+   sum = 0
+in
+   for i := 1 to 100 do
+      sum_squares := sum_squares + i * i
+      sum := sum + i
+   end
+   print(str(sum * sum - sum_squares))
+end
+

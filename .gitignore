@@ -2,6 +2,7 @@
 *.o
 *.ppu
 a.out
+output.s
 ppas.sh
 compile
 print
