@@ -80,7 +80,7 @@ begin
       list^.next := f
    else
       append(list^.next, f, line, col);
-end;       
+end;
 
 
 procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
@@ -89,8 +89,9 @@ begin
    new(f);
    f^.name := name;
    f^.ty := ty;
-      
-   if rec^.fields = nil then 
+   f^.next := nil;
+
+   if rec^.fields = nil then
       rec^.fields := f
    else
       append(rec^.fields, f, line, col);

@@ -363,3 +363,28 @@ end" "0
 20
 21
 22"
+
+test_code "print(str(length(\"abcdefg\")))" "7"
+
+# test_code "print(str(length(read())))" ""
+
+test_code "let s = \"hello\"
+in
+   for i := 0 to 4 do
+      print(str(sub(s, i)))
+   end
+end" "104
+101
+108
+108
+111"
+
+test_code "let
+   s = \"hello, world!\"
+   ss1 = substring(s, 7, 5)
+   ss2 = substring(s, 0, 5)
+in
+   print(ss1)
+   print(ss2)
+end" "world
+hello"

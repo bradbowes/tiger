@@ -49,6 +49,24 @@ begin
    add_field(s, intern('n'), int_type, 0, 0);
    bind_external('str', s);
 
+   (* length *)
+   s := make_function_type(int_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   bind_external('length', s);
+
+   (* sub *)
+   s := make_function_type(int_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   add_field(s, intern('n'), int_type, 0, 0);
+   bind_external('sub', s);
+
+   (* substring *)
+   s := make_function_type(string_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   add_field(s, intern('start'), int_type, 0, 0);
+   add_field(s, intern('length'), int_type, 0, 0);
+   bind_external('substring', s);
+
    (* concat *)
    s := make_function_type(string_type);
    add_field(s, intern('s1'), string_type, 0, 0);
@@ -61,5 +79,4 @@ begin
 
 end;
 
-end.   
-   
+end.

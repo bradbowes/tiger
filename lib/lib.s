@@ -19,7 +19,7 @@ _main:
    movq $heap_size, %rdi               // allocate heap
    call _malloc
    cmpq $0, %rax                       // check for null
-   jz fail
+   jz main_fail
    movq %rax, %r15                     // top of heap pointer
    movq %rax, 8(%r14)                  // save base heap pointer
 
@@ -28,16 +28,16 @@ _main:
 
    movq 8(%r14),  %rdi                // free the heap
    call _free
-   jmp exit
+   jmp main_exit
 
-fail:
+main_fail:
    movq $2, %rdi
    movq heap_err_msg@GOTPCREL(%rip), %rsi
    movq $25, %rdx
    movq $SYS_write, %rax
    syscall
 
-exit:
+main_exit:
    addq $56, %rsp
    movq $SYS_exit, %rax
    xorq %rdi, %rdi
@@ -88,8 +88,8 @@ f$_print:
    jmp f$_write
 
 
-.globl f$_str
 .align 3
+.globl f$_str
 f$_str:
    pushq %rbx
    pushq %rcx
@@ -109,8 +109,51 @@ f$_str:
    ret
 
 
-.globl f$_toh
 .align 3
+.globl f$_length
+f$_length:
+   movq 16(%rsp), %rsi
+   movq (%rsi), %rax
+   ret
+
+
+.align 3
+.globl f$_sub
+f$_sub:
+   movq 16(%rsp), %rsi                 // string parameter
+   movq 24(%rsp), %rbx                 // position parameter
+   movb 8(%rsi, %rbx, 1), %al
+   andq $0x00000000000ff, %rax
+   ret
+
+
+.align 3
+.globl f$_substring
+f$_substring:
+   movq 16(%rsp), %rsi                 // source string
+   movq 24(%rsp), %rbx                 // start position
+   addq $8, %rbx
+   addq %rbx, %rsi
+   movq 32(%rsp), %rcx                 // length
+   movq %rcx, (%r15)
+   xorq %rbx, %rbx
+substring_loop:
+   cmpq %rbx, %rcx
+   jl substring_done
+   movb (%rsi, %rbx, 1), %al
+   movb %al, 8(%r15, %rbx, 1)
+   incq %rbx
+   jmp substring_loop
+substring_done:
+   movq %r15, %rax
+   addq $15, %rcx
+   addq %rcx, %r15
+   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   ret
+
+
+.align 3
+.globl f$_toh
 f$_toh:
    movq %r15, %rax
    ret
