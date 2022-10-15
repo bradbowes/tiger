@@ -3,9 +3,6 @@
 - compiler for Andrew Appel's Tiger language with a few tweaks.
 - written in Free Pascal, following the green Tiger book but not very closely.
 - compiles to inefficient as assembly language for Mac OS X86_64.
-- compilation strategy similar Abdulaziz Ghuloum's scheme compiler
-  article http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf. Function
-  arguments, local variables and temporaries are on the stack.
 - compiles to assembly from type checked AST with no IR.
 - integers are int64
 
@@ -55,7 +52,7 @@
 ## Conversion
 
 - str(i: int): string           (converts int to string, done)
-- str2int(s: string): int
+- num(s: string): int           (converts string to int)
 
 ## Strings
 
@@ -67,4 +64,3 @@
 - concat(s1: string, s2: string): string (done)
 - compare(s1: string, s2: string): int
 - find(src: string, find: string): int
-

@@ -109,14 +109,12 @@ procedure scan(s: scanner);
 
 
    procedure skip_white;
-
       procedure newline;
       begin
          s^.y := s^.y + 1;
          s^.x := 0;
          next
       end;
-
    begin
       while s^.ch in [' ', chr(9), chr(13), chr(10)] do begin
          case s^.ch of
@@ -132,11 +130,25 @@ procedure scan(s: scanner);
 
 
    procedure skip_comment;
+      procedure newline;
+      begin
+         s^.y := s^.y + 1;
+         s^.x := 0;
+      end;
    begin
       token.value := '/*';
       repeat
          repeat
             next;
+            case s^.ch of
+               chr(10): newline();
+               chr(13): begin
+                  push_char();
+                  if s^.ch = chr(10) then
+                     push_char();
+                  newline();
+               end;
+            end;
             token.value := token.value + s^.ch;
          until s^.ch = '*';
          next;
@@ -148,6 +160,11 @@ procedure scan(s: scanner);
 
 
    procedure get_string;
+      procedure newline;
+      begin
+         s^.y := s^.y + 1;
+         s^.x := 0;
+      end;
    begin
       next;
       repeat
@@ -158,8 +175,18 @@ procedure scan(s: scanner);
             else
                break;
          end
-         else
+         else begin
+            case s^.ch of
+               chr(10): newline();
+               chr(13): begin
+                  push_char();
+                  if s^.ch = chr(10) then
+                     push_char();
+                  newline();
+               end;
+            end;
             push_char();
+         end;
       until false;
       token.tag := string_token;
    end;
