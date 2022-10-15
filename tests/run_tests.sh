@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -387,12 +387,10 @@ in
 end" "world
 hello"
 
-# END_COMMENT
-
 test_code "let
    s = \"hi\"
 in
-   for i := 1 to 10 do
+   for i := 1 to 4 do
       let
          len = length(s)
          x = 0
@@ -403,6 +401,45 @@ in
          end
       end
    end
-end" ""
+end" "1
+104
+105
+2
+104
+105
+3
+104
+105
+4
+104
+105"
 
-         
+
+test_code "print(chr(97))" "a"
+test_code "print(chr(ord(\"b\")))" "b"
+test_code "print(str(ord(\"c\")))" "99"
+
+test_code "let
+   s = concat(\"hello\", \"world\")
+in
+   print(s)
+   print(str(length(s)))
+end" "helloworld
+10"
+
+END_COMMENT
+
+test_code "let
+   empty = \"\"
+   ch = chr(97)
+in
+   for i := 1 to 5 do
+      empty := concat(ch, empty)
+      print(empty)
+   end
+end" "a
+aa
+aaa
+aaaa
+aaaaa"
+

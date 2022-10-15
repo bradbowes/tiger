@@ -60,10 +60,11 @@
 ## Strings
 
 - length(s: string): int        (done)
-- sub(s: string, n: int): int   (gets ascii code of character at position n)
-- chr(n: int): string
+- sub(s: string, n: int): int   (done)
+- ord(s: string): int           (done)
+- chr(n: int): string           (done)
 - substring(s: string, start: int, len: int): string (done)
-- concat(s1: string, s2: string): string
+- concat(s1: string, s2: string): string (done)
 - compare(s1: string, s2: string): int
 - find(src: string, find: string): int
 

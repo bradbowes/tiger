@@ -13,15 +13,14 @@ in
       total := total + n
       n := n + 3
    end
-   
+
    n := 5
    while n < 1000 do
       if n mod 15 > 0 then
          total := total + n
       n := n + 5
    end
-   
+
    print(str(total))
 end
-   
-   
+

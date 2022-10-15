@@ -128,6 +128,64 @@ f$_sub:
 
 
 .align 3
+.globl f$_ord
+f$_ord:
+   movq 16(%rsp), %rsi                 // string parameter
+   movb 8(%rsi), %al
+   andq $0x00000000000ff, %rax
+   ret
+
+
+.align 3
+.globl f$_chr
+f$_chr:
+   movq $1, (%r15)
+   movq 16(%rsp), %rax
+   movb %al, 8(%r15)
+   movq %r15, %rax
+   addq $16, %r15
+   ret
+
+
+.align 3
+copy:
+   xorq %rbx, %rbx
+copy_loop:
+   cmpq %rbx, %rcx
+   jl copy_done
+   movb (%rsi, %rbx, 1), %al
+   movb %al, (%rdi, %rbx, 1)
+   incq %rbx
+   jmp copy_loop
+copy_done:
+   movb $0, (%rdi, %rbx, 1)
+   ret
+
+
+.align 3
+.globl f$_concat
+f$_concat:
+   movq 16(%rsp), %rsi                 // string 1
+   movq (%rsi), %rcx
+   movq %rcx, %rdx
+   addq $8, %rsi
+   leaq 8(%r15), %rdi
+   call copy
+   movq 24(%rsp), %rsi                 // string 2
+   addq %rcx, %rdi
+   movq (%rsi), %rcx
+   addq %rcx, %rdx
+   addq $8, %rsi
+   call copy
+   movq %rdx, (%r15)
+   movq %r15, %rax
+   addq $15, %rdx
+   addq %rdx, %r15
+   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   ret
+
+
+.align 3
 .globl f$_substring
 f$_substring:
    movq 16(%rsp), %rsi                 // source string

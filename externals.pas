@@ -60,6 +60,16 @@ begin
    add_field(s, intern('n'), int_type, 0, 0);
    bind_external('sub', s);
 
+   (* ord *)
+   s := make_function_type(int_type);
+   add_field(s, intern('s'), string_type, 0, 0);
+   bind_external('ord', s);
+
+   (* chr *)
+   s := make_function_type(string_type);
+   add_field(s, intern('n'), int_type, 0, 0);
+   bind_external('chr', s);
+
    (* substring *)
    s := make_function_type(string_type);
    add_field(s, intern('s'), string_type, 0, 0);

@@ -16,5 +16,7 @@ clean:
 	rm -f tests/test*.s
 	rm -f tests/test*.tiger
 	rm -f tests/test*.out
+	rm -f tests/a.out
+	rm -f tests/output.s
 
 
