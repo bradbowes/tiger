@@ -360,7 +360,9 @@ var
       emit_expression(n^.expr2, stack_index, nest);
       emit('    movq %%rax, %%rcx', []);
       emit('    movq %%rax, %d(%%rsp)', [offset]);
+      emit('    movq %%rcx, %d(%%rsp)', [offset - 24]);
       emit_expression(n^.cond, stack_index, nest);
+      emit('    movq %d(%%rsp), %%rcx', [offset - 24]);
       emit('    movq %%rax, %%rbx', []);
       emit('%s:', [lbl1]);
       emit('    cmpq %%rcx, %%rbx', []);

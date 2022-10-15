@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -334,8 +334,6 @@ in
    print(str(numbers[0][0]))
 end" "0"
 
-END_COMMENT
-
 test_code "let
    type int_array = array of int
    type int_matrix = array of int_array
@@ -388,3 +386,23 @@ in
    print(ss2)
 end" "world
 hello"
+
+# END_COMMENT
+
+test_code "let
+   s = \"hi\"
+in
+   for i := 1 to 10 do
+      let
+         len = length(s)
+         x = 0
+      in
+         print(str(i))
+         for j := 0 to len - 1 do
+            print(str(sub(s, j)))
+         end
+      end
+   end
+end" ""
+
+         

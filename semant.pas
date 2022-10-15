@@ -355,11 +355,11 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    begin
       new_env := add_scope(env);
       n^.binding := bind(new_env, n^.name, int_type, si + 1, nest, n^.line, n^.col);
-      if type_check(n^.expr2, si + 5, nest, env, tenv) <> int_type then
+      if type_check(n^.expr2, si + 6, nest, env, tenv) <> int_type then
          err('for start value must be integer type', n^.expr2^.line, n^.expr2^.col);
-      if type_check(n^.cond, si + 5, nest, env, tenv) <> int_type then
+      if type_check(n^.cond, si + 6, nest, env, tenv) <> int_type then
          err('for to value must be integer type', n^.cond^.line, n^.cond^.col);
-      if type_check(n^.expr, si + 5, nest, new_env, tenv) <> void_type then
+      if type_check(n^.expr, si + 6, nest, new_env, tenv) <> void_type then
          err('for body cannot return a vaule', n^.expr^.line, n^.expr^.col);
       check_for := void_type;
    end;
