@@ -12,7 +12,6 @@ let
       for i := 0 to n - 1 do begin
          for j := 0 to n - 1 do
             write(if col[i] = j then " Q" else " .")
-
          print("")
       end
       print("")

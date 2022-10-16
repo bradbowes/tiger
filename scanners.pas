@@ -88,6 +88,10 @@ procedure scan(s: scanner);
          else begin
             read(s^.src, s^.ch);
             s^.x := s^.x + 1;
+            if s^.ch = chr(10) then begin
+               s^.y := s^.y + 1;
+               s^.x := 0;
+            end
          end
          else
             err('Read past end of file', token.line, token.col);
@@ -109,46 +113,18 @@ procedure scan(s: scanner);
 
 
    procedure skip_white;
-      procedure newline;
-      begin
-         s^.y := s^.y + 1;
-         s^.x := 0;
-         next
-      end;
    begin
-      while s^.ch in [' ', chr(9), chr(13), chr(10)] do begin
-         case s^.ch of
-           ' ', chr(9): next;
-           chr(10): newline;
-           chr(13): begin
-              newline;
-              if s^.ch = chr(10) then next;
-           end;
-         end;
-      end;
+      while s^.ch in [' ', chr(9) .. chr(13)] do
+         next;
    end;
 
 
    procedure skip_comment;
-      procedure newline;
-      begin
-         s^.y := s^.y + 1;
-         s^.x := 0;
-      end;
    begin
       token.value := '/*';
       repeat
          repeat
             next;
-            case s^.ch of
-               chr(10): newline();
-               chr(13): begin
-                  push_char();
-                  if s^.ch = chr(10) then
-                     push_char();
-                  newline();
-               end;
-            end;
             token.value := token.value + s^.ch;
          until s^.ch = '*';
          next;
@@ -160,34 +136,54 @@ procedure scan(s: scanner);
 
 
    procedure get_string;
-      procedure newline;
-      begin
-         s^.y := s^.y + 1;
-         s^.x := 0;
-      end;
+   var
+      escape, code: string;
    begin
       next;
-      repeat
-         if s^.ch = '"' then begin
+      while s^.ch <> '"' do
+         if s^.ch = '\' then begin
             next;
-            if s^.ch = '"' then
-               push_char()
-            else
-               break;
-         end
-         else begin
             case s^.ch of
-               chr(10): newline();
-               chr(13): begin
-                  push_char();
-                  if s^.ch = chr(10) then
-                     push_char();
-                  newline();
+               't': escape := chr(9);   (* tab *)
+               'n': escape := chr(10);  (* newline *)
+               'r': escape := chr(13);  (* carriage return *)
+               '\': escape := '\';
+               '"': escape := '"';
+               '''': escape := '''';
+               '0'..'9': begin
+                  code := s^.ch;
+                  next;
+                  if s^.ch in ['0'..'9'] then
+                     code := code + s^.ch
+                  else
+                     err('illegal escape sequence', s^.x, s^.y);
+                  next;
+                  if s^.ch in ['0'..'9'] then
+                     code := code + s^.ch
+                  else
+                     err('illegal escape sequence',  s^.x, s^.y);
+                  if code > '255' then
+                     err('illegal escape sequence',  s^.x, s^.y);
+                  escape := chr(atoi(code, s^.x, s^.y));
                end;
+               ' ', chr(9) .. chr(13): begin
+                  skip_white;
+                  if s^.ch = '\' then begin
+                     next;
+                     continue;
+                  end
+                  else
+                     err('illegal escape sequence',  s^.x, s^.y);
+               end;
+               else
+                  err('illegal escape sequence',  s^.x, s^.y);
             end;
-            push_char();
-         end;
-      until false;
+            token.value := token.value + escape;
+            next;
+         end
+         else
+            push_char;
+      next;
       token.tag := string_token;
    end;
 

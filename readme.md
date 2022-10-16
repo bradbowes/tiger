@@ -17,7 +17,8 @@
 - semicolon may optionally appear at the end of any expression.
 - variable declarations: `var` keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
-- strings are VB style (for now). Strings can include linebreaks and span multiple lines.
+- strings can include linebreaks and span multiple lines.
+- string escape \^c (control character) not implemented.
 - no nested comments
 - type aliases are not implemented.
 - `break` expression is not implemented.
@@ -25,20 +26,23 @@
 # To do
 
 - builtin library functions
-- escapes in strings
-- builtin inline functions (abs, ord, etc)
 - records
 - lists?
 - multi-dimensional arrays
 - array literals
 - tail calls
-- lambdas, first class functions
+- anonymous functions, first class functions
 - closures
 - overloads
 - garbage collector
 - enum
 - case expressions
 - tagged unions
+- modules, separate compilation
+- data types (real, byte, char)
+- unicode strings
+- optimization
+- ffi
 
 # Library
 

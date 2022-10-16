@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -104,11 +104,9 @@ in
 end" "60"
 
 test_code "print(\"abcdef\")" "abcdef"
-test_code "print(\"this is \"\"line 1\"\"
+test_code "print(\"this is \\\"line 1\\\"
 this is line 2\")" "this is \"line 1\"
 this is line 2"
-
-test_code "let path = \"c:\\home\" in print(path) end" "c:\\home"
 
 test_code "let square(n: int): int = n * n in print(str(square(5))) end" "25"
 test_code "let sum(m: int, n: int): int = m * m + n * n in print(str(sum(3, 4))) end" "25"
@@ -426,8 +424,6 @@ in
 end" "helloworld
 10"
 
-# END_COMMENT
-
 test_code "let
    empty = \"\"
    ch = chr(97)
@@ -441,4 +437,13 @@ aa
 aaa
 aaaa
 aaaaa"
+
+END_COMMENT
+
+test_code 'let path = "c:\\\\home" in print(path) end' 'c:\home'
+test_code 'print("hello\nworld")' 'hello
+world'
+test_code 'print("\\097")', 'a'
+test_code 'print("hello \
+   \world!")', 'hello world!'
 

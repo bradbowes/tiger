@@ -194,15 +194,8 @@ f$_substring:
    addq %rbx, %rsi
    movq 32(%rsp), %rcx                 // length
    movq %rcx, (%r15)
-   xorq %rbx, %rbx
-substring_loop:
-   cmpq %rbx, %rcx
-   jl substring_done
-   movb (%rsi, %rbx, 1), %al
-   movb %al, 8(%r15, %rbx, 1)
-   incq %rbx
-   jmp substring_loop
-substring_done:
+   leaq 8(%r15), %rdi
+   call copy
    movq %r15, %rax
    addq $15, %rcx
    addq %rcx, %r15
