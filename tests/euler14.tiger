@@ -1,0 +1,51 @@
+/*
+   The following iterative sequence is defined for the set
+   of positive integers:
+
+   n → n/2 (n is even)
+   n → 3n + 1 (n is odd)
+
+   Using the rule above and starting with 13, we generate the
+   following sequence:
+
+   13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1
+
+   It can be seen that this sequence (starting at 13 and finishing
+   at 1) contains 10 terms. Although it has not been proved yet
+   (Collatz Problem), it is thought that all starting numbers
+   finish at 1.
+
+   Which starting number, under one million, produces the
+   longest chain?
+
+   NOTE: Once the chain starts the terms are allowed to go above
+   one million.
+*/
+
+let
+   chain(n: int, len: int): int =
+      if n > 1 then
+         chain(if n mod 2 = 0 then n / 2 else n * 3 + 1, len + 1)
+      else
+         len
+
+   longest(): int =
+      let
+         max_len = 1
+         sequence = 1
+      in
+         for i := 2 to 1000000 do
+            let
+               tmp = chain(i, 1)
+            in
+               if tmp > max_len then begin
+                  max_len := tmp
+                  sequence := i
+               end
+            end
+         sequence
+      end
+in
+   print(str(longest()))
+end
+

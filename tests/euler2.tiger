@@ -16,14 +16,14 @@ let
    fib = 0
    total = 0
 in
-   while fib <= 4000000 do
+   while fib <= 4000000 do begin
       if fib mod 2 = 0 then
          total := total + fib
       fib := m + n
       m := n
       n := fib
    end
-   
+
    print(str(total))
-end   
+end
 

@@ -39,11 +39,10 @@ in
       in
          for j := 0 to 12 do
             product := product * (sub(s, i + j) - base)
-         end
+
          if product > answer then
             answer := product
       end
-   end
 
    print(str(answer))
 end

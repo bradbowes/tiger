@@ -1,30 +1,41 @@
 let
    type s_array = array of string
    numbers = s_array[100] of ""
-   sum = ""
-   carries = 0
    base = ord("0")
+   sum = ""
 
-   add(a: string, b: string): string =
+   add_all(): string =
       let
          sum = ""
-         carry = 0
-      in
-         for i := 1 to 50 do
-            let
-               n = 50 - i
-               x = sub(a, n) - base
-               y = sub(b, n) - base
-               z = x + y + carry
-               digit = str(z mod 10)
-            in
-               carry := if z > 9 then 1 else 0
-               sum := concat(digit, sum)
-            end
-         end
+         carries = 0
 
-         carries := carries + carry
-         sum
+         add(a: string, b: string): string =
+            let
+               sum = ""
+               carry = 0
+            in
+               for i := 1 to 50 do
+                  let
+                     n = 50 - i
+                     x = sub(a, n) - base
+                     y = sub(b, n) - base
+                     z = x + y + carry
+                     digit = chr(base + z mod 10)
+                  in
+                     carry := if z > 9 then 1 else 0
+                     sum := concat(digit, sum)
+                  end
+
+               carries := carries + carry
+               sum
+            end
+      in
+         sum := add(numbers[0], numbers[1])
+
+         for i := 2 to 99 do
+            sum := add(sum, numbers[i])
+
+         concat(str(carries), sum)
       end
 
 in
@@ -129,15 +140,10 @@ in
    numbers[98] := "20849603980134001723930671666823555245252804609722"
    numbers[99] := "53503534226472524250874054075591789781264330331690"
 
-   sum := add(numbers[0], numbers[1])
-
-   for i := 2 to 99 do
-      sum := add(sum, numbers[i])
-   end
-
-   sum := concat(str(carries), sum)
+   sum := add_all()
 
    print(sum)
    print(substring(sum, 0, 10))
+
 end
 

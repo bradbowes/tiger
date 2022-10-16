@@ -19,22 +19,18 @@ let
       else
          r
 in
-   while a < 1000 and b < 1000 do
+   while a < 1000 and b < 1000 do begin
       n := a * b
-      if n = reverse(n, 0) then begin
+      if n = reverse(n, 0) then
          answer := n
-      end
+
       if a = b then begin
          b := b + 1
          a := if answer = 0 then 900 else answer / b
-      end else
+      end
+      else
          a := a + 1
-         
    end
 
    print(str(answer))
 end
-         
-         
-         
-      

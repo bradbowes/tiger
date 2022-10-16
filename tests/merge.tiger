@@ -10,10 +10,10 @@ let
       in
          while buffer = " " or buffer = "\n" do
             buffer := getchar()
-            
+
          any.any := isdigit(buffer)
-         
-         while isdigit(buffer) do
+
+         while isdigit(buffer) do begin
             i := i * 10 + ord(buffer) - ord("0");
             buffer := getchar()
          end
@@ -21,7 +21,7 @@ let
       end
 
    type list = { first: int, rest: list }
-   
+
    readlist() : list =
       let
          any = any { any = false }
@@ -29,13 +29,12 @@ let
       in
          if any.any then
             list { first = i, rest = readlist() }
-         else
-            begin
-               buffer := getchar()
-               nil
-            end
+         else begin
+            buffer := getchar()
+            nil
+         end
       end
-         
+
    merge(a: list, b: list) : list =
       if a = nil then b
       else if b = nil then a
@@ -55,8 +54,10 @@ let
          if i < 0 then begin
             write("-")
             f(-1)
-         end else if i > 0 then f(i)
-         else write("0")
+         end
+         else
+            if i > 0 then f(i)
+            else write("0")
       end
 
     printlist(l: list) =

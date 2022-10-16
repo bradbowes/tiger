@@ -224,7 +224,7 @@ var
          else
             begin
                next;
-               err('Expected value, got ''' + value + '''', line, col);
+               err('Expected ''end'', got ''' + value + '''', line, col);
             end;
       end;
 
@@ -418,7 +418,7 @@ var
       next;
       condition := get_expression;
       advance(do_token, 'do');
-      get_while_expression := make_while_node(condition, get_sequence(), line, col);
+      get_while_expression := make_while_node(condition, get_expression, line, col);
    end;
 
 
@@ -437,7 +437,7 @@ var
       advance(to_token, 'to');
       finish := get_expression;
       advance(do_token, 'do');
-      body := get_sequence();
+      body := get_expression;
       get_for_expression := make_for_node(iter, start, finish, body, line, col);
    end;
 

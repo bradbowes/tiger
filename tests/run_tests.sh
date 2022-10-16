@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -257,7 +257,7 @@ end" "134"
 
 test_code "for i := 1 to 5 do
    print(str(i))
-end" "1
+" "1
 2
 3
 4
@@ -269,11 +269,9 @@ test_code "let
 in
    for i := 0 to 4 do
       a[i] := (i + 1) * 2
-   end
 
    for i := 0 to 4 do
       print(str(a[i]))
-   end
 
 end" "2
 4
@@ -306,7 +304,14 @@ in
    print(str(e(25)))
 end" "57"
 
-test_code "let n = 1 in while n < 10 do print(str(n)) n := n + 1 end end" "1
+test_code "let
+   n = 1
+in
+   while n < 10 do begin
+      print(str(n))
+      n := n + 1
+   end
+end" "1
 2
 3
 4
@@ -339,18 +344,15 @@ test_code "let
    type int_matrix = array of int_array
    numbers = int_matrix[3] of nil
 in
-   for i := 0 to 2 do
+   for i := 0 to 2 do begin
       numbers[i] := int_array[3] of 0
       for j := 0 to 2 do
          numbers[i][j] := i * 10 + j
-      end
    end
 
    for i := 0 to 2 do
       for j := 0 to 2 do
          print(str(numbers[i][j]))
-      end
-   end
 
 end" "0
 1
@@ -370,7 +372,6 @@ test_code "let s = \"hello\"
 in
    for i := 0 to 4 do
       print(str(sub(s, i)))
-   end
 end" "104
 101
 108
@@ -398,9 +399,7 @@ in
          print(str(i))
          for j := 0 to len - 1 do
             print(str(sub(s, j)))
-         end
       end
-   end
 end" "1
 104
 105
@@ -427,13 +426,13 @@ in
 end" "helloworld
 10"
 
-END_COMMENT
+# END_COMMENT
 
 test_code "let
    empty = \"\"
    ch = chr(97)
 in
-   for i := 1 to 5 do
+   for i := 1 to 5 do begin
       empty := concat(ch, empty)
       print(empty)
    end

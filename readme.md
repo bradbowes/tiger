@@ -12,10 +12,9 @@
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
 - added boolean data type. Relational operators return booleans, `true` and `false` are keyword literals.
-- while and for bodies can contain multiple expressions and close with the `end` keyword.
 - sequence expression is enclosed in `begin` and `end` instead of parenthesis.
-- semicolons between expressions in `while`, `for`, `begin` and `let` bodies are optional.
-- semicolon may optionally appear after any expression.
+- semicolons between expressions in `begin` and `let` bodies are optional.
+- semicolon may optionally appear at the end of any expression.
 - variable declarations: `var` keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings are VB style (for now). Strings can include linebreaks and span multiple lines.
