@@ -204,34 +204,6 @@ test_code "print(str(42))" "42"
 test_code "print(\"\")" ""
 
 test_code "let
-   type person = {name: string, age: int}
-   type people = array of person
-in
-   0
-end" ""
-
-test_code "let
-   type int_list = {n: int, next: int_list}
-in
-   0
-end" ""
-
-test_code "let
-   type item = {name: string, qty: int, next: item, inv: invoice}
-   type item_list = {it: item, next: item_list}
-   type invoice = {n: int, items: item_list}
-in
-   0
-end" ""
-
-test_code "let
-   type person = {name: string, age: int}
-   a: person = nil
-in
-   print(if a = nil then \"nil\" else \"?\")
-end" "nil"
-
-test_code "let
    odd(n: int): bool = if n = 0 then false else even(n - 1)
    even(n: int): bool = if n = 0 then true else odd(n - 1)
 in
@@ -438,12 +410,42 @@ aaa
 aaaa
 aaaaa"
 
-END_COMMENT
-
 test_code 'let path = "c:\\\\home" in print(path) end' 'c:\home'
 test_code 'print("hello\nworld")' 'hello
 world'
 test_code 'print("\\097")', 'a'
 test_code 'print("hello \
    \world!")', 'hello world!'
+
+
+test_code "let
+   type item = {name: string, qty: int, next: item, inv: invoice}
+   type item_list = {it: item, next: item_list}
+   type invoice = {n: int, items: item_list}
+in
+   0
+end" ""
+
+END_COMMENT
+
+test_code "let
+   type person = {name: string, age: int}
+in
+   0
+end" ""
+
+
+test_code "let
+   type person = { name: string, age: int }
+   a = person { name = \"Harry Potter\", age = 19 }
+in
+   print(if a = nil then \"nil\" else \"?\")
+end" "?"
+
+test_code "let
+   type person = { name: string, age: int }
+   a: person = nil
+in
+   print(if a = nil then \"nil\" else \"?\")
+end" "nil"
 

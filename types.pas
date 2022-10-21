@@ -13,6 +13,7 @@ type
    field_t = record
       name: symbol;
       ty: spec;
+      offset: longint;
       next: field
    end;
 
@@ -37,8 +38,9 @@ const
    string_type: spec = @string_type;
 
 
-procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
-function get_field(rec: spec; name: symbol; line, col: longint): spec;
+procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);
+procedure add_field(rec: spec; name: symbol; ty: spec; offset, line, col: longint);
+function get_field(rec: spec; name: symbol; line, col: longint): field;
 function make_array_type(base: spec): spec;
 function make_record_type(): spec;
 function make_function_type(return: spec): spec;
@@ -83,7 +85,7 @@ begin
 end;
 
 
-procedure add_field(rec: spec; name: symbol; ty: spec; line, col: longint);
+procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);
 var f: field;
 begin
    new(f);
@@ -99,24 +101,41 @@ begin
 end;
 
 
-function lookup(list: field; name: symbol): spec;
+procedure add_field(rec: spec; name: symbol; ty: spec; offset, line, col: longint);
+var f: field;
+begin
+   new(f);
+   f^.name := name;
+   f^.ty := ty;
+   f^.offset := offset;
+   f^.next := nil;
+
+   if rec^.fields = nil then
+      rec^.fields := f
+   else
+      append(rec^.fields, f, line, col);
+   rec^.length := rec^.length + 1;
+end;
+
+
+function lookup(list: field; name: symbol): field;
 begin
    if list = nil then
       lookup := nil
    else if list^.name = name then
-      lookup := list^.ty
+      lookup := list
    else
       lookup := lookup(list^.next, name);
 end;
 
 
-function get_field(rec: spec; name: symbol; line, col: longint): spec;
-var ty: spec;
+function get_field(rec: spec; name: symbol; line, col: longint): field;
+var f: field;
 begin
-   ty := lookup(rec^.fields, name);
-   if ty = nil then
+   f := lookup(rec^.fields, name);
+   if f = nil then
       err('object has no field ''' + name^.id + '''', line, col);
-   get_field := ty;
+   get_field := f;
 end;
 
 

@@ -36,51 +36,51 @@ begin
 
    (* write *)
    s := make_function_type(void_type);
-   add_field(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
    bind_external('write', s);
 
    (* print *)
    s := make_function_type(void_type);
-   add_field(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
    bind_external('print', s);
 
    (* str *)
    s := make_function_type(string_type);
-   add_field(s, intern('n'), int_type, 0, 0);
+   add_param(s, intern('n'), int_type, 0, 0);
    bind_external('str', s);
 
    (* length *)
    s := make_function_type(int_type);
-   add_field(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
    bind_external('length', s);
 
    (* sub *)
    s := make_function_type(int_type);
-   add_field(s, intern('s'), string_type, 0, 0);
-   add_field(s, intern('n'), int_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('n'), int_type, 0, 0);
    bind_external('sub', s);
 
    (* ord *)
    s := make_function_type(int_type);
-   add_field(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
    bind_external('ord', s);
 
    (* chr *)
    s := make_function_type(string_type);
-   add_field(s, intern('n'), int_type, 0, 0);
+   add_param(s, intern('n'), int_type, 0, 0);
    bind_external('chr', s);
 
    (* substring *)
    s := make_function_type(string_type);
-   add_field(s, intern('s'), string_type, 0, 0);
-   add_field(s, intern('start'), int_type, 0, 0);
-   add_field(s, intern('length'), int_type, 0, 0);
+   add_param(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('start'), int_type, 0, 0);
+   add_param(s, intern('length'), int_type, 0, 0);
    bind_external('substring', s);
 
    (* concat *)
    s := make_function_type(string_type);
-   add_field(s, intern('s1'), string_type, 0, 0);
-   add_field(s, intern('s2'), string_type, 0, 0);
+   add_param(s, intern('s1'), string_type, 0, 0);
+   add_param(s, intern('s2'), string_type, 0, 0);
    bind_external('concat', s);
 
    (* toh *)

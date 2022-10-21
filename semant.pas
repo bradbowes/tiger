@@ -28,7 +28,12 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty1 := type_check(n^.expr, si + 1, nest, env, tenv);
       ty2 := type_check(n^.expr2, si, nest, env, tenv);
       if ty1 <> ty2 then
-         err('operator incompatible types', n^.line, n^.col);
+         if (ty1 <> nil_type) and (ty2 <> nil_type) then
+            err('operator incompatible types', n^.line, n^.col) (* both not nil *)
+         else (* one side is nil *)
+            if (ty1^.tag = primitive_type) and (ty2^.tag = primitive_type) then
+               (* both primitive but not both nil *)
+               err('operator incompatible types', n^.line, n^.col);
       if op in numeric_ops then
          if ty1 = int_type then
             check_binary_op := int_type
@@ -67,7 +72,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             ty2 := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;
             if ty1 = nil_type then begin
                if ty2^.tag = primitive_type then
-                  err(n^.type_name^.id + ' type can''t be nil', n^.line, n^.col);
+                  err(n^.type_name^.id + ' type can''t be nil', n^.line, n^.col)
+               else ty1 := ty2;
             end
             else
                if ty1 <> ty2 then
@@ -95,18 +101,17 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       fenv := add_scope(env);
       it := n^.list^.first;
       stack_index := -2; { args go up from sp; leave space for link address and return address }
-      while it <> nil do
-         begin
-            param := it^.node;
-            key := param^.name;
-            line := param^.line;
-            col := param^.col;
-            param_type := lookup(tenv, param^.type_name, line, col)^.ty;
-            add_field(ty, key, param_type, line, col);
-            bind(fenv, key, param_type, stack_index, nest + 1, line, col);
-            it := it^.next;
-            stack_index := stack_index - 1;
-         end;
+      while it <> nil do begin
+         param := it^.node;
+         key := param^.name;
+         line := param^.line;
+         col := param^.col;
+         param_type := lookup(tenv, param^.type_name, line, col)^.ty;
+         add_param(ty, key, param_type, line, col);
+         bind(fenv, key, param_type, stack_index, nest + 1, line, col);
+         it := it^.next;
+         stack_index := stack_index - 1;
+      end;
       n^.env := fenv;
       n^.binding := bind(env, n^.name, ty, si, nest, n^.line, n^.col);
    end;
@@ -134,9 +139,11 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       case tyspec^.tag of
          array_desc_node:
             ty := make_array_type(lookup(tenv, tyspec^.type_name, tyspec^.line, tyspec^.col)^.ty);
-         record_desc_node:
+         record_desc_node: begin
             ty := make_record_type();
+         end;
       end;
+
       bind(tenv, n^.name, ty, 0, 0, n^.line, n^.col);
    end;
 
@@ -144,18 +151,20 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    procedure check_record_body(n: node; tenv: scope);
    var
       it: node_list_item;
-      field: node;
-      line, col: longint;
-      ty, field_ty: spec;
+      fld: node;
+      offset, line, col: longint;
+      ty, fld_ty: spec;
    begin
+      offset := 0;
       ty := lookup(tenv, n^.name, n^.line, n^.col)^.ty;
       it := n^.expr^.list^.first;
       while it <> nil do begin
-         field := it^.node;
-         line := field^.line;
-         col := field^.col;
-         field_ty := lookup(tenv, field^.type_name, line, col)^.ty;
-         add_field(ty, field^.name, field_ty, line, col);
+         fld := it^.node;
+         line := fld^.line;
+         col := fld^.col;
+         fld_ty := lookup(tenv, fld^.type_name, line, col)^.ty;
+         add_field(ty, fld^.name, fld_ty, offset, line, col);
+         offset := offset + 1;
          it := it^.next;
       end;
    end;
@@ -166,8 +175,11 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       it: node_list_item;
       has_var_decls: boolean = false;
       has_type_decls: boolean = false;
+      has_fun_decls: boolean = false;
       new_env, new_tenv: scope;
       stack_index, offset: longint;
+      type_decls: node_list = nil;
+      fun_decls: node_list = nil;
 
    begin
       stack_index := si;
@@ -178,38 +190,72 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                stack_index := stack_index + 1;
                has_var_decls := true;
             end;
-            fun_decl_node: has_var_decls := true;
+            fun_decl_node: has_fun_decls := true;
             type_decl_node: has_type_decls := true;
          end;
          it := it^.next;
       end;
 
-      if has_var_decls then new_env := add_scope(env) else new_env := env;
-      if has_type_decls then new_tenv := add_scope(tenv) else new_tenv := tenv;
-      it := n^.list^.first;
-      offset := si;
-      while it <> nil do begin
-         case it^.node^.tag of
-            var_decl_node: begin
-               check_var_decl(it^.node, stack_index, offset, new_env, new_tenv);
-               offset := offset + 1;
-            end;
-            fun_decl_node: check_fun_decl(it^.node, stack_index, new_env, new_tenv);
-            type_decl_node: check_type_decl(it^.node, new_tenv);
-         end;
-         it := it^.next;
-      end;
+      if has_type_decls then begin
+         new_tenv := add_scope(tenv);
+         type_decls := make_list();
+      end
+      else
+         new_tenv := tenv;
+
+      if has_fun_decls then
+         fun_decls := make_list();
+
+      if has_var_decls or has_fun_decls then
+         new_env := add_scope(env)
+      else
+         new_env := env;
 
       it := n^.list^.first;
       while it <> nil do begin
          case it^.node^.tag of
-            fun_decl_node:
-               check_fun_body(it^.node, stack_index, new_env, new_tenv);
-            type_decl_node:
-               if it^.node^.expr^.tag = record_desc_node then
-                  check_record_body(it^.node, new_tenv);
+            fun_decl_node: append(fun_decls, it^.node);
+            type_decl_node: append(type_decls, it^.node);
          end;
          it := it^.next;
+      end;
+
+      if has_type_decls then begin
+         it := type_decls^.first;
+         while it <> nil do begin
+            check_type_decl(it^.node, new_tenv);
+            it := it^.next
+         end;
+         it := type_decls^.first;
+         while it <> nil do begin
+            if it^.node^.expr^.tag = record_desc_node then
+               check_record_body(it^.node, new_tenv);
+            it := it^.next
+         end;
+      end;
+
+      offset := si;
+      if has_fun_decls or has_var_decls then begin
+         it := n^.list^.first;
+         while it <> nil do begin
+            case it^.node^.tag of
+               fun_decl_node:
+                  check_fun_decl(it^.node, stack_index, new_env, new_tenv);
+               var_decl_node: begin
+                  check_var_decl(it^.node, stack_index, offset, new_env, new_tenv);
+                  offset := offset + 1;
+               end;
+            end;
+            it := it^.next;
+         end;
+      end;
+
+      if has_fun_decls then begin
+         it := fun_decls^.first;
+         while it <> nil do begin
+            check_fun_body(it^.node, stack_index, new_env, new_tenv);
+            it := it^.next
+         end;
       end;
 
       new_env^.stack_index := stack_index;
@@ -375,6 +421,90 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
+   function check_record(): spec;
+   type
+      field_check = ^field_check_t;
+      field_check_t = record
+         f: field;
+         check: boolean;
+         next: field_check;
+      end;
+
+   var
+      checks: field_check = nil;
+      fc : field_check;
+      b : binding;
+      ty, field_ty: spec;
+      rec_type: symbol;
+      f: field;
+      it: node_list_item;
+      value: node;
+      name: symbol;
+
+      procedure add_check(f: field);
+      var fc: field_check;
+      begin
+         new(fc);
+         fc^.f := f;
+         fc^.check := false;
+         fc^.next := checks;
+         checks := fc;
+      end;
+
+      function find_check(name: symbol): field_check;
+      var fc: field_check;
+      begin
+         fc := checks;
+         while fc <> nil do begin
+            if fc^.f^.name = name then
+               break;
+            fc := fc^.next
+         end;
+         find_check := fc;
+      end;
+
+
+   begin
+      rec_type := n^.type_name;
+      b := lookup(tenv, rec_type, n^.line, n^.col);
+      ty := b^.ty;
+      if ty^.tag <> record_type then
+         err ('''' + rec_type^.id + ''' is not a record', n^.line, n^.col);
+      f := ty^.fields;
+      while f <> nil do begin
+         add_check(f);
+         f := f^.next;
+      end;
+
+      it := n^.list^.first;
+      while it <> nil do begin
+         value := it^.node;
+         name := value^.name;
+         fc := find_check(name);
+         if fc = nil then
+            err(name^.id + ' field doesn''t exist', value^.line, value ^.col);
+         if fc^.check then
+            err(name^.id + ' field appears more than once.', value^.line, value^.col);
+         field_ty := type_check(value^.expr, si, nest, env, tenv);
+         if field_ty = fc^.f^.ty then
+            fc^.check := true
+         else
+            err(name^.id + ' field is wrong type', value^.line, value^.col);
+         it  := it^.next;
+      end;
+
+      fc := checks;
+      while fc <> nil do begin
+         if not fc^.check then
+            err(fc^.f^.name^.id + ' field is missing from record', n^.line, n^.col);
+         fc := fc^.next;
+      end;
+
+      n^.binding := b;
+
+      check_record := ty;
+
+   end;
 (*
    function check_field_var(): spec;
    var ty: spec;
@@ -385,44 +515,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_field_var := get_field(ty, n^.name, n^.line, n^.col);
    end;
 
-   function check_record(): spec;
-   type
-      field_check = record
-         f: field;
-         check: boolean;
-         next: ^field_check;
-      end;
-
-   var
-      checks: ^field_check = nil;
-      ty: spec;
-      rec_type: symbol;
-      f: field;
-
-      procedure add_check(f: field);
-      var fc: ^field_check;
-      begin
-         new(fc);
-         fc^.field := f;
-         fc^.check := False;
-         fc^.next := checks;
-         checks := fc;
-      end;
-
-   begin
-      rec_type := n^.type_name;
-      ty := lookup(tenv, rec_type, n^.line, n^.col);
-      if ty.tag <> record_type then
-         err ('''' + rec_type^.id + ''' is not a record');
-      f := ty.fields;
-      while f <> nil do
-         begin
-            add_check(f);
-            f := f.next;
-         end;
-
-         format := n^.type_name^.id + ' ' + format_list(n^.list, ',', true) + newline + '';
-   end;
 *)
 begin
    type_check := void_type;
@@ -455,6 +547,8 @@ begin
          type_check := check_sequence();
       array_node:
          type_check := check_array();
+      record_node:
+         type_check := check_record();
       indexed_var_node:
          type_check := check_indexed_var();
       for_node:
@@ -470,8 +564,6 @@ begin
          type_check := check_field_var();
       field_node:
          format := n^.name^.id + ' = ' + format(n^.expr);
-      record_node:
-         format := n^.type_name^.id + ' {' + format_list(n^.list, ',', true) + newline + '}';
       else begin
          str(n^.tag, s);
          format := '???? ' + s + ' ????';

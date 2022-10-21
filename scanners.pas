@@ -128,6 +128,8 @@ procedure scan(s: scanner);
             token.value := token.value + s^.ch;
          until s^.ch = '*';
          next;
+         while s^.ch = '*' do
+            next;
       until s^.ch = '/';
       next;
       token.value := token.value + '/';
@@ -137,7 +139,8 @@ procedure scan(s: scanner);
 
    procedure get_string;
    var
-      escape, code: string;
+      escape: string = '';
+      code: string;
    begin
       next;
       while s^.ch <> '"' do

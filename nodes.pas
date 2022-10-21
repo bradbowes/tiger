@@ -98,6 +98,7 @@ function make_array_node(ty: symbol; size, value: node; line, col: longint): nod
 
 implementation
 
+
 function make_list(): node_list;
 var list: node_list;
 begin

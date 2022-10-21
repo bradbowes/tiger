@@ -2,7 +2,7 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, semant, externals;
+uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, semant, externals;
 
 
 procedure emit_expression(n: node; si, nest: longint); forward;
@@ -333,6 +333,31 @@ var
    end;
 
 
+   procedure emit_record();
+   var
+      ty: spec;
+      it: node_list_item;
+      value: node;
+      offset, size: longint;
+   begin
+      size := 0;
+      writeln(n^.binding = nil);
+      ty := n^.binding^.ty;
+      writeln('two');
+      it := n^.list^.first;
+      while it <> nil do begin
+         writeln('three');
+         value := it^.node;
+         emit_expression(value^.expr, si, nest);
+         offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
+         emit('    movq %%rax, %d(%%r15)', [offset * 8]);
+         it := it^.next;
+         if offset >= size then size := offset + 1;
+      end;
+      emit('    addq $%d, %%r15', [size * 8]);
+   end;
+
+
    procedure emit_indexed_var();
    begin
       emit_expression(n^.expr2, si, nest);
@@ -481,6 +506,8 @@ begin
          emit_var();
       array_node:
          emit_array();
+      record_node:
+         emit_record();
       indexed_var_node:
          emit_indexed_var();
       call_node:
