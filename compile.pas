@@ -338,23 +338,25 @@ var
       ty: spec;
       it: node_list_item;
       value: node;
-      offset, size: longint;
+      offset, size, stack_index, i: longint;
    begin
-      size := 0;
-      writeln(n^.binding = nil);
+      size := n^.list^.length;
+      stack_index := size * -8;
       ty := n^.binding^.ty;
-      writeln('two');
       it := n^.list^.first;
       while it <> nil do begin
-         writeln('three');
          value := it^.node;
-         emit_expression(value^.expr, si, nest);
+         emit_expression(value^.expr, stack_index, nest);
          offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
-         emit('    movq %%rax, %d(%%r15)', [offset * 8]);
+         emit('    movq %%rax, %d(%%rsp)', [si - offset * 8]);
          it := it^.next;
-         if offset >= size then size := offset + 1;
       end;
-      emit('    addq $%d, %%r15', [size * 8]);
+      for i := 0 to size - 1 do begin
+         emit('    movq %d(%%rsp), %%rax', [si - i * 8]);
+         emit('    movq %%rax, %d(%%r15)', [i * 8]);
+      end;
+      emit('    movq %%r15, %%rax' + lineending +
+           '    addq $%d, %%r15', [size * 8]);
    end;
 
 
@@ -367,6 +369,21 @@ var
       emit_expression(n^.expr, si - 16, nest);
       emit('    movq %d(%%rsp), %%rsi', [si - 8]);
       emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
+      emit('    movq %d(%%rsp), %%rsi', [si]);
+   end;
+
+
+   procedure emit_field_var();
+   var
+      ty: spec;
+      offset: longint;
+   begin
+      ty := n^.expr^.binding^.ty;
+      offset := get_field(ty, n^.name, n^.line, n^.col)^.offset;
+      emit_expression(n^.expr, si, nest);
+      emit('    movq %%rsi, %d(%%rsp)', [si]);
+      emit('    movq %%rax, %%rsi', []);
+      emit('    movq %d(%%rsi), %%rax', [8 * offset]);
       emit('    movq %d(%%rsp), %%rsi', [si]);
    end;
 
@@ -510,6 +527,8 @@ begin
          emit_record();
       indexed_var_node:
          emit_indexed_var();
+      field_var_node:
+         emit_field_var();
       call_node:
          emit_call();
       if_else_node:

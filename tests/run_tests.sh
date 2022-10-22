@@ -438,9 +438,16 @@ end" ""
 test_code "let
    type person = { name: string, age: int }
    a = person { name = \"Harry Potter\", age = 19 }
+   b = person { name = \"Dumbledore\", age = 153 }
 in
-   print(if a = nil then \"nil\" else \"?\")
-end" "?"
+   print(a.name)
+   print(str(a.age))
+   print(b.name)
+   print(str(b.age))
+end" "Harry Potter
+19
+Dumbledore
+153"
 
 test_code "let
    type person = { name: string, age: int }

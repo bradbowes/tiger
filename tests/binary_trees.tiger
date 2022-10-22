@@ -1,0 +1,70 @@
+let
+   type node = { left: node, right: node }
+
+
+   create(depth: int): node =
+      if depth > 0 then
+         node { left = create(depth - 1), right = create(depth - 1) }
+      else
+         node { left = nil, right = nil }
+
+
+   check(n: node): int =
+      if n.left <> nil then
+         check(n.left) + check(n.right) + 1
+      else
+         1
+
+
+   shl(n: int, pos: int): int =
+      if pos > 0 then
+         shl(n * 2, pos - 1)
+      else
+         n
+
+
+   main(d: int) =
+      let
+         min_depth = 4
+         max_depth = if d < min_depth - 2 then min_depth - 2 else d
+         stretch_depth = max_depth + 1
+         long_lived_tree: node = nil
+         n = min_depth
+      in
+         write("stretch tree of depth ")
+         write(str(stretch_depth))
+         write("\t check: ")
+         print(str(check(create(stretch_depth))))
+
+         long_lived_tree := create(max_depth)
+
+         while n <= max_depth do begin
+            let
+               iterations = shl(1, max_depth - n + min_depth)
+               total = 0
+            in
+               for i := 1 to iterations do
+                  let
+                     node = create(n)
+                  in
+                     total := total + check(node)
+                  end
+
+               write(str(iterations))
+               write("\t trees of depth ")
+               write(str(n))
+               write("\t check: ")
+               print(str(total))
+            end
+            n := n + 2
+         end
+
+         write("long lived tree of depth ")
+         write(str(max_depth))
+         write("\t check: ")
+         print(str(check(long_lived_tree)))
+      end
+
+in
+   main(10)
+end

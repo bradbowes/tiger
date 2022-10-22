@@ -148,7 +148,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
-   procedure check_record_body(n: node; tenv: scope);
+   procedure check_record_decl_body(n: node; tenv: scope);
    var
       it: node_list_item;
       fld: node;
@@ -229,7 +229,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          it := type_decls^.first;
          while it <> nil do begin
             if it^.node^.expr^.tag = record_desc_node then
-               check_record_body(it^.node, new_tenv);
+               check_record_decl_body(it^.node, new_tenv);
             it := it^.next
          end;
       end;
@@ -485,8 +485,9 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             err(name^.id + ' field doesn''t exist', value^.line, value ^.col);
          if fc^.check then
             err(name^.id + ' field appears more than once.', value^.line, value^.col);
-         field_ty := type_check(value^.expr, si, nest, env, tenv);
-         if field_ty = fc^.f^.ty then
+         field_ty := type_check(value^.expr, si + n^.list^.length, nest, env, tenv);
+         if (field_ty = fc^.f^.ty) or
+            ((field_ty = nil_type) and (fc^.f^.ty^.tag <> primitive_type)) then
             fc^.check := true
          else
             err(name^.id + ' field is wrong type', value^.line, value^.col);
@@ -501,21 +502,18 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       end;
 
       n^.binding := b;
-
       check_record := ty;
-
    end;
-(*
+
    function check_field_var(): spec;
    var ty: spec;
    begin
       ty := type_check(n^.expr, si, nest, env, tenv);
       if ty^.tag <> record_type then
          err('object is not a record.', n^.expr^.line, n^.expr^.col);
-      check_field_var := get_field(ty, n^.name, n^.line, n^.col);
+      check_field_var := get_field(ty, n^.name, n^.line, n^.col)^.ty;
    end;
 
-*)
 begin
    type_check := void_type;
    case n^.tag of
@@ -551,6 +549,8 @@ begin
          type_check := check_record();
       indexed_var_node:
          type_check := check_indexed_var();
+      field_var_node:
+         type_check := check_field_var();
       for_node:
          type_check := check_for();
       while_node:
@@ -559,16 +559,6 @@ begin
          writeln(n^.tag);
          err('type_check: feature not supported yet!', n^.line, n^.col);
       end;
-(*
-      field_var_node:
-         type_check := check_field_var();
-      field_node:
-         format := n^.name^.id + ' = ' + format(n^.expr);
-      else begin
-         str(n^.tag, s);
-         format := '???? ' + s + ' ????';
-      end;
-      *)
    end;
 end;
 
