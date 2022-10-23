@@ -253,6 +253,24 @@ var
    end;
 
 
+   procedure emit_field_assign();
+   var
+      offset: longint;
+      variable: node;
+      ty: spec;
+   begin
+      variable :=  n^.expr2;
+      ty := variable^.expr^.binding^.ty;
+      offset := get_field(ty, variable^.name, variable^.line, variable^.col)^.offset;
+      emit('    movq %%rsi, %d(%%rsp)', [si]);
+      emit_expression(variable^.expr, si - 8, nest);
+      emit('    movq %%rax, %%rsi', []);
+      emit_expression(n^.expr, si - 8, nest);
+      emit('    movq %%rax, %d(%%rsi)', [offset * 8]);
+      emit('    movq %d(%%rsp), %%rsi', [si]);
+   end;
+
+
    procedure emit_assign();
    begin
       case n^.expr2^.tag of
@@ -260,6 +278,8 @@ var
             emit_simple_assign();
          indexed_var_node:
             emit_indexed_assign();
+         field_var_node:
+            emit_field_assign();
       end;
       emit ('    xorq %%rax, %%rax', []);
    end;

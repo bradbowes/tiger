@@ -456,3 +456,14 @@ in
    print(if a = nil then \"nil\" else \"?\")
 end" "nil"
 
+test_code "let
+   type person = { name: string, age: int }
+   a = person { name = \"Harry Potter\", age = 19 }
+in
+   print(a.name)
+   print(str(a.age))
+   a.age := 20
+   print(str(a.age))
+end" "Harry Potter
+19
+20"

@@ -333,10 +333,11 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty: spec;
       new_si: longint;
    begin
-      if n^.expr2^.tag = indexed_var_node then
-         new_si := si + 2
-      else
-         new_si := si;
+      case n^.expr2^.tag of
+         indexed_var_node: new_si := si + 2;
+         field_var_node: new_si := si + 1;
+         else new_si := si + 2;
+      end;
       ty := type_check(n^.expr2, new_si, nest, env, tenv);
       if ty <> type_check(n^.expr, new_si, nest, env, tenv) then
          err('assignment type mismatch', n^.line, n^.col);

@@ -25,8 +25,8 @@
 
 # To do
 
+- short circuit and/or
 - builtin library functions
-- records
 - lists?
 - multi-dimensional arrays
 - array literals
