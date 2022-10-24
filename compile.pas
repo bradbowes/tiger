@@ -361,11 +361,12 @@ var
       offset, size, stack_index, i: longint;
    begin
       size := n^.list^.length;
-      stack_index := size * -8;
+      stack_index := si + (size * -8);
       ty := n^.binding^.ty;
       it := n^.list^.first;
       while it <> nil do begin
          value := it^.node;
+         emit('// record field %s', [value^.name^.id]);
          emit_expression(value^.expr, stack_index, nest);
          offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
          emit('    movq %%rax, %d(%%rsp)', [si - offset * 8]);

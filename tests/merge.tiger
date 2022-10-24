@@ -1,21 +1,36 @@
 let
-   type any = { any: bool }
-   buffer = getchar()
+   /***************************/
+   /*  getchar implementation */
+   buf = read()
+   pos = 0
 
-   readint(any: any) : int =
+   getchar(): int =
+      if pos < length(buf) then begin
+         pos := pos + 1
+         sub(buf, pos - 1)
+      end
+      else begin
+         buf := read()
+         pos := 0
+         getchar()
+      end
+   /***************************/
+
+   type any = { any: bool }
+   ch = getchar()
+
+   readint(any: any): int =
       let
          i = 0
-         isdigit(s: string) : bool =
-            ord(buffer) >= ord("0") and ord(buffer) <= ord("9")
+         isdigit(ch: int): bool =
+            ch >= ord("0") and ch <= ord("9")
       in
-         while buffer = " " or buffer = "\n" do
-            buffer := getchar()
-
-         any.any := isdigit(buffer)
-
-         while isdigit(buffer) do begin
-            i := i * 10 + ord(buffer) - ord("0");
-            buffer := getchar()
+         while ch = ord(" ") or ch = ord("\n") do
+            ch := getchar()
+         any.any := isdigit(ch)
+         while isdigit(ch) do begin
+            i := i * 10 + ch - ord("0");
+            ch := getchar()
          end
          i
       end
@@ -30,7 +45,7 @@ let
          if any.any then
             list { first = i, rest = readlist() }
          else begin
-            buffer := getchar()
+            ch := getchar()
             nil
          end
       end

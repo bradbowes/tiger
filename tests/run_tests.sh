@@ -15,7 +15,7 @@ test_code () {
    cc -o $exe ../lib/lib.s $output
    echo $1 '=>' $2
    if [ "$(./$exe)" = "$2" ]; then
-      echo '\e[0;32mOK\e[0m' 
+      echo '\e[0;32mOK\e[0m'
    else
       echo '\e[0;31mFAIL\e[0m'
       echo "$(./$exe)"
@@ -36,6 +36,7 @@ test_code "print(str(10 - 2 - 2))" "6"
 test_code "print(str(10 - (2 - 2)))" "10"
 test_code "print(str(10 - 2 + 2))" "10"
 test_code "print(str(256*256))" "65536"
+test_code "print(str(256*-256))" "-65536"
 test_code "print(str(81 / 9))" "9"
 test_code "print(str(82 / 9))" "9"
 test_code "print(str(16 * (12 + 4)))" "256"
@@ -426,14 +427,11 @@ in
    0
 end" ""
 
-END_COMMENT
-
 test_code "let
    type person = {name: string, age: int}
 in
    0
 end" ""
-
 
 test_code "let
    type person = { name: string, age: int }
@@ -448,6 +446,8 @@ end" "Harry Potter
 19
 Dumbledore
 153"
+
+END_COMMENT
 
 test_code "let
    type person = { name: string, age: int }
@@ -467,3 +467,5 @@ in
 end" "Harry Potter
 19
 20"
+
+

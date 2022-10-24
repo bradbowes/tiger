@@ -112,17 +112,23 @@ f$_str:
 .align 3
 .globl f$_length
 f$_length:
-   movq 16(%rsp), %rsi
+   pushq %rsi
+   movq 24(%rsp), %rsi
    movq (%rsi), %rax
+   popq %rsi
    ret
 
 
 .align 3
 .globl f$_sub
 f$_sub:
-   movq 16(%rsp), %rsi                 // string parameter
-   movq 24(%rsp), %rbx                 // position parameter
+   pushq %rsi
+   pushq %rbx
+   movq 32(%rsp), %rsi                 // string parameter
+   movq 40(%rsp), %rbx                 // position parameter
    movb 8(%rsi, %rbx, 1), %al
+   popq %rbx
+   popq %rsi
    andq $0x00000000000ff, %rax
    ret
 
@@ -130,9 +136,11 @@ f$_sub:
 .align 3
 .globl f$_ord
 f$_ord:
-   movq 16(%rsp), %rsi                 // string parameter
+   pushq %rsi
+   movq 24(%rsp), %rsi                 // string parameter
    movb 8(%rsi), %al
    andq $0x00000000000ff, %rax
+   popq %rsi
    ret
 
 

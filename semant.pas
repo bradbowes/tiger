@@ -12,6 +12,14 @@ uses utils, ops, symbols;
 
 function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
+   function compatible(a, b: spec): boolean;
+   begin
+      compatible := (a = b) or
+                    ((b = nil_type) and (a^.tag <> primitive_type)) or
+                    ((a = nil_type) and (b^.tag <> primitive_type));
+   end;
+
+
    function check_unary_op(): spec;
    begin
       { minus is the only unary op }
@@ -27,13 +35,9 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       op := n^.op;
       ty1 := type_check(n^.expr, si + 1, nest, env, tenv);
       ty2 := type_check(n^.expr2, si, nest, env, tenv);
-      if ty1 <> ty2 then
-         if (ty1 <> nil_type) and (ty2 <> nil_type) then
-            err('operator incompatible types', n^.line, n^.col) (* both not nil *)
-         else (* one side is nil *)
-            if (ty1^.tag = primitive_type) and (ty2^.tag = primitive_type) then
-               (* both primitive but not both nil *)
-               err('operator incompatible types', n^.line, n^.col);
+      if not compatible(ty1, ty2) then
+         err('operator incompatible types', n^.line, n^.col);
+
       if op in numeric_ops then
          if ty1 = int_type then
             check_binary_op := int_type
@@ -62,24 +66,18 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if ty1 = void_type then
          err(n^.name^.id + ' variable initializer doesn''t produce a value', n^.expr^.line, n^.expr^.col);
 
-      if n^.type_name = nil then
-         begin
-            if ty1 = nil_type then
-               err('variable with nil initializer needs explicit type', n^.line, n^.col);
-         end
+      if (n^.type_name = nil) then
+         if  (ty1 = nil_type) then
+            err('variable with nil initializer needs explicit type', n^.line, n^.col)
+         else
+            ty2 := ty1
       else
-         begin
-            ty2 := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;
-            if ty1 = nil_type then begin
-               if ty2^.tag = primitive_type then
-                  err(n^.type_name^.id + ' type can''t be nil', n^.line, n^.col)
-               else ty1 := ty2;
-            end
-            else
-               if ty1 <> ty2 then
-                  err('initializer doesn''t match type spec', n^.line, n^.col);
-         end;
-      n^.binding := bind(env, n^.name, ty1, offset, nest, n^.line, n^.col);
+         ty2 := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;
+
+      if not compatible(ty1, ty2) then
+         err('initializer doesn''t match type spec', n^.line, n^.col);
+
+      n^.binding := bind(env, n^.name, ty2, offset, nest, n^.line, n^.col);
    end;
 
 
@@ -124,7 +122,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty := lookup(env, n^.name, n^.line, n^.col)^.ty;
       if n^.expr <> nil then begin
          body_type := type_check(n^.expr, si, nest + 1, n^.env, tenv);
-         if ty^.base <> body_type then
+         if not compatible(ty^.base, body_type) then
             err('function return type doesn''t match declaration', n^.line, n^.col);
       end;
    end;
@@ -279,7 +277,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if type_check(n^.cond, si, nest, env, tenv) <> bool_type then
          err('if condition is not a boolean value', n^.line, n^.col);
       ty := type_check(n^.expr, si, nest, env, tenv);
-      if ty <> type_check(n^.expr2, si, nest, env, tenv) then
+      if not compatible(ty, type_check(n^.expr2, si, nest, env, tenv)) then
          err('if and else clauses incompatible types', n^.line, n^.col);
       check_if_else := ty;
    end;
@@ -372,13 +370,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          err('Array size must be an integer.', n^.line, n^.col);
       base := ty1^.base;
       ty2 := type_check(n^.expr, si, nest, env, tenv);
-      if ty2 = nil_type then begin
-         if base^.tag = primitive_type then
-            err(ty_name + ' array type can''t have nil values.', n^.line, n^.col);
-      end
-      else
-         if ty2 <> base then
-            err(ty_name + ' array initializer is the wrong type.', n^.line, n^.col);
+      if not compatible(ty2, base) then
+         err(ty_name + ' array initializer is the wrong type.', n^.line, n^.col);
       check_array := ty1;
    end;
 
@@ -487,8 +480,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          if fc^.check then
             err(name^.id + ' field appears more than once.', value^.line, value^.col);
          field_ty := type_check(value^.expr, si + n^.list^.length, nest, env, tenv);
-         if (field_ty = fc^.f^.ty) or
-            ((field_ty = nil_type) and (fc^.f^.ty^.tag <> primitive_type)) then
+         if compatible(field_ty, fc^.f^.ty) then
             fc^.check := true
          else
             err(name^.id + ' field is wrong type', value^.line, value^.col);
