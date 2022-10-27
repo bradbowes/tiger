@@ -188,6 +188,30 @@ var
    end;
 
 
+   procedure emit_and();
+   var
+      lbl: string;
+   begin
+      lbl := new_label();
+      emit_expression(n^.expr, si, nest);
+      emit('    jz %s', [lbl]);
+      emit_expression(n^.expr2, si, nest);
+      emit('%s:', [lbl]);
+   end;
+
+
+   procedure emit_or();
+   var
+      lbl: string;
+   begin
+      lbl := new_label();
+      emit_expression(n^.expr, si, nest);
+      emit('    jnz %s', [lbl]);
+      emit_expression(n^.expr2, si, nest);
+      emit('%s:', [lbl]);
+   end;
+
+
    procedure emit_string();
    var
       slabel: string;
@@ -468,56 +492,59 @@ begin
          emit('    negq %%rax', []);
       end;
       binary_op_node: begin
-         tmp := inttostr(si) + '(%rsp)';
-         emit_expression(n^.expr2, si, nest);
-         emit('    movq %%rax, %s', [tmp]);
-         emit_expression(n^.expr, si - 8, nest);
          case n^.op of
-            plus_op:
-               emit('    addq %s, %%rax', [tmp]);
-            minus_op:
-               emit('    subq %s, %%rax', [tmp]);
-            mul_op:
-               emit('    imulq %s, %%rax', [tmp]);
-            div_op:
-               emit('    cqto' + lineending +
-                    '    idivq %s', [tmp]);
-            mod_op:
-               emit('    cqto' + lineending +
-                    '    idivq %s' + lineending +
-                    '    movq %%rdx, %%rax', [tmp]);
-            eq_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    sete %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         neq_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    setne %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         lt_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    setl %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         leq_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    setle %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         gt_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    setg %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         geq_op:
-               emit('    cmpq %s, %%rax' + lineending +
-                    '    setge %%al' + lineending +
-                    '    andq $1, %%rax', [tmp]);
-	         and_op:
-	            emit('    andq %s, %%rax', [tmp]);
-	         or_op:
-	            emit('    orq %s, %%rax', [tmp]);
-            else begin
-               writeln(n^.op);
-               err('emit: operator not implemented yet!', n^.line, n^.col);
-            end;
+            and_op:
+               emit_and();
+            or_op:
+               emit_or();
+            else
+                  tmp := inttostr(si) + '(%rsp)';
+                  emit_expression(n^.expr2, si, nest);
+                  emit('    movq %%rax, %s', [tmp]);
+                  emit_expression(n^.expr, si - 8, nest);
+                  case n^.op of
+                     plus_op:
+                        emit('    addq %s, %%rax', [tmp]);
+                     minus_op:
+                        emit('    subq %s, %%rax', [tmp]);
+                     mul_op:
+                        emit('    imulq %s, %%rax', [tmp]);
+                     div_op:
+                        emit('    cqto' + lineending +
+                             '    idivq %s', [tmp]);
+                     mod_op:
+                        emit('    cqto' + lineending +
+                             '    idivq %s' + lineending +
+                             '    movq %%rdx, %%rax', [tmp]);
+                     eq_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    sete %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+         	         neq_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    setne %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+         	         lt_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    setl %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+         	         leq_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    setle %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+         	         gt_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    setg %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+         	         geq_op:
+                        emit('    cmpq %s, %%rax' + lineending +
+                             '    setge %%al' + lineending +
+                             '    andq $1, %%rax', [tmp]);
+                     else begin
+                        writeln(n^.op);
+                        err('emit: operator not implemented yet!', n^.line, n^.col);
+                     end;
+               end;
          end;
       end;
       boolean_node: begin

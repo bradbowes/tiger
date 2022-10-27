@@ -1,0 +1,31 @@
+/*
+   Starting in the top left corner of a 2×2 grid, and only
+   being able to move to the right and down, there are
+   exactly 6 routes to the bottom right corner.
+
+   How many such routes are there through a 20×20 grid?
+*/
+let
+   solve(n: int): int =
+      let
+         type int_array = array of int
+         type grid = array of int_array
+
+         g = grid[n + 1] of nil
+      in
+         for i := 0 to n do
+            g[i] := int_array[n + 1] of 0
+
+         for x := 0 to n do
+            for y := 0 to n do
+               g[x][y] :=
+                  if x = 0 then
+                     if y = 0 then 0 else 1
+                  else
+                     if y = 0 then 1 else g[x - 1][y] + g[x][y - 1]
+
+         g[n][n]
+      end
+in
+   print(str(solve(20)))
+end

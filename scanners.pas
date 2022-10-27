@@ -281,7 +281,7 @@ begin
          end;
          '0'..'9': get_number;
          '"': get_string;
-         'a'..'z', 'A'..'Z', '_': get_id;
+         'a'..'z', 'A'..'Z': get_id;
       else
          err('Illegal token ''' + s^.ch + '''', token.line, token.col);
       end;

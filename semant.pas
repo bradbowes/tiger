@@ -28,6 +28,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       check_unary_op := int_type;
    end;
 
+
    function check_binary_op(): spec;
    var op: op_tag; ty1, ty2: spec;
    begin
@@ -63,6 +64,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty1, ty2: spec;
    begin
       ty1 := type_check(n^.expr, si, nest, env, tenv);
+      ty2 := nil;
       if ty1 = void_type then
          err(n^.name^.id + ' variable initializer doesn''t produce a value', n^.expr^.line, n^.expr^.col);
 
@@ -119,7 +121,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    var
       ty, body_type: spec;
    begin
-      ty := lookup(env, n^.name, n^.line, n^.col)^.ty;
+      ty := n^.binding^.ty;
       if n^.expr <> nil then begin
          body_type := type_check(n^.expr, si, nest + 1, n^.env, tenv);
          if not compatible(ty^.base, body_type) then
@@ -142,7 +144,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          end;
       end;
 
-      bind(tenv, n^.name, ty, 0, 0, n^.line, n^.col);
+      n^.binding := bind(tenv, n^.name, ty, 0, 0, n^.line, n^.col);
    end;
 
 
@@ -154,7 +156,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty, fld_ty: spec;
    begin
       offset := 0;
-      ty := lookup(tenv, n^.name, n^.line, n^.col)^.ty;
+      ty := n^.binding^.ty;
       it := n^.expr^.list^.first;
       while it <> nil do begin
          fld := it^.node;
@@ -230,6 +232,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                check_record_decl_body(it^.node, new_tenv);
             it := it^.next
          end;
+         it := type_decls^.first;
+         while it <> nil do
+            dispose(it);
+         dispose(type_decls);
       end;
 
       offset := si;
@@ -254,6 +260,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
             check_fun_body(it^.node, stack_index, new_env, new_tenv);
             it := it^.next
          end;
+         it := fun_decls^.first;
+         while it <> nil do
+            dispose(it);
+         dispose(fun_decls);
       end;
 
       new_env^.stack_index := stack_index;

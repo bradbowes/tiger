@@ -447,8 +447,6 @@ end" "Harry Potter
 Dumbledore
 153"
 
-END_COMMENT
-
 test_code "let
    type person = { name: string, age: int }
    a: person = nil
@@ -460,12 +458,20 @@ test_code "let
    type person = { name: string, age: int }
    a = person { name = \"Harry Potter\", age = 19 }
 in
-   print(a.name)
-   print(str(a.age))
-   a.age := 20
-   print(str(a.age))
+   print(a.name);
+   print(str(a.age));
+   a.age := 20;
+   print(str(a.age));
 end" "Harry Potter
 19
 20"
 
+END_COMMENT
 
+test_code "true or (begin print(\"x\"); false end)" ""
+test_code "false or (begin print(\"x\"); false end)" "x"
+test_code "true and (begin print(\"x\"); false end)" "x"
+test_code "false and (begin print(\"x\"); false end)" ""
+test_code "true or (begin print(\"x\"); false end) or (begin print(\"y\"); true end)" ""
+test_code "false or (begin print(\"x\"); false end) or (begin print(\"y\"); true end)" "x
+y"

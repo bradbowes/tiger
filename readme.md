@@ -11,12 +11,20 @@
 - added `mod` operator.
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
-- added boolean data type. Relational operators return booleans, `true` and `false` are keyword literals.
-- sequence expression is enclosed in `begin` and `end` instead of parenthesis.
-- semicolons between expressions in `begin` and `let` bodies are optional.
-- semicolon may optionally appear at the end of any expression.
-- variable declarations: `var` keyword not used, format is `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
-- function declarations: `function` keyword not used. format is `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
+- added boolean data type. Relational operators return booleans, `true` and
+  `false` are keyword literals.
+- expression sequences are enclosed in `begin` and `end` instead of
+  parentheses.
+- semicolons at the end of expressions in `begin` and `let` bodies are
+  optional.
+- let and begin must contain at least one expression, "no value"
+  expressions (eg. `begin end` or 'let ... in end') are not allowed.
+- variable declarations: `var` keyword not used, format is
+  `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
+- function declarations: `function` keyword not used, format is
+  `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
+- mutually recursive type or function declarations may occur anywhere
+  in the same let expression, they do not need to be declared consecutively.
 - strings can include linebreaks and span multiple lines.
 - string escape \^c (control character) not implemented.
 - no nested comments
@@ -25,7 +33,6 @@
 
 # To do
 
-- short circuit and/or
 - builtin library functions
 - lists?
 - multi-dimensional arrays
