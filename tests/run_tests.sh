@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -466,7 +466,7 @@ end" "Harry Potter
 19
 20"
 
-END_COMMENT
+# END_COMMENT
 
 test_code "true or (begin print(\"x\"); false end)" ""
 test_code "false or (begin print(\"x\"); false end)" "x"

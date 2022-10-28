@@ -171,42 +171,93 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
 
    function check_let(): spec;
-   var
-      it: node_list_item;
-      has_var_decls: boolean = false;
-      has_type_decls: boolean = false;
-      has_fun_decls: boolean = false;
-      new_env, new_tenv: scope;
-      stack_index, offset: longint;
-      type_decls: node_list = nil;
-      fun_decls: node_list = nil;
+      type
+         state_tag = (var_state, fun_state, type_state);
+
+      var
+         state: state_tag;
+         group: node_list = nil;
+         it: node_list_item;
+         has_var_decls: boolean = false;
+         has_type_decls: boolean = false;
+         new_env, new_tenv: scope;
+         stack_index, offset: longint;
+
+      procedure dispose_group();
+      var
+         it, next: node_list_item;
+      begin
+         it := group^.first;
+         while it <> nil do begin
+            next := it^.next;
+            dispose(it);
+            it := next;
+         end;
+         dispose(group);
+         group := nil;
+      end;
+
+      procedure update_state(new_state: state_tag);
+      var
+         it: node_list_item;
+      begin
+         case state of
+            var_state:
+               if new_state <> var_state then
+                  group := make_list();
+
+            fun_state:
+               if new_state <> fun_state then begin
+                  it := group^.first;
+                  while it <> nil do begin
+                     check_fun_body(it^.node, stack_index, new_env, new_tenv);
+                     it := it^.next;
+                  end;
+                  dispose_group();
+                  if new_state = type_state then
+                     group := make_list();
+               end;
+
+            type_state:
+               if new_state <> type_state then begin
+                  it := group^.first;
+                  while it <> nil do begin
+                     if it^.node^.expr^.tag = record_desc_node then
+                        check_record_decl_body(it^.node, new_tenv);
+                     it := it^.next
+                  end;
+                  dispose_group();
+                  if new_state = fun_state then
+                     group := make_list();
+               end;
+         end;
+         state := new_state;
+      end;
 
    begin
+      state := var_state;
+      offset := si;
       stack_index := si;
+
       it := n^.list^.first;
       while it <> nil do begin
          case it^.node^.tag of
             var_decl_node: begin
-               stack_index := stack_index + 1;
                has_var_decls := true;
+               stack_index := stack_index + 1;
             end;
-            fun_decl_node: has_fun_decls := true;
+            fun_decl_node: has_var_decls := true;
             type_decl_node: has_type_decls := true;
          end;
          it := it^.next;
       end;
 
-      if has_type_decls then begin
-         new_tenv := add_scope(tenv);
-         type_decls := make_list();
-      end
+      if has_type_decls then
+         new_tenv := add_scope(tenv)
       else
          new_tenv := tenv;
 
-      if has_fun_decls then
-         fun_decls := make_list();
-
-      if has_var_decls or has_fun_decls then
+      if has_var_decls then
          new_env := add_scope(env)
       else
          new_env := env;
@@ -214,57 +265,27 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       it := n^.list^.first;
       while it <> nil do begin
          case it^.node^.tag of
-            fun_decl_node: append(fun_decls, it^.node);
-            type_decl_node: append(type_decls, it^.node);
+            var_decl_node: begin
+               update_state(var_state);
+               check_var_decl(it^.node, stack_index, offset, new_env, new_tenv);
+               offset := offset + 1;
+            end;
+
+            fun_decl_node: begin
+               update_state(fun_state);
+               check_fun_decl(it^.node, stack_index, new_env, new_tenv);
+               append(group, it^.node);
+            end;
+
+            type_decl_node: begin
+               update_state(type_state);
+               check_type_decl(it^.node, new_tenv);
+               append(group, it^.node);
+            end;
          end;
          it := it^.next;
       end;
-
-      if has_type_decls then begin
-         it := type_decls^.first;
-         while it <> nil do begin
-            check_type_decl(it^.node, new_tenv);
-            it := it^.next
-         end;
-         it := type_decls^.first;
-         while it <> nil do begin
-            if it^.node^.expr^.tag = record_desc_node then
-               check_record_decl_body(it^.node, new_tenv);
-            it := it^.next
-         end;
-         it := type_decls^.first;
-         while it <> nil do
-            dispose(it);
-         dispose(type_decls);
-      end;
-
-      offset := si;
-      if has_fun_decls or has_var_decls then begin
-         it := n^.list^.first;
-         while it <> nil do begin
-            case it^.node^.tag of
-               fun_decl_node:
-                  check_fun_decl(it^.node, stack_index, new_env, new_tenv);
-               var_decl_node: begin
-                  check_var_decl(it^.node, stack_index, offset, new_env, new_tenv);
-                  offset := offset + 1;
-               end;
-            end;
-            it := it^.next;
-         end;
-      end;
-
-      if has_fun_decls then begin
-         it := fun_decls^.first;
-         while it <> nil do begin
-            check_fun_body(it^.node, stack_index, new_env, new_tenv);
-            it := it^.next
-         end;
-         it := fun_decls^.first;
-         while it <> nil do
-            dispose(it);
-         dispose(fun_decls);
-      end;
+      update_state(var_state);
 
       new_env^.stack_index := stack_index;
       n^.env := new_env;

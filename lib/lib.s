@@ -5,7 +5,7 @@ SYS_write = 0x02000004
 SYS_open =  0x02000005
 SYS_close = 0x02000006
 SYS_wait4 = 0x02000007
-heap_size = 16 * 1024 * 1024
+heap_size = 256 * 1024 * 1024
 
 .text
 .align 3

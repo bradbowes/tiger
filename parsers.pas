@@ -225,7 +225,7 @@ var
          else
             begin
                next;
-               err('Expected ''end'', got ''' + value + '''', line, col);
+               err('Expected expression, got ''' + value + '''', line, col);
             end;
       end;
 

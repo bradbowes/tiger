@@ -23,8 +23,6 @@
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used, format is
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
-- mutually recursive type or function declarations may occur anywhere
-  in the same let expression, they do not need to be declared consecutively.
 - strings can include linebreaks and span multiple lines.
 - string escape \^c (control character) not implemented.
 - no nested comments
@@ -34,20 +32,20 @@
 # To do
 
 - builtin library functions
-- lists?
-- multi-dimensional arrays
-- array literals
+- more primitive data types (real, byte, char)
+- unicode strings
 - tail calls
 - anonymous functions, first class functions
 - closures
-- overloads
-- garbage collector
 - enum
 - case expressions
-- tagged unions
+- multi-dimensional arrays
+- array literals
+- overloads
+- garbage collector
+- polymorphic types and functions
+- file types
 - modules, separate compilation
-- data types (real, byte, char)
-- unicode strings
 - optimization
 - ffi
 
