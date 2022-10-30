@@ -1,10 +1,16 @@
-all:	compile lib.o
+all:	compile print lib.o
 
 compile:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
 	parsers.pas bindings.pas types.pas semant.pas externals.pas \
-	compile.pas
+	transforms.pas compile.pas
 	fpc -Sh -Px86_64 -O3 compile
 	strip compile
+
+print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
+	parsers.pas bindings.pas types.pas semant.pas externals.pas \
+	transforms.pas formats.pas print.pas
+	fpc -Sh -Px86_64 -O3 print
+	strip print
 
 test:	compile
 	cd tests; ./run_tests.sh; cd ..

@@ -2,7 +2,7 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, semant, externals;
+uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, semant, externals, transforms;
 
 
 procedure emit_expression(n: node; si, nest: longint); forward;
@@ -390,7 +390,6 @@ var
       it := n^.list^.first;
       while it <> nil do begin
          value := it^.node;
-         emit('// record field %s', [value^.name^.id]);
          emit_expression(value^.expr, stack_index, nest);
          offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
          emit('    movq %%rax, %d(%%rsp)', [si - offset * 8]);
@@ -603,6 +602,10 @@ begin
    load_externals();
    ast := parse(paramstr(1));
    type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
+
+   ast := transform(ast);
+   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
+
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);

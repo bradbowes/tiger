@@ -140,6 +140,18 @@ begin
    n^.tag := tag;
    n^.line := line;
    n^.col := col;
+   n^.int_val := 0;
+   n^.string_val := nil;
+   n^.bool_val := false;
+   n^.binding := nil;
+   n^.name := nil;
+   n^.type_name := nil;
+   n^.cond := nil;
+   n^.expr := nil;
+   n^.expr2 := nil;
+   n^.op := nul_op;
+   n^.list := nil;
+   n^.env := nil;
    make_node := n;
 end;
 

@@ -1,6 +1,7 @@
 let
    /***************************/
    /*  getchar implementation */
+
    buf = read()
    pos = 0
 
@@ -14,6 +15,7 @@ let
          pos := 0
          getchar()
       end
+
    /***************************/
 
    type any = { any: bool }
@@ -37,7 +39,7 @@ let
 
    type list = { first: int, rest: list }
 
-   readlist() : list =
+   readlist(): list =
       let
          any = any { any = false }
          i = readint(any)
@@ -76,12 +78,13 @@ let
       end
 
     printlist(l: list) =
-       if l = nil then print("\n")
+       if l = nil then print("")
        else begin
           printint(l.first);
           write(" ");
           printlist(l.rest)
        end
+
 in
    printlist(merge(readlist(), readlist()))
 end
