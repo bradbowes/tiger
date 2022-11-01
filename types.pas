@@ -36,6 +36,8 @@ const
    bool_type: spec = @_bool_type;
    _string_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
    string_type: spec = @string_type;
+   _char_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
+   char_type: spec = @char_type;
 
 
 procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);

@@ -147,6 +147,11 @@ var
                next;
                factor := make_nil_node(line, col);
             end;
+         char_token:
+            begin
+               next;
+               factor := make_char_node(ord(value[1]), line, col);
+            end;
          minus_token:
             begin
                next;
@@ -210,15 +215,6 @@ var
          lparen_token:
             begin
                next;
-               (*
-               list := get_expression_list();
-               if list^.first = list^.last then begin
-                  factor := list^.first^.node;
-                  dispose(list);
-               end
-               else
-                  factor := make_sequence_node(list, line, col);
-               *)
                factor := get_expression();
                advance(rparen_token, ')');
             end;
@@ -248,7 +244,7 @@ var
          case token.tag of
             mul_token: helper := helper(make_node(mul_op));
             div_token: helper := helper(make_node(div_op));
-	    mod_token: helper := helper(make_node(mod_op));
+            mod_token: helper := helper(make_node(mod_op));
             else helper := left;
          end;
       end;
@@ -623,10 +619,25 @@ var
       end;
    end;
 
+
+   function get_program() : node;
+   var
+      list: node_list;
+   begin
+      list := make_list();
+      repeat
+         append(list, get_expression());
+         if token.tag = semicolon_token then next;
+      until token.tag = eof_token;
+      next;
+      get_program := make_sequence_node(list, 1, 1);
+   end;
+
+
 begin
    the_scanner := make_scanner(file_name);
    next;
-   parse := get_expression;
+   parse := get_program();
 end; { parse }
 
 

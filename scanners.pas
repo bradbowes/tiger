@@ -7,6 +7,7 @@ type
                 array_token,
                 assign_token,
                 begin_token,
+                char_token,
                 colon_token,
                 comma_token,
                 comment_token,
@@ -191,6 +192,19 @@ procedure scan(s: scanner);
    end;
 
 
+   procedure get_char();
+   begin
+      next;
+      if s^.ch = '"' then
+         get_string()
+      else
+         err('illegal character literal', s^.x, s^.y);
+      if length(token.value) <> 1 then
+         err('illegal character literal', token.line, token.col);
+      token.tag := char_token;
+   end;
+
+
    procedure get_number;
    begin
       while s^.ch in ['0'..'9'] do
@@ -281,6 +295,7 @@ begin
          end;
          '0'..'9': get_number;
          '"': get_string;
+         '#': get_char;
          'a'..'z', 'A'..'Z': get_id;
       else
          err('Illegal token ''' + s^.ch + '''', token.line, token.col);

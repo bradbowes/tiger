@@ -6,8 +6,8 @@
 */
 
 let
+   count = 1
    n = 1
-   i = 1
 
    prime(n: int): bool =
       let
@@ -15,19 +15,18 @@ let
          isprime = true
       in
          while i * i <= n and isprime do begin
-            if n mod i = 0 then
-               isprime := false
+            isprime := n mod i <> 0
             i := i + (if i = 2 then 1 else 2)
          end
 
          isprime
       end
 in
-   while n <= 10001 do begin
-      i := i + (if i <= 2 then 1 else 2)
-      if prime(i) then
-         n := n + 1
+   while count <= 10001 do begin
+      n := n + (if n <= 2 then 1 else 2)
+      if prime(n) then
+         count := count + 1
    end
 
-   print(str(i))
+   print(str(n))
 end

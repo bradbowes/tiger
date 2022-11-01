@@ -5,6 +5,8 @@
   Find the sum of all the multiples of 3 or 5 below 1000.
 */
 
+/* imperative version */
+
 let
    n = 3
    total = 0
@@ -22,5 +24,24 @@ in
    end
 
    print(str(total))
+end
+
+/* functional version */
+
+let
+   threes(n: int, sum: int): int =
+      if n < 1000 then
+         threes(n + 3, sum + n)
+      else sum
+
+   fives(n: int, sum: int): int =
+      if n < 1000 then
+         if n mod 15 > 0 then
+            fives(n + 5, sum + n)
+         else
+            fives(n + 5, sum)
+      else sum
+in
+   print(str(fives(5, threes(3, 0))))
 end
 

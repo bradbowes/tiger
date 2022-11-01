@@ -26,7 +26,7 @@ _main:
    // main code here
    call f$_tiger_entry
 
-   movq 8(%r14),  %rdi                // free the heap
+   movq 8(%r14),  %rdi                 // free the heap
    call _free
    jmp main_exit
 
@@ -58,6 +58,19 @@ f$_read:
    addq $15, %rbx                      // add space for length plus alignment
    addq %rbx, %r15                     // update heap pointer
    andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   ret
+
+
+.align 3
+.global f$_putchar
+f$_putchar:
+   movb 16(%rsp), %al
+   movq $1, %rdi
+   movq output_buffer@GOTPCREL(%rip), %rsi
+   movb %al, (%rsi)
+   movq $1, %rdx
+   movq $SYS_write, %rax
+   syscall
    ret
 
 
@@ -136,22 +149,12 @@ f$_sub:
 .align 3
 .globl f$_ord
 f$_ord:
-   pushq %rsi
-   movq 24(%rsp), %rsi                 // string parameter
-   movb 8(%rsi), %al
-   andq $0x00000000000ff, %rax
-   popq %rsi
-   ret
+   ret                                 // cast char to int, does nothing
 
 
 .align 3
 .globl f$_chr
-f$_chr:
-   movq $1, (%r15)
-   movq 16(%rsp), %rax
-   movb %al, 8(%r15)
-   movq %r15, %rax
-   addq $16, %r15
+f$_chr:                                // cast int to char, does nothing
    ret
 
 
@@ -225,14 +228,18 @@ newline:
    .quad 1
    .asciz "\n"
 
-
 .align 3
 heap_err_msg:
    .asciz "Could not allocate heap.\n"
-
 
 .align 3
 str_fmt:
    .asciz "%ld"
 
+.align 3
+input_buffer:
+   .skip 4096, 0
 
+.align 3
+output_buffer:
+   .skip 4096, 0

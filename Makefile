@@ -12,7 +12,7 @@ print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
 	fpc -Sh -Px86_64 -O3 print
 	strip print
 
-test:	compile
+test:	compile print lib.o
 	cd tests; ./run_tests.sh; cd ..
 
 lib.o:	lib/lib.s

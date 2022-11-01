@@ -42,10 +42,12 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if op in numeric_ops then
          if ty1 = int_type then
             check_binary_op := int_type
+         else if (ty1 = char_type) and (op in [plus_op, minus_op]) then
+            check_binary_op := char_type
          else
             err('numeric operator incompatible type', n^.line, n^.col)
       else if op in comparison_ops then
-         if (ty1 = int_type) or (ty1 = string_type) then
+         if (ty1 = int_type) or (ty1 = string_type) or (ty1 = char_type) then
             check_binary_op := bool_type
          else
             err('comparison operator incompatible type', n^.line, n^.col)
@@ -549,6 +551,10 @@ begin
          type_check := bool_type;
       string_node:
          type_check := string_type;
+      char_node:
+         type_check := char_type;
+      empty_node:
+         type_check := void_type;
       unary_op_node:
          type_check := check_unary_op();
       binary_op_node:

@@ -194,7 +194,8 @@ var
    begin
       lbl := new_label();
       emit_expression(n^.expr, si, nest);
-      emit('    jz %s', [lbl]);
+      emit('    cmpq $0, %%rax' + lineending +
+           '    jz %s', [lbl]);
       emit_expression(n^.expr2, si, nest);
       emit('%s:', [lbl]);
    end;
@@ -206,7 +207,8 @@ var
    begin
       lbl := new_label();
       emit_expression(n^.expr, si, nest);
-      emit('    jnz %s', [lbl]);
+      emit('    cmpq $0, %%rax' + lineending +
+           '    jnz %s', [lbl]);
       emit_expression(n^.expr2, si, nest);
       emit('%s:', [lbl]);
    end;
@@ -484,7 +486,7 @@ var
 
 begin
    case n^.tag of
-      integer_node:
+      integer_node, char_node:
          emit('    movq $%d, %%rax', [n^.int_val]);
       unary_op_node: begin
          emit_expression(n^.expr, si, nest);
@@ -555,6 +557,8 @@ begin
          emit_string();
       nil_node:
          emit('    xorq %%rax, %%rax', []);
+      empty_node:
+         (* nothing to do *);
       let_node:
          emit_let();
       var_decl_node: begin

@@ -1,7 +1,7 @@
 let
    type s_array = array of string
    numbers = s_array[100] of ""
-   base = ord("0")
+   zero = #"0"
    sum = ""
 
    add_all(): string =
@@ -17,10 +17,10 @@ let
                for i := 1 to 50 do
                   let
                      n = 50 - i
-                     x = sub(a, n) - base
-                     y = sub(b, n) - base
+                     x = ord(sub(a, n) - zero)
+                     y = ord(sub(b, n) - zero)
                      z = x + y + carry
-                     digit = chr(base + z mod 10)
+                     digit = str(z mod 10)
                   in
                      carry := if z > 9 then 1 else 0
                      sum := concat(digit, sum)

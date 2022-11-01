@@ -1,24 +1,29 @@
 # Tiger compiler
 
 - compiler for Andrew Appel's Tiger language with a few tweaks.
-- written in Free Pascal, following the green Tiger book but not very closely.
+- written in Free Pascal.
 - compiles to inefficient as assembly language for Mac OS X86_64.
-- compiles to assembly from type checked AST with no IR.
+- hand written recursive descent lexer and parser.
 - integers are int64
 
 # Differences from the Tiger book
 
+- program can be more than one expression. Expressions are executed in
+  order until end of file.
+- semicolon is an expression terminator rather than separator and
+  may also appear at the end of a sequence.
+- semicolons are optional but may change the meaning of a program, for
+  example `a - b` isn't the same as `a; -b`.
 - added `mod` operator.
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
 - added boolean data type. Relational operators return booleans, `true` and
   `false` are keyword literals.
+- added char data type. Char literals are `#` followed by a single letter in
+  quotation marks. eg `#"a"` or escape sequences `#"\n"`.
 - expression sequences are enclosed in `begin` and `end` instead of
   parentheses.
-- semicolons at the end of expressions in `begin` and `let` bodies are
-  optional.
-- let and begin must contain at least one expression, "no value"
-  expressions (eg. `begin end` or 'let ... in end') are not allowed.
+- let and begin must contain at least one expression.
 - variable declarations: `var` keyword not used, format is
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used, format is

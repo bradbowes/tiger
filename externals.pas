@@ -29,6 +29,7 @@ begin
    bind(global_tenv, intern('int'), int_type, 0, 0, 0, 0);
    bind(global_tenv, intern('string'), string_type, 0, 0, 0, 0);
    bind(global_tenv, intern('bool'), bool_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('char'), char_type, 0, 0, 0, 0);
 
    (* read *)
    s := make_function_type(string_type);
@@ -44,6 +45,11 @@ begin
    add_param(s, intern('s'), string_type, 0, 0);
    bind_external('print', s);
 
+   (* putchar *)
+   s := make_function_type(void_type);
+   add_param(s, intern('c'), char_type, 0, 0);
+   bind_external('putchar', s);
+
    (* str *)
    s := make_function_type(string_type);
    add_param(s, intern('n'), int_type, 0, 0);
@@ -55,18 +61,18 @@ begin
    bind_external('length', s);
 
    (* sub *)
-   s := make_function_type(int_type);
+   s := make_function_type(char_type);
    add_param(s, intern('s'), string_type, 0, 0);
    add_param(s, intern('n'), int_type, 0, 0);
    bind_external('sub', s);
 
    (* ord *)
    s := make_function_type(int_type);
-   add_param(s, intern('s'), string_type, 0, 0);
+   add_param(s, intern('c'), char_type, 0, 0);
    bind_external('ord', s);
 
    (* chr *)
-   s := make_function_type(string_type);
+   s := make_function_type(char_type);
    add_param(s, intern('n'), int_type, 0, 0);
    bind_external('chr', s);
 

@@ -12,8 +12,10 @@ type
                indexed_var_node,
                integer_node,
                string_node,
+               char_node,
                boolean_node,
                nil_node,
+               empty_node,
                type_decl_node,
                var_decl_node,
                fun_decl_node,
@@ -75,8 +77,10 @@ function make_field_var_node(obj: node; field: symbol; line, col: longint): node
 function make_indexed_var_node(arr, index: node; line, col: longint): node;
 function make_integer_node(val: int64; line, col: longint): node;
 function make_string_node(val: symbol; line, col: longint): node;
+function make_char_node(val, line, col: longint): node;
 function make_boolean_node(val: boolean; line, col: longint): node;
 function make_nil_node(line, col: longint): node;
+function make_empty_node(line, col: longint): node;
 function make_type_decl_node(name: symbol; spec: node; line, col: longint): node;
 function make_var_decl_node(name, ty: symbol; expr: node; line, col: longint): node;
 function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; line, col: longint): node;
@@ -223,6 +227,15 @@ begin
 end;
 
 
+function make_char_node(val, line, col: longint): node;
+var n: node;
+begin
+   n := make_node(char_node, line, col);
+   n^.int_val := val;
+   make_char_node := n;
+end;
+
+
 function make_boolean_node(val: boolean; line, col: longint): node;
 var n: node;
 begin
@@ -235,6 +248,12 @@ end;
 function make_nil_node(line, col: longint): node;
 begin
    make_nil_node := make_node(nil_node, line, col);
+end;
+
+
+function make_empty_node(line, col: longint): node;
+begin
+   make_empty_node := make_node(empty_node, line, col);
 end;
 
 

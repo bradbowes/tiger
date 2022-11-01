@@ -11,5 +11,5 @@ begin
    type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
 
    ast := transform(ast);
-   writeln(format(ast)); 
+   writeln(format(ast));
 end.

@@ -97,7 +97,7 @@ begin
       unary_op_node:
          format := op_display[n^.op] + ' ' + format(n^.expr);
       binary_op_node:
-         format := format(n^.expr) + ' ' + op_display[n^.op] + ' ' + format(n^.expr2);
+         format := '(' + format(n^.expr) + ' ' + op_display[n^.op] + ' ' + format(n^.expr2) + ')';
       field_node:
          format := n^.name^.id + ' = ' + format(n^.expr);
       field_desc_node:
@@ -148,6 +148,8 @@ begin
          format := n^.type_name^.id + ' {' + format_list(n^.list, ',', true) + newline + '}';
       array_node:
          format := n^.type_name^.id + '[' + format(n^.expr2) + '] of ' + format(n^.expr);
+      empty_node:
+         format := '';
       else begin
          str(n^.tag, s);
          format := '???? ' + s + ' ????';

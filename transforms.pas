@@ -110,6 +110,66 @@ begin
                else
                   transform := copy();
             end
+         else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
+            case op of
+               eq_op:
+                  transform := make_boolean_node(e1^.bool_val = e2^.bool_val, line, col);
+               neq_op:
+                  transform := make_boolean_node(e1^.bool_val <> e2^.bool_val, line, col);
+               and_op:
+                  transform :=  make_boolean_node(e1^.bool_val and e2^.bool_val, line, col);
+               or_op:
+                  transform := make_boolean_node(e1^.bool_val or e2^.bool_val, line, col);
+               else
+                  transform := copy();
+            end
+         else if (op = and_op) then
+            if e1^.tag = boolean_node then
+               if e1^.bool_val then
+                  transform := e2
+               else
+                  transform := e1
+            else if (e2^.tag = boolean_node) and e2^.bool_val then
+               transform := e1
+            else
+               transform := copy()
+         else if (op = or_op) then
+            if e1^.tag = boolean_node then
+               if e1^.bool_val then
+                  transform := e1
+               else
+                  transform := e2
+            else if (e2^.tag = boolean_node) and (not e2^.bool_val) then
+               transform := e1
+            else
+               transform := copy()
+         else
+            transform := copy();
+      end;
+      if_node: begin
+         e1 := transform(cond);
+         if e1^.tag = boolean_node then
+            if e1^.bool_val then
+               transform := transform(expr)
+            else
+               transform := make_empty_node(line, col)
+         else
+            transform := copy();
+      end;
+      if_else_node: begin
+         e1 := transform(cond);
+         if e1^.tag = boolean_node then
+            if e1^.bool_val then
+               transform := transform(expr)
+            else
+               transform := transform(expr2)
+         else
+            transform := copy();
+      end;
+      while_node: begin
+         e1 := transform(cond);
+         if (e1^.tag = boolean_node) and (not e1^.bool_val) then
+            transform := make_empty_node(line, col)
          else
             transform := copy();
       end;

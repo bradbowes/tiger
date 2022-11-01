@@ -8,7 +8,7 @@
 */
 
 let
-   base = ord("0")
+   base = #"0"
    answer = 0
    s = "73167176531330624919225119674426574742355349194934\
        \96983520312774506326239578318016984801869478851843\
@@ -37,7 +37,7 @@ in
          product = 1
       in
          for j := 0 to 12 do
-            product := product * (sub(s, i + j) - base)
+            product := product * ord(sub(s, i + j) - base)
 
          if product > answer then
             answer := product
