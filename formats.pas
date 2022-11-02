@@ -67,6 +67,8 @@ begin
       end;
       string_node:
          format := '"' + n^.string_val^.id + '"';
+      char_node:
+         format := '#"' + chr(n^.int_val) + '"';
       boolean_node:
          if n^.bool_val then format := 'true' else format := 'false';
       nil_node:

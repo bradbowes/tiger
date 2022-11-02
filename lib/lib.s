@@ -14,8 +14,11 @@ heap_size = 256 * 1024 * 1024
 _main:
    subq $40, %rsp                      // space for global variables
    movq %rsp, %r14                     // save global var pointer
-   movq %rdi,  32(%r14)                // argc
-   movq %rsi,  24(%r14)                // argv
+   movq %rdi, 32(%r14)                 // argc
+   movq %rsi, 24(%r14)                 // argv
+   xorq %rax, %rax
+   movq %rax, 16(%r14)                 // input_count
+   movq %rax, 8(%r14)                  // input_position
    movq $heap_size, %rdi               // allocate heap
    call _malloc
    cmpq $0, %rax                       // check for null
@@ -59,6 +62,29 @@ f$_read:
    addq %rbx, %r15                     // update heap pointer
    andq $0xfffffffffffffff8, %r15      // align 8 bytes
    ret
+
+
+.align 3
+.globl f$_getchar
+f$_getchar:
+   subq $16, %rsp
+   movq $0, %rdi
+   movq %rsp, %rsi
+   movq $1, %rdx
+   movq $SYS_read, %rax
+   syscall
+   cmpq $0, %rax
+   jne got_input
+   movq $-1, %rax
+   jmp done_input
+got_input:
+   movb (%rsi), %al
+   andq $0x00000000000000ff, %rax
+done_input:
+   addq $16, %rsp
+   ret
+   
+
 
 
 .align 3
@@ -237,9 +263,16 @@ str_fmt:
    .asciz "%ld"
 
 .align 3
+input_count:
+   .quad 0
+input_pos:
+   .quad 0
+
+.align 3
 input_buffer:
    .skip 4096, 0
 
 .align 3
 output_buffer:
    .skip 4096, 0
+

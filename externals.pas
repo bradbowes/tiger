@@ -50,6 +50,10 @@ begin
    add_param(s, intern('c'), char_type, 0, 0);
    bind_external('putchar', s);
 
+   (* getchar *)
+   s := make_function_type(char_type);
+   bind_external('getchar', s);
+
    (* str *)
    s := make_function_type(string_type);
    add_param(s, intern('n'), int_type, 0, 0);

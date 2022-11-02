@@ -1,23 +1,4 @@
 let
-   /***************************/
-   /*  getchar implementation */
-
-   buf = read()
-   pos = 0
-
-   getchar(): char =
-      if pos < length(buf) then begin
-         pos := pos + 1
-         sub(buf, pos - 1)
-      end
-      else begin
-         buf := read()
-         pos := 0
-         getchar()
-      end
-
-   /***************************/
-
    type any = { any: bool }
    ch = getchar()
 
@@ -77,13 +58,13 @@ let
             else putchar(#"0")
       end
 
-    printlist(l: list) =
-       if l = nil then putchar(#"\n")
-       else begin
-          printint(l.first);
-          putchar(#" ");
-          printlist(l.rest)
-       end
+   printlist(l: list) =
+      if l = nil then putchar(#"\n")
+      else begin
+         printint(l.first);
+         putchar(#" ");
+         printlist(l.rest)
+      end
 
 in
    printlist(merge(readlist(), readlist()))

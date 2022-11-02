@@ -322,14 +322,15 @@ var
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
       { link }
-      if target = nest then
-         emit('    movq %%rsp, %d(%%rsp)', [pos])
-      else begin
-         emit('    movq 16(%%rsp), %%rbp', []);
-         for i := nest - 2 downto target do
-            emit('    movq 16(%%rbp), %%rbp', []);
-         emit('    movq %%rbp, %d(%%rsp)', [pos]);
-      end;
+      if not n^.binding^.external then
+         if target = nest then
+            emit('    movq %%rsp, %d(%%rsp)', [pos])
+         else begin
+            emit('    movq 16(%%rsp), %%rbp', []);
+            for i := nest - 2 downto target do
+               emit('    movq 16(%%rbp), %%rbp', []);
+            emit('    movq %%rbp, %d(%%rsp)', [pos]);
+         end;
       pos := pos + 8;
       arg := n^.list^.first;
       while arg <> nil do begin
@@ -340,7 +341,6 @@ var
       end;
       emit('    subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
-
          emit('    call f$_%s', [n^.name^.id])
       else
          emit('    call f%d$_%s', [n^.binding^.id, n^.name^.id]);
