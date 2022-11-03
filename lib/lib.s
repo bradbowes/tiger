@@ -83,8 +83,6 @@ got_input:
 done_input:
    addq $16, %rsp
    ret
-   
-
 
 
 .align 3
