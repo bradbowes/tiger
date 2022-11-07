@@ -38,10 +38,11 @@ let
             let
                tmp = chain(i, 1)
             in
-               if tmp > max_len then begin
-                  max_len := tmp
-                  sequence := i
-               end
+               if tmp > max_len then
+                  begin
+                     max_len := tmp
+                     sequence := i
+                  end
             end
          sequence
       end

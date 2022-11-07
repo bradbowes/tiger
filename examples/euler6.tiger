@@ -8,10 +8,11 @@ let
    sum_squares = 0
    sum = 0
 in
-   for i := 1 to 100 do begin
-      sum_squares := sum_squares + i * i
-      sum := sum + i
-   end
+   for i := 1 to 100 do
+      begin
+         sum_squares := sum_squares + i * i
+         sum := sum + i
+      end
 
    print(str(sum * sum - sum_squares))
 end

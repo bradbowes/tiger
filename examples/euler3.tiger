@@ -9,23 +9,27 @@ let
    i = 2
    p = 0
 
-   prime(n: int): bool = let
-      i = 2
-      isprime = true
-   in
-      while i * i <= n and isprime do begin
-         isprime := n mod i <> 0
-         i := i + (if i = 2 then 1 else 2)
+   prime(n: int): bool =
+      let
+         i = 2
+         isprime = true
+      in
+         while i * i <= n and isprime do
+            begin
+               isprime := n mod i <> 0
+               i := i + (if i = 2 then 1 else 2)
+            end
+
+         isprime
       end
 
-      isprime
-   end
 in
-   while i * i <= n do begin
-      if prime(i) and n mod i = 0 then
-         p := i
-      i := i + 1
-   end
+   while i * i <= n do
+      begin
+         if prime(i) and n mod i = 0 then
+            p := i
+         i := i + (if i = 2 then 1 else 2)
+      end
 
    print(str(p))
 end

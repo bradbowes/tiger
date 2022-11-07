@@ -14,16 +14,18 @@ let
    c = 997
 
 in
-   while (a * a + b * b <> c * c) do begin
-      if a = b - 1 then begin
-         b := b + 1
-         a := 1
-      end
-      else
-         a := a + 1
+   while (a * a + b * b <> c * c) do
+      begin
+         if a = b - 1 then
+            begin
+               b := b + 1
+               a := 1
+            end
+         else
+            a := a + 1
 
-      c := 1000 - (a + b)
-   end
+         c := 1000 - (a + b)
+      end
 
    print(str(a * b * c))
 

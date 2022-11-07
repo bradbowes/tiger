@@ -8,8 +8,6 @@
 
 # Differences from the Tiger book
 
-- program can be more than one expression. Expressions are executed in
-  order until end of file.
 - semicolon is an expression terminator rather than separator and
   may also appear at the end of a sequence.
 - semicolons are optional but may change the meaning of a program, for
@@ -37,9 +35,9 @@
 # To do
 
 - builtin library functions
-- more primitive data types (real, byte, char)
+- more primitive data types (real, file)
 - unicode strings
-- tail calls
+- tail call optimization
 - anonymous functions, first class functions
 - closures
 - enum
@@ -49,7 +47,6 @@
 - overloads
 - garbage collector
 - polymorphic types and functions
-- file types
 - modules, separate compilation
 - optimization
 - ffi

@@ -10,7 +10,6 @@
 let
    a = 900
    b = 900
-   n = 0
    answer = 0
 
    reverse(n: int, r: int): int =
@@ -19,18 +18,23 @@ let
       else
          r
 in
-   while a < 1000 and b < 1000 do begin
-      n := a * b
-      if n = reverse(n, 0) then
-         answer := n
+   while a < 1000 and b < 1000 do
+      begin
+         let
+            n = a * b
+         in
+            if n = reverse(n, 0) then
+               answer := n
+         end
 
-      if a = b then begin
-         b := b + 1
-         a := if answer = 0 then 900 else answer / b
+         if a = b then
+            begin
+               b := b + 1
+               a := if answer = 0 then 900 else answer / b
+            end
+         else
+            a := a + 1
       end
-      else
-         a := a + 1
-   end
 
    print(str(answer))
 end

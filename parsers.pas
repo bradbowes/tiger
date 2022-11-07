@@ -221,7 +221,7 @@ var
          else
             begin
                next;
-               err('Expected expression, got ''' + value + '''', line, col);
+               err('Expected expression or ''end'', got ''' + value + '''', line, col);
             end;
       end;
 
@@ -619,7 +619,7 @@ var
       end;
    end;
 
-
+(*
    function get_program() : node;
    var
       list: node_list;
@@ -632,12 +632,14 @@ var
       next;
       get_program := make_sequence_node(list, 1, 1);
    end;
-
+*)
 
 begin
    the_scanner := make_scanner(file_name);
    next;
-   parse := get_program();
+   parse := get_expression();
+   if token.tag <> eof_token then
+      err('extraneous input', token.line, token.col);
 end; { parse }
 
 

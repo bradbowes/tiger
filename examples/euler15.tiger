@@ -16,10 +16,11 @@ let
          for i := 0 to n do
             g[i] := int_array[n + 1] of 0
 
-         for i := 1 to n do begin
-            g[i][0] := 1;
-            g[0][i] := 1
-         end
+         for i := 1 to n do
+            begin
+               g[i][0] := 1;
+               g[0][i] := 1
+            end
 
          for x := 1 to n do
             for y := 1 to n do

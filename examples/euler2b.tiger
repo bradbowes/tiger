@@ -10,20 +10,15 @@
   even-valued terms.
 */
 
-let
-   m = 0
-   n = 1
-   fib = 0
-   total = 0
-in
-   while fib <= 4000000 do begin
-      if fib mod 2 = 0 then
-         total := total + fib
-      fib := m + n
-      m := n
-      n := fib
-   end
+/* functional style */
 
-   print(str(total))
+let
+   even_sum(m: int, n: int, sum: int): int =
+      if n <= 4000000 then
+         even_sum(n, m + n, if n mod 2 = 0 then sum + n else sum)
+      else
+         sum
+in
+   print(str(even_sum(0, 1, 0)))
 end
 
