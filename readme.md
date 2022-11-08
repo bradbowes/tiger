@@ -31,15 +31,15 @@
 - no nested comments
 - type aliases are not implemented.
 - `break` expression is not implemented.
+- string comparison operators (`<`, `<=`, `>`, `>=`) not implemented.
+  Use `string_compare` function instead.
 
 # To do
 
-- builtin library functions
-- more primitive data types (real, file)
-- unicode strings
 - tail call optimization
 - anonymous functions, first class functions
 - closures
+- file type
 - enum
 - case expressions
 - multi-dimensional arrays
@@ -50,27 +50,28 @@
 - modules, separate compilation
 - optimization
 - ffi
+- unicode
 
-# Library
+# Standard Library
 
 ## IO
 
-- read(): string                (done)
-- write(s: string)              (done)
-- print(s: string)              (appends newline to write output, done)
+- read(): string
+- write(s: string)
+- print(s: string)              (appends newline to write output)
+- getchar(): char
+- putchar(c: char)
 
 ## Conversion
 
-- str(i: int): string           (converts int to string, done)
-- num(s: string): int           (converts string to int)
+- str(i: int): string           (converts int to string)
+- num(s: string): int           (converts string to int) (todo)
+- ord(ch: char): int
+- chr(n: int): char
 
 ## Strings
 
-- length(s: string): int        (done)
-- sub(s: string, n: int): int   (done)
-- ord(s: string): int           (done)
-- chr(n: int): string           (done)
-- substring(s: string, start: int, len: int): string (done)
-- concat(s1: string, s2: string): string (done)
-- compare(s1: string, s2: string): int
-- find(src: string, find: string): int
+- length(s: string): int
+- substring(s: string, start: int, len: int): string
+- string_concat(s1: string, s2: string): string
+- string_compare(s1: string, s2: string): int

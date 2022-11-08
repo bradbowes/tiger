@@ -1,3 +1,7 @@
+/*
+   Copy stdin to stdout until end of file
+*/
+
 let
    ch = getchar()
 in

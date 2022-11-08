@@ -110,6 +110,27 @@ begin
                else
                   transform := copy();
             end
+         else if (e1^.tag = char_node) and (e2^.tag = char_node) then
+            case op of
+               plus_op:
+                  transform := make_char_node(e1^.int_val + e2^.int_val, line, col);
+               minus_op:
+                  transform := make_char_node(e1^.int_val - e2^.int_val, line, col);
+               lt_op:
+                  transform := make_boolean_node(e1^.int_val < e2^.int_val, line, col);
+               leq_op:
+                  transform := make_boolean_node(e1^.int_val <= e2^.int_val, line, col);
+               gt_op:
+                  transform := make_boolean_node(e1^.int_val > e2^.int_val, line, col);
+               geq_op:
+                  transform := make_boolean_node(e1^.int_val >= e2^.int_val, line, col);
+               eq_op:
+                  transform := make_boolean_node(e1^.int_val = e2^.int_val, line, col);
+               neq_op:
+                  transform := make_boolean_node(e1^.int_val <> e2^.int_val, line, col);
+               else
+                  transform := copy();
+            end
          else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
             case op of
                eq_op:

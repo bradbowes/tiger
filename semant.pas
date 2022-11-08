@@ -39,25 +39,19 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       if not compatible(ty1, ty2) then
          err('operator incompatible types', n^.line, n^.col);
 
-      if op in numeric_ops then
-         if ty1 = int_type then
-            check_binary_op := int_type
-         else if (ty1 = char_type) and (op in [plus_op, minus_op]) then
-            check_binary_op := char_type
-         else
-            err('numeric operator incompatible type', n^.line, n^.col)
-      else if op in comparison_ops then
-         if (ty1 = int_type) or (ty1 = string_type) or (ty1 = char_type) then
-            check_binary_op := bool_type
-         else
-            err('comparison operator incompatible type', n^.line, n^.col)
-      else if op in boolean_ops then
-         if ty1 = bool_type then
-            check_binary_op := bool_type
-         else
-            err('boolean operator incompatible type', n^.line, n^.col)
+      if (op in numeric_ops) and (ty1 = int_type) then
+         check_binary_op := int_type
+      else if (op in char_ops) and (ty1 = char_type) then
+         check_binary_op := char_type
+      else if (op in comparison_ops) and
+              ((ty1 = int_type) or (ty1 = char_type)) then
+         check_binary_op := bool_type
+      else if (op in boolean_ops) and (ty1 = bool_type) then
+         check_binary_op := bool_type
+      else if op in equality_ops then
+         check_binary_op := bool_type
       else
-         check_binary_op := bool_type { equality_ops }
+         err('incompatible types for operator ''' + op_display[op] + '''', n^.line, n^.col);
    end;
 
 
@@ -414,11 +408,14 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty: spec;
    begin
       ty := type_check(n^.expr2, si, nest, env, tenv);
-      if ty^.tag <> array_type then
-         err('Object is not an array.', n^.expr2^.line, n^.expr2^.col);
+      if (ty^.tag <> array_type) and (ty <> string_type) then
+         err('Object is not an array or string.', n^.expr2^.line, n^.expr2^.col);
       if type_check(n^.expr, si + 1, nest, env, tenv) <> int_type then
-         err('Array index must be an integer.', n^.expr^.line, n^.expr^.col);
-      check_indexed_var := ty^.base;
+         err('Index must be an integer.', n^.expr^.line, n^.expr^.col);
+      if ty^.tag = array_type then
+         check_indexed_var := ty^.base
+      else
+         check_indexed_var := char_type;
    end;
 
 

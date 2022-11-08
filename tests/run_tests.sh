@@ -335,16 +335,6 @@ test_code "print(str(length(\"abcdefg\")))" "7"
 
 # test_code "print(str(length(read())))" ""
 
-test_code "let s = \"hello\"
-in
-   for i := 0 to 4 do
-      print(str(ord(sub(s, i))))
-end" "104
-101
-108
-108
-111"
-
 test_code "let
    s = \"hello, world!\"
    ss1 = substring(s, 7, 5)
@@ -355,43 +345,11 @@ in
 end" "world
 hello"
 
-test_code "let
-   s = \"hi\"
-in
-   for i := 1 to 4 do
-      let
-         len = length(s)
-         x = 0
-      in
-         print(str(i))
-         for j := 0 to len - 1 do
-            print(str(ord(sub(s, j))))
-      end
-end" "1
-104
-105
-2
-104
-105
-3
-104
-105
-4
-104
-105"
-
 
 test_code "putchar(chr(97))" "a"
 test_code "putchar(chr(ord(#\"b\")))" "b"
 test_code "print(str(ord(#\"c\")))" "99"
 
-test_code "let
-   s = concat(\"hello\", \"world\")
-in
-   print(s)
-   print(str(length(s)))
-end" "helloworld
-10"
 
 
 # test_code "let
@@ -463,8 +421,6 @@ end" "Harry Potter
 19
 20"
 
-# END_COMMENT
-
 test_code "true or (begin print(\"x\"); false end)" ""
 test_code "false or (begin print(\"x\"); false end)" "x"
 test_code "true and (begin print(\"x\"); false end)" "x"
@@ -478,3 +434,61 @@ test_code "print(if 2 = 3 or 2 = 2 then \"true\" else \"false\")" "true"
 test_code "print(if 2 = 3 or 3 = 4 then \"true\" else \"false\")" "false"
 test_code "print(if 2 = 2 or 1 = 1 then \"true\" else \"false\")" "true"
 test_code "if false then print(\"hello\")" ""
+
+test_code "let s = \"hello\"
+in
+   for i := 0 to 4 do
+      print(str(ord(s[i])))
+end" "104
+101
+108
+108
+111"
+
+test_code "let
+   s = \"hi\"
+in
+   for i := 1 to 4 do
+      let
+         len = length(s)
+         x = 0
+      in
+         print(str(i))
+         for j := 0 to len - 1 do
+            print(str(ord(s[j])))
+      end
+end" "1
+104
+105
+2
+104
+105
+3
+104
+105
+4
+104
+105"
+
+# END_COMMENT
+
+test_code "let
+   s = string_concat(\"hello\", \" world\")
+in
+   print(s)
+   print(str(length(s)))
+end" "hello world
+11"
+
+
+test_code "print(str(string_compare(\"\", \"hello\")))" "-1"
+test_code "let
+   s = \"hello, world!\"
+   ss1 = substring(s, 7, 5)
+   ss2 = substring(s, 0, 5)
+in
+   print(ss1)
+   print(ss2)
+end" "world
+hello"
+

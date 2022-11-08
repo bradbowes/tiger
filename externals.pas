@@ -64,12 +64,6 @@ begin
    add_param(s, intern('s'), string_type, 0, 0);
    bind_external('length', s);
 
-   (* sub *)
-   s := make_function_type(char_type);
-   add_param(s, intern('s'), string_type, 0, 0);
-   add_param(s, intern('n'), int_type, 0, 0);
-   bind_external('sub', s);
-
    (* ord *)
    s := make_function_type(int_type);
    add_param(s, intern('c'), char_type, 0, 0);
@@ -87,11 +81,17 @@ begin
    add_param(s, intern('length'), int_type, 0, 0);
    bind_external('substring', s);
 
-   (* concat *)
+   (* string_concat *)
    s := make_function_type(string_type);
    add_param(s, intern('s1'), string_type, 0, 0);
    add_param(s, intern('s2'), string_type, 0, 0);
-   bind_external('concat', s);
+   bind_external('string_concat', s);
+
+   (* string_compare *)
+   s := make_function_type(int_type);
+   add_param(s, intern('s1'), string_type, 0, 0);
+   add_param(s, intern('s2'), string_type, 0, 0);
+   bind_external('string_compare', s);
 
    (* toh *)
    s := make_function_type(int_type);

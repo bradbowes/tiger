@@ -157,20 +157,6 @@ f$_length:
 
 
 .align 3
-.globl f$_sub
-f$_sub:
-   pushq %rsi
-   pushq %rbx
-   movq 32(%rsp), %rsi                 // string parameter
-   movq 40(%rsp), %rbx                 // position parameter
-   movb 8(%rsi, %rbx, 1), %al
-   popq %rbx
-   popq %rsi
-   andq $0x00000000000ff, %rax
-   ret
-
-
-.align 3
 .globl f$_ord
 f$_ord:
    ret                                 // cast char to int, does nothing
@@ -187,7 +173,7 @@ copy:
    xorq %rbx, %rbx
 copy_loop:
    cmpq %rbx, %rcx
-   jl copy_done
+   jle copy_done
    movb (%rsi, %rbx, 1), %al
    movb %al, (%rdi, %rbx, 1)
    incq %rbx
@@ -198,8 +184,8 @@ copy_done:
 
 
 .align 3
-.globl f$_concat
-f$_concat:
+.globl f$_string_concat
+f$_string_concat:
    movq 16(%rsp), %rsi                 // string 1
    movq (%rsi), %rcx
    movq %rcx, %rdx
@@ -236,6 +222,39 @@ f$_substring:
    addq %rcx, %r15
    andq $0xfffffffffffffff8, %r15      // align 8 bytes
    ret
+
+
+.align 3
+.globl f$_string_compare
+f$_string_compare:
+   movq 16(%rsp), %rsi                 // string1
+   movq 24(%rsp), %rdi                 // string2
+   movq $-1, %rdx
+   xorq %rbx, %rbx
+   xorq %rax, %rax
+   movq (%rsi), %rcx
+   cmpq (%rdi), %rcx
+   jl compare_loop
+   je compare_same_size
+   movq (%rdi), %rcx                   // string2 is shorter
+   movq $1, %rdx
+   jmp compare_loop
+compare_same_size:
+   xorq %rdx, %rdx
+compare_loop:
+   cmpq %rbx, %rcx
+   jle loop_done
+   movb 8(%rsi, %rbx, 1), %al
+   subb 8(%rdi, %rbx, 1), %al
+   movsx %al, %rax
+   jne compare_done
+   incq %rbx
+   jmp compare_loop
+loop_done:
+   movq %rdx, %rax
+compare_done:
+   ret
+
 
 
 .align 3

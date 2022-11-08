@@ -414,7 +414,11 @@ var
       emit('    movq %%rsi, %d(%%rsp)', [si - 8]);
       emit_expression(n^.expr, si - 16, nest);
       emit('    movq %d(%%rsp), %%rsi', [si - 8]);
-      emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
+      if (n^.expr2^.binding <> nil) and (n^.expr2^.binding^.ty = string_type) then
+         emit('    movb 8(%%rsi, %%rax, 1), %%al' + lineending +
+              '    andq $0x00000000000000ff, %%rax', [])
+      else
+         emit('    movq 8(%%rsi, %%rax, 8), %%rax', []);
       emit('    movq %d(%%rsp), %%rsi', [si]);
    end;
 
@@ -606,10 +610,8 @@ begin
    load_externals();
    ast := parse(paramstr(1));
    type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
-
    ast := transform(ast);
    type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
-
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);

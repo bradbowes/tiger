@@ -1,6 +1,13 @@
+/*
+   Simple calculator. Supports integer add, subtract,
+   multiply and divide with parentheses.
+   Shows result after <enter> is pressed.
+   Control-D to end session
+*/
+
 let
    type token = { op: char, value: int }
-   ch : char = #" "
+   ch = #" "
 
    quit = chr(-1)
    num = #"0"
@@ -36,10 +43,11 @@ let
             let
                n = 0
             in
-               while digit() do begin
-                  n := n * 10 + ord(ch - #"0")
-                  ch := getchar()
-               end
+               while digit() do
+                  begin
+                     n := n * 10 + ord(ch - #"0")
+                     ch := getchar()
+                  end
                n
             end
 
@@ -48,13 +56,15 @@ let
          skip()
          if ch = plus or ch = minus or
             ch = mul or ch = div or
-            ch = lpar or ch = rpar then begin
-               t := token { op = ch, value = 0 }
-               ch := getchar()
-            end
+            ch = lpar or ch = rpar then
+               begin
+                  t := token { op = ch, value = 0 }
+                  ch := getchar()
+               end
          else if ch = newline or ch = quit then
             t := token { op = ch, value = 0 }
-         else if digit() then t := token { op = num, value = number() }
+         else if digit() then
+            t := token { op = num, value = number() }
          else t := error("syntax error")
 
          t
@@ -66,23 +76,25 @@ let
       let
          value = 0
       in
-         if t.op = num then begin
-            value := t.value
-            t := scan()
-         end
-         else if t.op = minus then begin
-            t := scan()
-            value := - factor()
-         end
-         else if t.op = lpar then begin
-            t := scan()
-            value := sum()
-            if t.op = rpar then
+         if t.op = num then
+            begin
+               value := t.value
                t := scan()
-            else  begin
-               t := error("unclosed parenthesis")
             end
-         end
+         else if t.op = minus then
+            begin
+               t := scan()
+               value := - factor()
+            end
+         else if t.op = lpar then
+            begin
+               t := scan()
+               value := sum()
+               if t.op = rpar then
+                  t := scan()
+               else
+                  t := error("unclosed parenthesis")
+            end
 
          value
       end
@@ -93,19 +105,20 @@ let
       in
          while t.op = mul or t.op = div do
             let
-               multiply = t.op = mul
+               ismult = t.op = mul
 
-               divide(m: int, n: int): int =
+               div(m: int, n: int): int =
                   if n <> 0 then
                      m / n
-                  else begin
-                     t := error("divide by zero")
-                     0
-                  end
+                  else
+                     begin
+                        t := error("divide by zero")
+                        0
+                     end
 
             in
                t := scan()
-               value := if multiply then value * factor() else divide(value, factor())
+               value := if ismult then value * factor() else div(value, factor())
             end
 
          value
@@ -117,10 +130,10 @@ let
       in
          while t.op = plus or t.op = minus do
             let
-               add = t.op = plus
+               isplus = t.op = plus
             in
                t := scan()
-               value := if add then value + product() else value - product()
+               value := if isplus then value + product() else value - product()
             end
 
          value
@@ -128,19 +141,22 @@ let
 
    value = sum()
 in
-   while t.op = newline or t.op = err do begin
-      if t.op = newline then begin
-         write("= ")
-         print(str(value))
+   while t.op = newline or t.op = err do
+      begin
+         if t.op = newline then
+            begin
+               write("= ")
+               print(str(value))
+            end
+         else
+            print(msg)
+         while ch = newline do
+            ch := getchar()
+         t := scan()
+         value := sum()
       end
-      else
-         print(msg)
-      while ch = newline do
-         ch := getchar()
-      t := scan()
-      value := sum()
-   end
 
+   /* consume any extra input */
    while ch <> newline do
       ch := getchar()
 end
