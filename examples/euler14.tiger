@@ -40,10 +40,10 @@ let
             in
                if tmp > max_len then
                   begin
-                     max_len := tmp
+                     max_len := tmp;
                      sequence := i
                   end
-            end
+            end;
          sequence
       end
 in

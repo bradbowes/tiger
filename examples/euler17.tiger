@@ -86,55 +86,55 @@ let
          0
 
 in
-   word[1] := "one"
-   word[2] := "two"
-   word[3] := "three"
-   word[4] := "four"
-   word[5] := "five"
-   word[6] := "six"
-   word[7] := "seven"
-   word[8] := "eight"
-   word[9] := "nine"
-   word[10] := "ten"
-   word[11] := "eleven"
-   word[12] := "twelve"
-   word[13] := "thirteen"
-   word[14] := "fourteen"
-   word[15] := "fifteen"
-   word[16] := "sixteen"
-   word[17] := "seventeen"
-   word[18] := "eighteen"
-   word[19] := "nineteen"
+   word[1] := "one";
+   word[2] := "two";
+   word[3] := "three";
+   word[4] := "four";
+   word[5] := "five";
+   word[6] := "six";
+   word[7] := "seven";
+   word[8] := "eight";
+   word[9] := "nine";
+   word[10] := "ten";
+   word[11] := "eleven";
+   word[12] := "twelve";
+   word[13] := "thirteen";
+   word[14] := "fourteen";
+   word[15] := "fifteen";
+   word[16] := "sixteen";
+   word[17] := "seventeen";
+   word[18] := "eighteen";
+   word[19] := "nineteen";
 
-   tens[1] := "ten"
-   tens[2] := "twenty"
-   tens[3] := "thirty"
-   tens[4] := "forty"
-   tens[5] := "fifty"
-   tens[6] := "sixty"
-   tens[7] := "seventy"
-   tens[8] := "eighty"
-   tens[9] := "ninety"
+   tens[1] := "ten";
+   tens[2] := "twenty";
+   tens[3] := "thirty";
+   tens[4] := "forty";
+   tens[5] := "fifty";
+   tens[6] := "sixty";
+   tens[7] := "seventy";
+   tens[8] := "eighty";
+   tens[9] := "ninety";
 
    for i := 1 to 19 do
       let
          len = length(word[i])
       in
          word_count[i] := len
-      end
+      end;
 
    for i := 1 to 9 do
       let
          len = length(tens[i])
       in
          tens_count[i] := len
-      end
+      end;
 
    for i := 1 to 1000 do
       begin
-         /* print(wordify(i)) */
+         /* print(wordify(i)); */
          total := total + count(i)
-      end
+      end;
 
    print(str(total))
 

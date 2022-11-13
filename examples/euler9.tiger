@@ -18,14 +18,14 @@ in
       begin
          if a = b - 1 then
             begin
-               b := b + 1
+               b := b + 1;
                a := 1
             end
          else
-            a := a + 1
+            a := a + 1;
 
          c := 1000 - (a + b)
-      end
+      end;
 
    print(str(a * b * c))
 

@@ -8,10 +8,6 @@
 
 # Differences from the Tiger book
 
-- semicolon is an expression terminator rather than separator and
-  may also appear at the end of a sequence.
-- semicolons are optional but may change the meaning of a program, for
-  example `a - b` isn't the same as `a; -b`.
 - `mod` (integer division remainder) operator.
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.

@@ -21,11 +21,11 @@ in
    while n <= 4000000 do
       begin
          if fib mod 2 = 0 then
-            sum := sum + fib
-         fib := m + n
-         m := n
+            sum := sum + fib;
+         fib := m + n;
+         m := n;
          n := fib
-      end
+      end;
 
    print(str(sum))
 end

@@ -13,17 +13,16 @@ let
 in
    while n < 1000 do
       begin
-         total := total + n
+         total := total + n;
          n := n + 3
-      end
-
-   n := 5
+      end;
+   n := 5;
    while n < 1000 do
       begin
          if n mod 15 > 0 then
-            total := total + n
+            total := total + n;
          n := n + 5
-      end
+      end;
 
    print(str(total))
 end

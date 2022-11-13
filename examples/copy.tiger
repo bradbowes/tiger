@@ -5,8 +5,9 @@
 let
    ch = getchar()
 in
-   while ch <> chr(-1) do begin
-      putchar(ch)
-      ch := getchar()
-   end
+   while ch <> chr(-1) do
+      begin
+         putchar(ch);
+         ch := getchar()
+      end
 end

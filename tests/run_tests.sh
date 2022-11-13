@@ -180,7 +180,7 @@ end" "5"
 test_code "let
    a = 0
 in
-   a := 5
+   a := 5;
    print(str(a))
 end" "5"
 
@@ -215,7 +215,7 @@ test_code "let
    type int_array = array of int
    a = int_array[3] of 42
 in
-   a[0] := 50
+   a[0] := 50;
    print(str(a[0] + a[1] + a[2]))
 end" "134"
 
@@ -232,7 +232,7 @@ test_code "let
    a = int_array[5] of 0
 in
    for i := 0 to 4 do
-      a[i] := (i + 1) * 2
+      a[i] := (i + 1) * 2;
 
    for i := 0 to 4 do
       print(str(a[i]))
@@ -272,7 +272,7 @@ test_code "let
    n = 1
 in
    while n < 10 do begin
-      print(str(n))
+      print(str(n));
       n := n + 1
    end
 end" "1
@@ -290,7 +290,7 @@ test_code "let
    i = 0
    update() = i := i + 1
 in
-   update()
+   update();
    print(str(i))
 end" "1"
 
@@ -309,10 +309,10 @@ test_code "let
    numbers = int_matrix[3] of nil
 in
    for i := 0 to 2 do begin
-      numbers[i] := int_array[3] of 0
+      numbers[i] := int_array[3] of 0;
       for j := 0 to 2 do
          numbers[i][j] := i * 10 + j
-   end
+   end;
 
    for i := 0 to 2 do
       for j := 0 to 2 do
@@ -335,7 +335,7 @@ test_code "let
    ss1 = substring(s, 7, 5)
    ss2 = substring(s, 0, 5)
 in
-   print(ss1)
+   print(ss1);
    print(ss2)
 end" "world
 hello"
@@ -388,9 +388,9 @@ test_code "let
    a = person { name = \"Harry Potter\", age = 19 }
    b = person { name = \"Dumbledore\", age = 153 }
 in
-   print(a.name)
-   print(str(a.age))
-   print(b.name)
+   print(a.name);
+   print(str(a.age));
+   print(b.name);
    print(str(b.age))
 end" "Harry Potter
 19
@@ -411,7 +411,7 @@ in
    print(a.name);
    print(str(a.age));
    a.age := 20;
-   print(str(a.age));
+   print(str(a.age))
 end" "Harry Potter
 19
 20"
@@ -448,7 +448,7 @@ in
          len = length(s)
          x = 0
       in
-         print(str(i))
+         print(str(i));
          for j := 0 to len - 1 do
             print(str(ord(s[j])))
       end
@@ -468,7 +468,7 @@ end" "1
 test_code "let
    s = string_concat(\"hello\", \" world\")
 in
-   print(s)
+   print(s);
    print(str(length(s)))
 end" "hello world
 11"
@@ -479,12 +479,10 @@ test_code "let
    ss1 = substring(s, 7, 5)
    ss2 = substring(s, 0, 5)
 in
-   print(ss1)
+   print(ss1);
    print(ss2)
 end" "world
 hello"
-
-# END_COMMENT
 
 test_code "let
    type s_array = array of string
@@ -492,14 +490,14 @@ test_code "let
    sa = s_array[5] of \"hello\"
    ia = i_array[5] of 0
 in
-   sa[0] := \"one\"
-   sa[1] := \"two\"
-   sa[2] := \"three\"
-   sa[3] := \"four\"
-   sa[4] := \"five\"
+   sa[0] := \"one\";
+   sa[1] := \"two\";
+   sa[2] := \"three\";
+   sa[3] := \"four\";
+   sa[4] := \"five\";
 
    for i := 0 to 4 do
-      ia[i] := length(sa[i])
+      ia[i] := length(sa[i]);
 
    for i := 0 to 4 do
       print(str(ia[i]))
@@ -509,3 +507,6 @@ end" "3
 5
 4
 4"
+
+# END_COMMENT
+

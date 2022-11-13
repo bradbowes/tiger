@@ -11,9 +11,9 @@ let
    print_board() = begin
       for i := 0 to n - 1 do begin
          for j := 0 to n - 1 do
-            write(if col[i] = j then " Q" else " .")
+            write(if col[i] = j then " Q" else " .");
          print("")
-      end
+      end;
       print("")
    end
 
@@ -23,13 +23,13 @@ let
       else
          for r := 0 to n - 1 do
             if row[r] = 0 and diag1[r + c] = 0 and diag2[r + 7 - c] = 0 then begin
-               row[r] := 1
-               diag1[r + c] := 1
-               diag2[r + 7 - c] := 1
-               col[c] := r
-               try(c + 1)
-               row[r] := 0
-               diag1[r + c] := 0
+               row[r] := 1;
+               diag1[r + c] := 1;
+               diag2[r + 7 - c] := 1;
+               col[c] := r;
+               try(c + 1);
+               row[r] := 0;
+               diag1[r + c] := 0;
                diag2[r + 7 - c] := 0
             end
 in
