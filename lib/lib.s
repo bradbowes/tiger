@@ -1,10 +1,24 @@
-SYS_exit =  0x02000001
-SYS_fork =  0x02000002
-SYS_read =  0x02000003
-SYS_write = 0x02000004
-SYS_open =  0x02000005
-SYS_close = 0x02000006
-SYS_wait4 = 0x02000007
+MAC_OS =          0x02000000
+SYS_EXIT =        MAC_OS | 1
+SYS_FORK =        MAC_OS | 2
+SYS_READ =        MAC_OS | 3
+SYS_WRITE =       MAC_OS | 4
+SYS_OPEN =        MAC_OS | 5
+SYS_CLOSE =       MAC_OS | 6
+
+STD_INPUT =       0x0000
+STD_OUTPUT =      0x0001
+STD_ERR =         0x0002
+
+O_RDONLY =        0x0000
+O_WRONLY =        0x0001
+O_RDWR =          0x0002
+
+O_CREAT =         0x00000200      /* create if nonexistant */
+O_TRUNC =         0x00000400      /* truncate to zero length */
+O_EXCL =          0x00000800      /* error if already exists */
+
+
 heap_size = 16 * 1024 * 1024
 
 .text
@@ -31,29 +45,48 @@ _main:
 
    movq 8(%r14),  %rdi                 // free the heap
    call _free
-   jmp main_exit
+   jmp main_done
 
 main_fail:
-   movq $2, %rdi
+   movq $STD_ERR, %rdi
    movq heap_err_msg@GOTPCREL(%rip), %rsi
    movq $25, %rdx
-   movq $SYS_write, %rax
+   movq $SYS_WRITE, %rax
    syscall
 
-main_exit:
-   addq $56, %rsp
-   movq $SYS_exit, %rax
-   xorq %rdi, %rdi
+main_done:
+   addq $40, %rsp
+   xorq %rax, %rax
+   ret
+
+
+.align 3
+.globl f$_open_input
+f$_open_input:
+   movq 16(%rsp), %rdi                 // path
+   addq $8, %rdi
+   movq $O_RDONLY, %rsi
+   movq $SYS_OPEN, %rax
    syscall
+   ret
+
+
+.align 3
+.globl f$_close
+f$_close:
+   movq 16(%rsp), %rdi
+   movq $SYS_CLOSE, %rax
+   syscall
+   ret
 
 
 .align 3
 .globl f$_read
 f$_read:
-   movq $0, %rdi                       // stdin descriptor
+   movq $STD_INPUT, %rdi
    leaq 8(%r15), %rsi                  // read buffer (top of heap plus space for string length)
    movq $4096, %rdx                    // buffer length
-   movq $SYS_read, %rax
+   movq $SYS_READ, %rax
    syscall
    movq %rax, (%r15)                   // string length
    movq %rax, %rbx                     // save string length
@@ -68,10 +101,10 @@ f$_read:
 .globl f$_getchar
 f$_getchar:
    subq $16, %rsp
-   movq $0, %rdi
+   movq $STD_INPUT, %rdi
    movq %rsp, %rsi
    movq $1, %rdx
-   movq $SYS_read, %rax
+   movq $SYS_READ, %rax
    syscall
    cmpq $0, %rax
    jne got_input
@@ -89,11 +122,11 @@ done_input:
 .global f$_putchar
 f$_putchar:
    movb 16(%rsp), %al
-   movq $1, %rdi
+   movq $STD_OUTPUT, %rdi
    movq output_buffer@GOTPCREL(%rip), %rsi
    movb %al, (%rsi)
    movq $1, %rdx
-   movq $SYS_write, %rax
+   movq $SYS_WRITE, %rax
    syscall
    ret
 
@@ -103,11 +136,11 @@ f$_putchar:
 f$_write:
    pushq %rbx
    pushq %rcx
-   movq $1, %rdi                        // stdout descriptor
+   movq $STD_OUTPUT, %rdi
    movq 32(%rsp), %rbx                  // string parameter
    movq (%rbx), %rdx                    // string length field
    leaq 8(%rbx), %rsi                   // start of string
-   movq $SYS_write, %rax
+   movq $SYS_WRITE, %rax
    syscall
    popq %rcx
    popq %rbx

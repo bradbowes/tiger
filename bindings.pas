@@ -12,6 +12,8 @@ type
       external: boolean;
       stack_index: longint;
       nesting_level: longint;
+      mutates: boolean;
+      escapes: boolean;
    end;
 
    tree = ^tree_t;
@@ -168,6 +170,8 @@ begin
    b^.stack_index := stack_index;
    b^.nesting_level := nesting_level;
    b^.external := false;
+   b^.mutates := false;
+   b^.escapes := false;
    env^.bindings := insert(t, b);
    bind := b;
 end;

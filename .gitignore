@@ -9,3 +9,4 @@ print
 tests/test*.tiger
 tests/test*.s
 tests/test*.out
+lib/*.h

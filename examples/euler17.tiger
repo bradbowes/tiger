@@ -1,0 +1,141 @@
+/*
+   If the numbers 1 to 5 are written out in words:
+   one, two, three, four, five, then there are
+   3 + 3 + 5 + 4 + 4 = 19 letters used in total.
+
+   If all the numbers from 1 to 1000 (one thousand)
+   inclusive were written out in words, how many
+   letters would be used?
+
+   NOTE: Do not count spaces or hyphens. For example,
+   342 (three hundred and forty-two) contains 23
+   letters and 115 (one hundred and fifteen) contains 20
+   letters. The use of "and" when writing out numbers
+   is in compliance with British usage.
+*/
+let
+   type s_array = array of string
+   type i_array = array of int
+   word = s_array[20] of ""
+   tens = s_array[10] of ""
+   word_count = i_array[20] of 0
+   tens_count = i_array[10] of 0
+   total = 0
+
+   wordify(n: int): string =
+      if n < 20 then
+         word[n]
+      else if n < 100 then
+         let
+            s = tens[n / 10]
+         in
+            if n mod 10 = 0 then
+               s
+            else
+               string_concat(s, string_concat("-", word[n mod 10]))
+         end
+      else if n < 1000 then
+         let
+            s = string_concat(word[n / 100], " hundred")
+         in
+            if n mod 100 = 0 then
+               s
+            else
+               string_concat(s, string_concat(" and ", wordify(n mod 100)))
+         end
+      else if n < 1000000 then
+         let
+            s = string_concat(wordify(n / 1000), " thousand")
+         in
+            if n mod 1000 = 0 then
+               s
+            else if n mod 1000 > 100 then
+               string_concat(s, string_concat(", ", wordify(n mod 1000)))
+            else
+               string_concat(s, string_concat(" and ", wordify(n mod 1000)))
+         end
+      else
+         "NUMBER IS OVER ONE MILLION!!!"
+
+   count(n: int): int =
+      if n < 20 then
+         word_count[n]
+      else if n < 100 then
+         tens_count[n / 10] + count(n mod 10)
+      else if n < 1000 then
+         let
+            h = word_count[n / 100] + 7
+         in
+            if n mod 100 = 0 then
+               h
+            else
+               h + 3 + count(n mod 100)
+         end
+      else if n < 1000000 then
+         let
+            t = count(n / 1000) + 8
+         in
+            if n mod 1000 = 0 then
+               t
+            else if n mod 1000 > 100 then
+               t + count(n mod 1000)
+            else
+               t + count(n mod 1000) + 3
+         end
+      else
+         0
+
+in
+   word[1] := "one"
+   word[2] := "two"
+   word[3] := "three"
+   word[4] := "four"
+   word[5] := "five"
+   word[6] := "six"
+   word[7] := "seven"
+   word[8] := "eight"
+   word[9] := "nine"
+   word[10] := "ten"
+   word[11] := "eleven"
+   word[12] := "twelve"
+   word[13] := "thirteen"
+   word[14] := "fourteen"
+   word[15] := "fifteen"
+   word[16] := "sixteen"
+   word[17] := "seventeen"
+   word[18] := "eighteen"
+   word[19] := "nineteen"
+
+   tens[1] := "ten"
+   tens[2] := "twenty"
+   tens[3] := "thirty"
+   tens[4] := "forty"
+   tens[5] := "fifty"
+   tens[6] := "sixty"
+   tens[7] := "seventy"
+   tens[8] := "eighty"
+   tens[9] := "ninety"
+
+   for i := 1 to 19 do
+      let
+         len = length(word[i])
+      in
+         word_count[i] := len
+      end
+
+   for i := 1 to 9 do
+      let
+         len = length(tens[i])
+      in
+         tens_count[i] := len
+      end
+
+   for i := 1 to 1000 do
+      begin
+         /* print(wordify(i)) */
+         total := total + count(i)
+      end
+
+   print(str(total))
+
+end

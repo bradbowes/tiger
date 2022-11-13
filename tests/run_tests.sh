@@ -143,9 +143,6 @@ in
    print(str(square(square(5))))
 end" "625"
 
-# test_code "let a = read() b = read() in (print(b) print(a)) end" "0"
-# test_code "(print(\"hello, world\"); print(str(0)))" "hello, world
-# 0"
 
 test_code "let
    a = 10
@@ -333,8 +330,6 @@ end" "0
 
 test_code "print(str(length(\"abcdefg\")))" "7"
 
-# test_code "print(str(length(read())))" ""
-
 test_code "let
    s = \"hello, world!\"
    ss1 = substring(s, 7, 5)
@@ -470,8 +465,6 @@ end" "1
 104
 105"
 
-# END_COMMENT
-
 test_code "let
    s = string_concat(\"hello\", \" world\")
 in
@@ -479,7 +472,6 @@ in
    print(str(length(s)))
 end" "hello world
 11"
-
 
 test_code "print(str(string_compare(\"\", \"hello\")))" "-1"
 test_code "let
@@ -492,3 +484,28 @@ in
 end" "world
 hello"
 
+# END_COMMENT
+
+test_code "let
+   type s_array = array of string
+   type i_array = array of int
+   sa = s_array[5] of \"hello\"
+   ia = i_array[5] of 0
+in
+   sa[0] := \"one\"
+   sa[1] := \"two\"
+   sa[2] := \"three\"
+   sa[3] := \"four\"
+   sa[4] := \"five\"
+
+   for i := 0 to 4 do
+      ia[i] := length(sa[i])
+
+   for i := 0 to 4 do
+      print(str(ia[i]))
+
+end" "3
+3
+5
+4
+4"

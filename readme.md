@@ -12,14 +12,14 @@
   may also appear at the end of a sequence.
 - semicolons are optional but may change the meaning of a program, for
   example `a - b` isn't the same as `a; -b`.
-- added `mod` operator.
+- `mod` (integer division remainder) operator.
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
-- added boolean data type. Relational operators return booleans, `true` and
+- boolean data type. Relational operators return booleans, `true` and
   `false` are keyword literals.
-- added char data type. Char literals are `#` followed by a single letter in
+- char data type. Char literals are `#` followed by a single letter in
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
-- expression sequences are enclosed in `begin` and `end` instead of
+- sequences are enclosed in `begin` and `end` instead of
   parentheses.
 - let and begin must contain at least one expression.
 - variable declarations: `var` keyword not used, format is
@@ -30,21 +30,23 @@
 - string escape \^c (control character) not implemented.
 - no nested comments
 - type aliases are not implemented.
-- `break` expression is not implemented.
-- string comparison operators (`<`, `<=`, `>`, `>=`) not implemented.
-  Use `string_compare` function instead.
+- `break` is not implemented.
+- string comparison operators (`<`, `<=`, `>`, `>=`) not implemented --
+  use `string_compare` function instead.
 
 # To do
 
+- array bounds checking
 - tail call optimization
 - anonymous functions, first class functions
 - closures
 - file type
+- access to command line arguments
 - enum
 - case expressions
 - multi-dimensional arrays
 - array literals
-- overloads
+- overloaded functions
 - garbage collector
 - polymorphic types and functions
 - modules, separate compilation
