@@ -19,7 +19,7 @@ var
    bool_val: boolean;
    (* bind: binding; *)
    name, type_name: symbol;
-   e1, e2, cond, expr, expr2: node;
+   e1, e2, cond, left, right: node;
    op: op_tag;
    list: node_list;
    (* env: scope; *)
@@ -40,8 +40,8 @@ var
       n^.name := name;
       n^.type_name := type_name;
       if cond <> nil then n^.cond := transform(cond);
-      if expr <> nil then n^.expr := transform(expr);
-      if expr2 <> nil then n^.expr2 := transform(expr2);
+      if left <> nil then n^.left := transform(left);
+      if right <> nil then n^.right := transform(right);
       n^.op := op;
       if list <> nil then begin
          ls := make_list();
@@ -66,23 +66,23 @@ begin
    name := n^.name;
    type_name := n^.type_name;
    cond := n^.cond;
-   expr := n^.expr;
-   expr2 := n^.expr2;
+   left := n^.left;
+   right := n^.right;
    op := n^.op;
    list := n^.list;
    (* env := n^.env; *)
 
    case tag of
       unary_op_node: begin
-         e1 := transform(expr);
+         e1 := transform(left);
          if e1^.tag = integer_node then
             transform := make_integer_node(-(e1^.int_val), line, col)
          else
             transform := copy();
       end;
       binary_op_node: begin
-         e1 := transform(expr);
-         e2 := transform(expr2);
+         e1 := transform(left);
+         e2 := transform(right);
          if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
             case op of
                plus_op:
@@ -171,7 +171,7 @@ begin
          e1 := transform(cond);
          if e1^.tag = boolean_node then
             if e1^.bool_val then
-               transform := transform(expr)
+               transform := transform(left)
             else
                transform := make_empty_node(line, col)
          else
@@ -181,9 +181,9 @@ begin
          e1 := transform(cond);
          if e1^.tag = boolean_node then
             if e1^.bool_val then
-               transform := transform(expr)
+               transform := transform(left)
             else
-               transform := transform(expr2)
+               transform := transform(right)
          else
             transform := copy();
       end;

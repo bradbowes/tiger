@@ -61,7 +61,7 @@ type
       bool_val: boolean;
       binding: binding;
       name, type_name: symbol;
-      cond, expr, expr2: node;
+      cond, left, right: node;
       op: op_tag;
       list: node_list;
       env: scope;
@@ -151,8 +151,8 @@ begin
    n^.name := nil;
    n^.type_name := nil;
    n^.cond := nil;
-   n^.expr := nil;
-   n^.expr2 := nil;
+   n^.left := nil;
+   n^.right := nil;
    n^.op := nul_op;
    n^.list := nil;
    n^.env := nil;
@@ -164,8 +164,8 @@ function make_assign_node(variable, expr: node; line, col: longint): node;
 var n: node;
 begin
    n := make_node(assign_node, line, col);
-   n^.expr2 := variable;
-   n^.expr := expr;
+   n^.left := variable;
+   n^.right := expr;
    make_assign_node := n;
 end;
 
@@ -193,7 +193,7 @@ function make_field_var_node(obj: node; field: symbol; line, col: longint): node
 var n: node;
 begin
    n := make_node(field_var_node, line, col);
-   n^.expr := obj;
+   n^.left := obj;
    n^.name := field;
    make_field_var_node := n;
 end;
@@ -203,8 +203,8 @@ function make_indexed_var_node(arr, index: node; line, col: longint): node;
 var n: node;
 begin
    n := make_node(indexed_var_node, line, col);
-   n^.expr2 := arr;
-   n^.expr := index;
+   n^.left := arr;
+   n^.right := index;
    make_indexed_var_node := n;
 end;
 
@@ -262,7 +262,7 @@ var n: node;
 begin
    n := make_node(type_decl_node, line, col);
    n^.name := name;
-   n^.expr := spec;
+   n^.right := spec;
    make_type_decl_node := n;
 end;
 
@@ -273,7 +273,7 @@ begin
    n := make_node(var_decl_node, line, col);
    n^.name := name;
    n^.type_name := ty;
-   n^.expr := expr;
+   n^.right := expr;
    make_var_decl_node := n;
 end;
 
@@ -285,7 +285,7 @@ begin
    n^.name := name;
    n^.list := params;
    n^.type_name := return_type;
-   n^.expr := body;
+   n^.right := body;
    make_fun_decl_node := n;
 end;
 
@@ -313,7 +313,7 @@ var n: node;
 begin
    n := make_node(unary_op_node, line, col);
    n^.op := op;
-   n^.expr := exp;
+   n^.left := exp;
    make_unary_op_node := n;
 end;
 
@@ -323,8 +323,8 @@ var n: node;
 begin
   n := make_node(binary_op_node, line, col);
   n^.op := op;
-  n^.expr := left;
-  n^.expr2 := right;
+  n^.left := left;
+  n^.right := right;
   make_binary_op_node := n;
 end;
 
@@ -333,8 +333,8 @@ function make_field_node(name: symbol; expr: node; line, col: longint): node;
 var n: node;
 begin
    n :=  make_node(field_node, line, col);
+   n^.left := expr;
    n^.name := name;
-   n^.expr := expr;
    make_field_node := n;
 end;
 
@@ -354,8 +354,8 @@ var n: node;
 begin
    n := make_node(if_else_node, line, col);
    n^.cond := condition;
-   n^.expr := consequent;
-   n^.expr2 := alternative;
+   n^.left := consequent;
+   n^.right := alternative;
    make_if_else_node := n
 end;
 
@@ -365,7 +365,7 @@ var n: node;
 begin
    n := make_node(if_node, line, col);
    n^.cond := condition;
-   n^.expr := consequent;
+   n^.left := consequent;
    make_if_node := n;
 end;
 
@@ -375,7 +375,7 @@ var n: node;
 begin
    n := make_node(while_node, line, col);
    n^.cond := condition;
-   n^.expr := body;
+   n^.left := body;
    make_while_node := n;
 end;
 
@@ -385,9 +385,9 @@ var n: node;
 begin
    n := make_node(for_node, line, col);
    n^.name := iter;
-   n^.expr2 := start;
+   n^.left := start;
    n^.cond := finish;
-   n^.expr := body;
+   n^.right := body;
    make_for_node := n;
 end;
 
@@ -397,7 +397,7 @@ var n: node;
 begin
    n := make_node(let_node, line, col);
    n^.list := decls;
-   n^.expr := body;
+   n^.left := body;
    make_let_node := n;
 end;
 
@@ -426,8 +426,8 @@ var n: node;
 begin
    n := make_node(array_node, line, col);
    n^.type_name := ty;
-   n^.expr2 := size;
-   n^.expr := value;
+   n^.left := size;
+   n^.right := value;
    make_array_node := n;
 end;
 

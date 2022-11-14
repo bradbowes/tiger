@@ -52,15 +52,15 @@ var s: string;
 begin
    case n^.tag of
       assign_node:
-         format := format(n^.expr2) + ' := ' + format(n^.expr);
+         format := format(n^.left) + ' := ' + format(n^.right);
       call_node:
          format :=  n^.name^.id + '(' + format_list(n^.list, ', ', false) + ')';
       simple_var_node:
          format := n^.name^.id;
       field_var_node:
-         format := format(n^.expr) + '.' + n^.name^.id;
+         format := format(n^.left) + '.' + n^.name^.id;
       indexed_var_node:
-         format := format(n^.expr2) + '[' + format(n^.expr) + ']';
+         format := format(n^.left) + '[' + format(n^.right) + ']';
       integer_node: begin
          str(n^.int_val, s);
          format := s;
@@ -74,12 +74,12 @@ begin
       nil_node:
          format := 'nil';
       type_decl_node:
-         format := newline + 'type ' + n^.name^.id + ' = ' + format(n^.expr);
+         format := newline + 'type ' + n^.name^.id + ' = ' + format(n^.right);
       var_decl_node: begin
          s := n^.name^.id;
          if n^.type_name <> nil then
             s := s + ': ' + n^.type_name^.id;
-         format := s + ' = ' + format( n^.expr);
+         format := s + ' = ' + format( n^.right);
       end;
       fun_decl_node: begin
          s := n^.name^.id +
@@ -88,7 +88,7 @@ begin
             s := s + ': ' + n^.type_name^.id;
          s := s + ' = ';
          indent;
-         s := s + newline + format(n^.expr);
+         s := s + newline + format(n^.right);
          dedent;
          format := s + newline;
       end;
@@ -97,48 +97,48 @@ begin
       array_desc_node:
          format := 'array of ' + n^.type_name^.id;
       unary_op_node:
-         format := op_display[n^.op] + ' ' + format(n^.expr);
+         format := op_display[n^.op] + ' ' + format(n^.left);
       binary_op_node:
-         format := '(' + format(n^.expr) + ' ' + op_display[n^.op] + ' ' + format(n^.expr2) + ')';
+         format := '(' + format(n^.left) + ' ' + op_display[n^.op] + ' ' + format(n^.right) + ')';
       field_node:
-         format := n^.name^.id + ' = ' + format(n^.expr);
+         format := n^.name^.id + ' = ' + format(n^.left);
       field_desc_node:
          format := n^.name^.id + ': ' + n^.type_name^.id;
       if_else_node: begin
          s := 'if ' + format(n^.cond) + ' then';
          indent;
-         s := s + newline + format(n^.expr);
+         s := s + newline + format(n^.left);
          dedent;
          s := s + newline + 'else';
          indent;
-         s := s + newline + format(n^.expr2);
+         s := s + newline + format(n^.right);
          dedent;
          format := s;
       end;
       if_node: begin
          s := 'if ' + format(n^.cond) + ' then';
          indent;
-         s := s + newline + format(n^.expr);
+         s := s + newline + format(n^.left);
          dedent;
          format := s;
       end;
       while_node: begin
          s := 'while ' + format(n^.cond) + ' do';
          indent;
-         s := s + newline + format(n^.expr);
+         s := s + newline + format(n^.left);
          dedent;
          format := s;
       end;
       for_node: begin
-         s := 'for ' + n^.name^.id + ' := ' + format(n^.expr2) + ' to ' + format(n^.cond) + ' do';
+         s := 'for ' + n^.name^.id + ' := ' + format(n^.left) + ' to ' + format(n^.cond) + ' do';
          indent;
-         s := s + newline + format(n^.expr);
+         s := s + newline + format(n^.right);
          dedent;
          format := s;
       end;
       let_node: begin
          s := 'let' + format_list(n^.list, '', true) + newline + 'in ';
-         s := s + format_list(n^.expr^.list, ';', true);
+         s := s + format_list(n^.left^.list, ';', true);
          format := s + newline + 'end';
       end;
       sequence_node: begin
@@ -149,7 +149,7 @@ begin
       record_node:
          format := n^.type_name^.id + ' {' + format_list(n^.list, ',', true) + newline + '}';
       array_node:
-         format := n^.type_name^.id + '[' + format(n^.expr2) + '] of ' + format(n^.expr);
+         format := n^.type_name^.id + '[' + format(n^.left) + '] of ' + format(n^.right);
       empty_node:
          format := '';
       else begin
