@@ -10,85 +10,86 @@ function transform(n: node): node;
 
 implementation
 
-uses symbols, ops, bindings, types, semant, externals;
+uses symbols, ops, bindings, types, semant;
 
 function trans1(n: node): node; forward;
+function trans2(n: node): node; forward;
+
+var
+   tf1: tf_function = @trans1;
+   tf2: tf_function = @trans2;
+
+function copy_node(n: node; tf: tf_function): node;
+var
+   new_node: node;
+   ls: node_list;
+   it: node_list_item;
+begin
+   new(new_node);
+   new_node^.tag := n^.tag;
+   new_node^.line := n^.line;
+   new_node^.col := n^.col;
+   new_node^.int_val := n^.int_val;
+   new_node^.string_val := n^.string_val;
+   new_node^.bool_val := n^.bool_val;
+   new_node^.name := n^.name;
+   new_node^.type_name := n^.type_name;
+   if n^.cond <> nil then new_node^.cond := tf(n^.cond);
+   if n^.left <> nil then new_node^.left := tf(n^.left);
+   if n^.right <> nil then new_node^.right := tf(n^.right);
+   new_node^.op := n^.op;
+   if n^.list <> nil then begin
+      ls := make_list();
+      it := n^.list^.first;
+      while it <> nil do begin
+         append(ls, tf(it^.node));
+         it := it^.next;
+      end;
+      new_node^.list := ls;
+   end;
+   copy_node := new_node;
+end;
 
 
 function transform(n: node): node;
+
+var
+   ast1, ast2: node;
+
+   procedure check(n: node);
+   begin
+      type_check(n, 1, 1, add_scope(global_env), add_scope(global_tenv));
+   end;
+
+
 begin
-   load_externals();
-   type_check(n, 1, 1, add_scope(global_env), add_scope(global_tenv));
-   n := trans1(n);
-   type_check(n, 1, 1, add_scope(global_env), add_scope(global_tenv));
-   n := trans1(n);
-   type_check(n, 1, 1, add_scope(global_env), add_scope(global_tenv));
-   transform := n;
+   check(n);
+   ast1 := trans1(n);
+   check(ast1);
+   ast2 := trans1(ast1);
+   check(ast2);
+   ast1 := trans2(ast2);
+   check(ast1);
+   transform := ast1;
 end;
 
 function trans1(n: node): node;
 var
-   tag: node_tag;
    line, col: longint;
-   int_val: int64;
-   string_val: symbol;
-   bool_val: boolean;
    bind: binding;
-   name, type_name: symbol;
    e1, e2, cond, left, right: node;
    op: op_tag;
-   list: node_list;
-   (* env: scope; *)
-
-   function copy(): node;
-   var
-      n: node;
-      ls: node_list;
-      it: node_list_item;
-   begin
-      new(n);
-      n^.tag := tag;
-      n^.line := line;
-      n^.col := col;
-      n^.int_val := int_val;
-      n^.string_val := string_val;
-      n^.bool_val := bool_val;
-      n^.name := name;
-      n^.type_name := type_name;
-      if cond <> nil then n^.cond := trans1(cond);
-      if left <> nil then n^.left := trans1(left);
-      if right <> nil then n^.right := trans1(right);
-      n^.op := op;
-      if list <> nil then begin
-         ls := make_list();
-         it := list^.first;
-         while it <> nil do begin
-            append(ls, trans1(it^.node));
-            it := it^.next;
-         end;
-         n^.list := ls;
-      end;
-      copy := n;
-   end;
 
 begin
-   tag := n^.tag;
    line := n^.line;
    col := n^.col;
-   int_val := n^.int_val;
-   string_val := n^.string_val;
-   bool_val := n^.bool_val;
    bind := n^.binding;
-   name := n^.name;
-   type_name := n^.type_name;
    cond := n^.cond;
    left := n^.left;
    right := n^.right;
    op := n^.op;
-   list := n^.list;
-   (* env := n^.env; *)
 
-   case tag of
+   case n^.tag of
       simple_var_node:
          if (not bind^.mutates) and (bind^.const_value) then
             if bind^.ty = int_type then
@@ -100,15 +101,15 @@ begin
             else if bind^.ty = string_type then
                trans1 := make_string_node(bind^.string_val, line, col)
             else
-               trans1 := copy()
+               trans1 := copy_node(n, tf1)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       unary_op_node: begin
          e1 := trans1(left);
          if e1^.tag = integer_node then
             trans1 := make_integer_node(-(e1^.int_val), line, col)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       end;
       binary_op_node: begin
          e1 := trans1(left);
@@ -138,7 +139,7 @@ begin
                neq_op:
                   trans1 := make_boolean_node(e1^.int_val <> e2^.int_val, line, col);
                else
-                  trans1 := copy();
+                  trans1 := copy_node(n, tf1);
             end
          else if (e1^.tag = char_node) and (e2^.tag = char_node) then
             case op of
@@ -159,7 +160,7 @@ begin
                neq_op:
                   trans1 := make_boolean_node(e1^.int_val <> e2^.int_val, line, col);
                else
-                  trans1 := copy();
+                  trans1 := copy_node(n, tf1);
             end
          else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
             case op of
@@ -172,7 +173,7 @@ begin
                or_op:
                   trans1 := make_boolean_node(e1^.bool_val or e2^.bool_val, line, col);
                else
-                  trans1 := copy();
+                  trans1 := copy_node(n, tf1);
             end
          else if (op = and_op) then
             if e1^.tag = boolean_node then
@@ -183,7 +184,7 @@ begin
             else if (e2^.tag = boolean_node) and e2^.bool_val then
                trans1 := e1
             else
-               trans1 := copy()
+               trans1 := copy_node(n, tf1)
          else if (op = or_op) then
             if e1^.tag = boolean_node then
                if e1^.bool_val then
@@ -193,9 +194,9 @@ begin
             else if (e2^.tag = boolean_node) and (not e2^.bool_val) then
                trans1 := e1
             else
-               trans1 := copy()
+               trans1 := copy_node(n, tf1)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       end;
       if_node: begin
          e1 := trans1(cond);
@@ -205,7 +206,7 @@ begin
             else
                trans1 := make_empty_node(line, col)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       end;
       if_else_node: begin
          e1 := trans1(cond);
@@ -215,18 +216,30 @@ begin
             else
                trans1 := trans1(right)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       end;
       while_node: begin
          e1 := trans1(cond);
          if (e1^.tag = boolean_node) and (not e1^.bool_val) then
             trans1 := make_empty_node(line, col)
          else
-            trans1 := copy();
+            trans1 := copy_node(n, tf1);
       end;
       else
-         trans1 := copy();
+         trans1 := copy_node(n, tf1);
    end;
+end;
+
+
+function trans2(n: node): node;
+begin
+   if n^.tag = var_decl_node then
+      if (not n^.binding^.mutates) and (n^.binding^.const_value) then
+         trans2 := make_empty_node(n^.line, n^.col)
+      else
+         trans2 := copy_node(n, tf2)
+   else
+      trans2 := copy_node(n, tf2);
 end;
 
 end.

@@ -376,7 +376,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty: spec;
       new_si: longint;
       left: node;
-      b: binding;
    begin
       left := n^.left;
       case left^.tag of

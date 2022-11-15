@@ -2,7 +2,7 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, transforms;
+uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, transforms, externals;
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -417,7 +417,8 @@ var
       emit('   movq %%rsi, %d(%%rbp)', [si - 8]);
       emit_expression(n^.right, si - 16, nest);
       emit('   movq %d(%%rbp), %%rsi', [si - 8]);
-      if (n^.left^.binding <> nil) and (n^.left^.binding^.ty = string_type) then
+      if ((n^.left^.binding <> nil) and (n^.left^.binding^.ty = string_type)) or
+         (n^.left^.tag = string_node) then
          emit('   movb 8(%%rsi, %%rax, 1), %%al' + lineending +
               '   andq $0x00000000000000ff, %%rax', [])
       else
@@ -610,8 +611,8 @@ end;
 
 
 begin
-   ast := parse(paramstr(1));
-   ast := transform(ast);
+   load_externals();
+   ast := transform(parse(paramstr(1)));
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);

@@ -1,10 +1,10 @@
 program print;
 uses
-   nodes, formats, parsers, transforms;
+   nodes, formats, parsers, transforms, externals;
 var
    ast: node;
 begin
-   ast := parse(paramstr(1));
-   ast := transform(ast);
+   load_externals();
+   ast := transform(parse(paramstr(1)));
    writeln(format(ast));
 end.

@@ -34,6 +34,7 @@ clean:
 	rm -f compile
 	rm -f *.o
 	rm -f *.s
+	rm -f a.out
 	rm -f ppas.sh
 	rm -f *.ppu
 	rm -f lib/lib.o
