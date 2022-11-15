@@ -58,24 +58,40 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    procedure check_var_decl(n: node; si, offset: longint; env, tenv: scope);
    var
       ty1, ty2: spec;
+      b: binding;
+      right: node;
+      line, col: longint;
    begin
-      ty1 := type_check(n^.right, si, nest, env, tenv);
+      right := n^.right;
+      line := n^.line;
+      col := n^.col;
+      ty1 := type_check(right, si, nest, env, tenv);
       ty2 := nil;
       if ty1 = void_type then
-         err(n^.name^.id + ' variable initializer doesn''t produce a value', n^.right^.line, n^.right^.col);
+         err(n^.name^.id + ' variable initializer doesn''t produce a value', right^.line, right^.col);
 
       if (n^.type_name = nil) then
          if  (ty1 = nil_type) then
-            err('variable with nil initializer needs explicit type', n^.line, n^.col)
+            err('variable with nil initializer needs explicit type', line, col)
          else
             ty2 := ty1
       else
-         ty2 := lookup(tenv, n^.type_name, n^.line, n^.col)^.ty;
+         ty2 := lookup(tenv, n^.type_name, line, col)^.ty;
 
       if not compatible(ty1, ty2) then
-         err('initializer doesn''t match type spec', n^.line, n^.col);
+         err('initializer doesn''t match type spec', line, col);
 
-      n^.binding := bind(env, n^.name, ty2, offset, nest, n^.line, n^.col);
+      b := bind(env, n^.name, ty2, offset, nest, line, col);
+      if  right^.tag in [integer_node, char_node, string_node, boolean_node] then
+         begin
+            b^.const_value := true;
+            case right^.tag of
+               integer_node, char_node: b^.int_val := right^.int_val;
+               string_node: b^.string_val := right^.string_val;
+               boolean_node: b^.bool_val := right^.bool_val;
+            end;
+         end;
+      n^.binding := b;
    end;
 
 

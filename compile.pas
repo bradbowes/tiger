@@ -2,8 +2,7 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, semant, externals, transforms;
-
+uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, transforms;
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -611,11 +610,8 @@ end;
 
 
 begin
-   load_externals();
    ast := parse(paramstr(1));
-   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
    ast := transform(ast);
-   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
    assign(f, 'output.s');
    rewrite(f);
    emit(prologue, []);

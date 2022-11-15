@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -73,12 +73,6 @@ test_code "print(if 2 + 2 = 4 = true then \"true\" else \"false\")" "true"
 test_code "print(if nil = nil then \"true\" else \"false\")" "true"
 test_code "print(if nil <> nil then \"true\" else \"false\")" "false"
 
-test_code "let
-   a = 15 + 29
-   b =  6
-in
-   print(str(a + b + 9))
-end" "59"
 
 test_code "let a = 10 in
    let b = a * 2 in
@@ -508,5 +502,11 @@ end" "3
 4
 4"
 
-# END_COMMENT
+END_COMMENT
 
+test_code "let
+   a = 15 + 29
+   b =  6
+in
+   print(str(a + b + 9))
+end" "59"

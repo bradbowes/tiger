@@ -14,6 +14,7 @@ type
       nesting_level: longint;
       mutates: boolean;
       escapes: boolean;
+      const_value: boolean;
       string_val: symbol;
       int_val: int64;
       bool_val: boolean;
@@ -175,6 +176,7 @@ begin
    b^.external := false;
    b^.mutates := false;
    b^.escapes := false;
+   b^.const_value := false;
    env^.bindings := insert(t, b);
    bind := b;
 end;
