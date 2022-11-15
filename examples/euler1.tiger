@@ -1,0 +1,55 @@
+/*
+  If we list all the natural numbers below 10 that are multiples
+  of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.
+
+  Find the sum of all the multiples of 3 or 5 below 1000.
+*/
+
+
+let
+   /* imperative style */
+   imperative(): int =
+      let
+         n = 3
+         sum = 0
+      in
+         while n < 1000 do
+            begin
+               sum := sum + n;
+               n := n + 3
+            end;
+         n := 5;
+         while n < 1000 do
+            begin
+               if n mod 15 > 0 then
+                  sum := sum + n;
+               n := n + 5
+            end;
+         sum
+      end
+
+
+   /* functional style */
+   functional(): int =
+      let
+         threes(n: int, sum: int): int =
+            if n < 1000 then
+               threes(n + 3, sum + n)
+            else sum
+
+         fives(n: int, sum: int): int =
+            if n < 1000 then
+               if n mod 15 > 0 then
+                  fives(n + 5, sum + n)
+               else
+                  fives(n + 5, sum)
+            else sum
+      in
+         fives(5, threes(3, 0))
+      end
+
+in
+   print(str(imperative()));
+   print(str(functional()))
+end
+

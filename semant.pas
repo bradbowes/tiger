@@ -294,6 +294,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    begin
       b := lookup(env, n^.name, n^.line, n^.col);
       n^.binding := b;
+      if b^.nesting_level <> nest then
+         b^.escapes := true;
       check_simple_var := b^.ty;
    end;
 
@@ -357,15 +359,20 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    var
       ty: spec;
       new_si: longint;
+      left: node;
+      b: binding;
    begin
-      case n^.left^.tag of
+      left := n^.left;
+      case left^.tag of
          indexed_var_node: new_si := si + 2;
          field_var_node: new_si := si + 1;
          else new_si := si + 2;
       end;
-      ty := type_check(n^.left, new_si, nest, env, tenv);
+      ty := type_check(left, new_si, nest, env, tenv);
       if not compatible(ty, type_check(n^.right, new_si, nest, env, tenv)) then
          err('assignment type mismatch', n^.line, n^.col);
+      if left^.tag = simple_var_node then
+         left^.binding^.mutates := true;
       check_assign := void_type;
    end;
 

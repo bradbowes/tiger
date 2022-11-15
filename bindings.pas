@@ -14,6 +14,9 @@ type
       nesting_level: longint;
       mutates: boolean;
       escapes: boolean;
+      string_val: symbol;
+      int_val: int64;
+      bool_val: boolean;
    end;
 
    tree = ^tree_t;
