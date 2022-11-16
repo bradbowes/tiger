@@ -17,13 +17,12 @@
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
 - sequences are enclosed in `begin` and `end` instead of
   parentheses.
-- let and begin must contain at least one expression.
+- let and begin bodies must contain at least one expression.
 - variable declarations: `var` keyword not used, format is
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used, format is
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings can include linebreaks and span multiple lines.
-- string escape \^c (control character) not implemented.
 - no nested comments
 - type aliases are not implemented.
 - `break` is not implemented.

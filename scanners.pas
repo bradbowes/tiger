@@ -154,6 +154,15 @@ procedure scan(s: scanner);
                '\': escape := '\';
                '"': escape := '"';
                '''': escape := '''';
+               '^': begin
+                  next;
+                  if s^.ch in ['A'..'Z'] then
+                     escape := chr(ord(s^.ch) - 64)
+                  else if s^.ch in ['a'.. 'z'] then
+                     escape := chr(ord(s^.ch) - 96)
+                  else
+                     err('illegal escape sequence', s^.x, s^.y);
+               end;
                '0'..'9': begin
                   code := s^.ch;
                   next;

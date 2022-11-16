@@ -8,9 +8,27 @@ function format(n: node): string;
 
 implementation
 
-uses ops;
+uses ops, sysutils;
 
 var indent_level: integer;
+
+function escape(s: string): string;
+var
+   out: string = '';
+   i: longint;
+begin
+   for i := 1 to length(s) do
+      case s[i] of
+         #9: out := out + '\t';
+         #10: out := out + '\n';
+         #13: out := out + '\r';
+         '\': out := out + '\\';
+         '"': out := out + '\"';
+         #0..#8, #11, #12, #14..#31, #127..#255: out := out + '\' + formatfloat('000', ord(s[i]));
+         else out := out + s[i];
+      end;
+   escape := out;
+end;
 
 function newline: string;
 begin
@@ -66,9 +84,9 @@ begin
          format := s;
       end;
       string_node:
-         format := '"' + n^.string_val^.id + '"';
+         format := '"' + escape(n^.string_val^.id) + '"';
       char_node:
-         format := '#"' + chr(n^.int_val) + '"';
+         format := '#"' + escape(chr(n^.int_val)) + '"';
       boolean_node:
          if n^.bool_val then format := 'true' else format := 'false';
       nil_node:

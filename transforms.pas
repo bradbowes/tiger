@@ -21,7 +21,7 @@ var
 
 function copy_node(n: node; tf: tf_function): node;
 var
-   new_node: node;
+   new_node, tmp: node;
    ls: node_list;
    it: node_list_item;
 begin
@@ -42,7 +42,9 @@ begin
       ls := make_list();
       it := n^.list^.first;
       while it <> nil do begin
-         append(ls, tf(it^.node));
+         tmp := tf(it^.node);
+         if tmp^.tag <> empty_node then
+            append(ls, tmp);
          it := it^.next;
       end;
       new_node^.list := ls;
