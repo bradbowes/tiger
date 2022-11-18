@@ -7,6 +7,7 @@ uses symbols, ops, bindings;
 type
    node_tag = (assign_node,
                call_node,
+               tail_call_node,
                simple_var_node,
                field_var_node,
                indexed_var_node,
@@ -397,7 +398,7 @@ var n: node;
 begin
    n := make_node(let_node, line, col);
    n^.list := decls;
-   n^.left := body;
+   n^.right := body;
    make_let_node := n;
 end;
 

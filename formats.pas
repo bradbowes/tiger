@@ -71,7 +71,7 @@ begin
    case n^.tag of
       assign_node:
          format := format(n^.left) + ' := ' + format(n^.right);
-      call_node:
+      call_node, tail_call_node:
          format :=  n^.name^.id + '(' + format_list(n^.list, ', ', false) + ')';
       simple_var_node:
          format := n^.name^.id;
@@ -156,7 +156,7 @@ begin
       end;
       let_node: begin
          s := 'let' + format_list(n^.list, '', true) + newline + 'in ';
-         s := s + format_list(n^.left^.list, ';', true);
+         s := s + format_list(n^.right^.list, ';', true);
          format := s + newline + 'end';
       end;
       sequence_node: begin

@@ -24,7 +24,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "print(str(12345))" "12345"
 test_code "print(str(65536))" "65536"
@@ -502,7 +502,7 @@ end" "3
 4
 4"
 
-END_COMMENT
+# END_COMMENT
 
 test_code "let
    a = 15 + 29

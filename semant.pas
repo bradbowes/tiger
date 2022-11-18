@@ -129,6 +129,26 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
+   procedure find_tail_calls(n: node);
+   begin
+      case n^.tag of
+         call_node:
+            n^.tag := tail_call_node;
+         if_node:
+            find_tail_calls(n^.left);
+         if_else_node: begin
+            find_tail_calls(n^.left);
+            find_tail_calls(n^.right);
+         end;
+         sequence_node:
+            if n^.list^.last <> nil then
+               find_tail_calls(n^.list^.last^.node);
+         let_node:
+            find_tail_calls(n^.right);
+      end;
+   end;
+
+
    procedure check_fun_body(n: node; si: longint; env, tenv: scope);
    var
       ty, body_type: spec;
@@ -138,6 +158,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          body_type := type_check(n^.right, si, nest + 1, n^.env, tenv);
          if not compatible(ty^.base, body_type) then
             err('function return type doesn''t match declaration', n^.line, n^.col);
+         find_tail_calls(n^.right);
       end;
    end;
 
@@ -301,7 +322,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
       new_env^.stack_index := stack_index;
       n^.env := new_env;
-      check_let := type_check(n^.left, stack_index, nest, new_env, new_tenv);
+      check_let := type_check(n^.right, stack_index, nest, new_env, new_tenv);
    end;
 
 
@@ -586,7 +607,7 @@ begin
          type_check := check_if_else();
       if_node:
          type_check := check_if();
-      call_node:
+      call_node, tail_call_node:
          type_check := check_call();
       assign_node:
          type_check := check_assign();

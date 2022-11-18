@@ -155,7 +155,7 @@ var
          emit_expression(it^.node, stack_index, nest);
          it := it^.next;
       end;
-      emit_expression(n^.left, stack_index, nest);
+      emit_expression(n^.right, stack_index, nest);
    end;
 
 
@@ -588,7 +588,7 @@ begin
          emit_indexed_var();
       field_var_node:
          emit_field_var();
-      call_node:
+      call_node, tail_call_node:
          emit_call();
       if_else_node:
          emit_if_else();
