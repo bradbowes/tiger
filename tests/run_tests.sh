@@ -149,25 +149,6 @@ in
 end" "30"
 
 
-test_code "let w = 3 a(x: int): int =
-  let b(y: int): int =
-     let c(z: int): int = w + x + y + z in c(15) end
-  in b(10) end
-in print(str(a(5))) end" "33"
-
-
-test_code "let
-   outer(n: int): int =
-      let
-         inner1(): int = inner2()
-         inner2(): int = n
-      in
-         inner1()
-      end
-in
-   print(str(outer(5)))
-end" "5"
-
 # test_code "(print(str(72)); print(str(42)))" "72
 # 42"
 
@@ -502,8 +483,6 @@ end" "3
 4
 4"
 
-# END_COMMENT
-
 test_code "let
    a = 15 + 29
    b =  6
@@ -517,3 +496,45 @@ test_code "begin
 end" "4
 4"
 
+# END_COMMENT
+
+test_code "let
+   w = 3
+   a(x: int): int =
+      let
+         b(y: int): int =
+            let
+               c(z: int): int =
+                  begin
+                     print(str(w));
+                     print(str(x));
+                     print(str(y));
+                     print(str(z));
+                     w + x + y + z
+                  end
+            in
+               c(15)
+            end
+      in
+         b(10)
+      end
+in
+   print(str(a(5)))
+end" "3
+5
+10
+15
+33"
+
+
+test_code "let
+   outer(n: int): int =
+      let
+         inner1(): int = inner2()
+         inner2(): int = n
+      in
+         inner1()
+      end
+in
+   print(str(outer(5)))
+end" "5"

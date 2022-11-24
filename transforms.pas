@@ -19,7 +19,61 @@ var
    tf1: tf_function = @trans1;
    tf2: tf_function = @trans2;
 
+
+procedure delete_tree(t: tree);
+begin
+   if t^.left <> nil then delete_tree(t^.left);
+   if t^.right <> nil then delete_tree(t^.right);
+   dispose(t^.binding);
+   dispose(t);
+end;
+
+
+procedure delete_scope(var env: scope);
+begin
+   if (env <> global_env) and (env <> global_tenv) then begin
+      if (env^.bindings <> nil) then
+         delete_tree(env^.bindings);
+      dispose(env);
+      env := nil;
+   end;
+end;
+
+
+procedure delete_node(var n: node);
+var
+   it, tmp: node_list_item;
+begin
+   if n^.cond <> nil then delete_node(n^.cond);
+   if n^.left <> nil then delete_node(n^.left);
+   if n^.right <> nil then delete_node(n^.right);
+   if n^.list <> nil then begin
+      it := n^.list^.first;
+      while it <> nil do begin
+         tmp := it^.next;
+         if it^.node <> nil then delete_node(it^.node);
+         dispose(it);
+         it := tmp;
+      end;
+      dispose(n^.list);
+   end;
+   if n^.tenv <> nil then delete_scope(n^.tenv);
+   if n^.env <> nil then delete_scope(n^.env);
+   dispose(n);
+   n := nil;
+end;
+
+
 function copy_node(n: node; tf: tf_function): node;
+
+   function cp(n: node): node;
+   begin
+      if n = nil then
+         cp := nil
+      else
+         cp := tf(n);
+   end;
+
 var
    new_node, tmp: node;
    ls: node_list;
@@ -34,9 +88,9 @@ begin
    new_node^.bool_val := n^.bool_val;
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
-   if n^.cond <> nil then new_node^.cond := tf(n^.cond);
-   if n^.left <> nil then new_node^.left := tf(n^.left);
-   if n^.right <> nil then new_node^.right := tf(n^.right);
+   new_node^.cond := cp(n^.cond);
+   new_node^.left := cp(n^.left);
+   new_node^.right := cp(n^.right);
    new_node^.op := n^.op;
    if n^.list <> nil then begin
       ls := make_list();
@@ -56,7 +110,7 @@ end;
 function transform(n: node): node;
 
 var
-   ast1, ast2: node;
+   ast1, ast2, ast3, ast4: node;
 
    procedure check(n: node);
    begin
@@ -65,14 +119,18 @@ var
 
 
 begin
-   check(n);
-   ast1 := trans1(n);
+   ast1 := n;
    check(ast1);
    ast2 := trans1(ast1);
    check(ast2);
-   ast1 := trans2(ast2);
-   check(ast1);
-   transform := ast1;
+   ast3 := trans1(ast2);
+   delete_node(ast2);
+   delete_node(ast1);
+   check(ast3);
+   ast4 := trans2(ast3);
+   delete_node(ast3);
+   check(ast4);
+   transform := ast4;
 end;
 
 function trans1(n: node): node;
@@ -236,7 +294,7 @@ end;
 function trans2(n: node): node;
 begin
    if n^.tag = var_decl_node then
-      if (not n^.binding^.mutates) and (n^.binding^.const_value) then
+      if (n^.binding <> nil) and (not n^.binding^.mutates) and (n^.binding^.const_value) then
          trans2 := make_empty_node(n^.line, n^.col)
       else
          trans2 := copy_node(n, tf2)

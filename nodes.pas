@@ -66,6 +66,7 @@ type
       op: op_tag;
       list: node_list;
       env: scope;
+      tenv: scope;
    end;
 
 
@@ -157,6 +158,7 @@ begin
    n^.op := nul_op;
    n^.list := nil;
    n^.env := nil;
+   n^.tenv := nil;
    make_node := n;
 end;
 

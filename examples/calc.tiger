@@ -141,15 +141,17 @@ let
 
    value = sum()
 in
-   while t.op = newline or t.op = err do
+   while t.op <> quit do
       begin
-         if t.op = newline then
+         if t.op = err then
+            print(msg)
+         else if t.op = newline then
             begin
                write("= ");
                print(str(value))
             end
          else
-            print(msg);
+            print("syntax error");
          while ch = newline do
             ch := getchar();
          t := scan();

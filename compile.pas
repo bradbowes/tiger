@@ -313,6 +313,41 @@ var
    end;
 
 
+   procedure emit_tail_call();
+   var
+      target, i: longint;
+      arg: node_list_item;
+      pos: longint;
+   begin
+      target := n^.binding^.nesting_level;
+      pos := 16;
+      { link }
+      if not n^.binding^.external then
+         if target = nest then
+            emit('   movq %%rbp, %d(%%rbp)', [pos])
+         else begin
+            emit('   movq %%rbp, %%rbx' + lineending +
+                 '   movq 16(%%rbx), %%rbx', []);
+            for i := nest - 3 downto target do
+               emit('   movq 16(%%rbx), %%rbx', []);
+            emit('   movq %%rbx, %d(%%rbp)', [pos]);
+         end;
+      pos := pos + 8;
+      arg := n^.list^.first;
+      while arg <> nil do begin
+         emit_expression(arg^.node, -8, nest);
+         emit('   movq %%rax, %d(%%rbp)', [pos]);
+         pos := pos + 8;
+         arg := arg^.next;
+      end;
+      emit('   popq %%rbp', []);
+      if n^.binding^.external then
+         emit('   jmp f$_%s', [n^.name^.id])
+      else
+         emit('   jmp f%d$_%s', [n^.binding^.id, n^.name^.id]);
+   end;
+
+
    procedure emit_call();
    var
       stack_size, target, i: longint;
@@ -590,6 +625,10 @@ begin
          emit_field_var();
       call_node, tail_call_node:
          emit_call();
+      (*
+      tail_call_node:
+         emit_tail_call();
+      *)
       if_else_node:
          emit_if_else();
       if_node:

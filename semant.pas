@@ -211,8 +211,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          state: state_tag;
          group: node_list = nil;
          it: node_list_item;
-         has_var_decls: boolean = false;
-         has_type_decls: boolean = false;
          new_env, new_tenv: scope;
          stack_index, offset: longint;
 
@@ -274,26 +272,13 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
       it := n^.list^.first;
       while it <> nil do begin
-         case it^.node^.tag of
-            var_decl_node: begin
-               has_var_decls := true;
-               stack_index := stack_index + 1;
-            end;
-            fun_decl_node: has_var_decls := true;
-            type_decl_node: has_type_decls := true;
-         end;
+         if it^.node^.tag = var_decl_node then
+            stack_index := stack_index + 1;
          it := it^.next;
       end;
 
-      if has_type_decls then
-         new_tenv := add_scope(tenv)
-      else
-         new_tenv := tenv;
-
-      if has_var_decls then
-         new_env := add_scope(env)
-      else
-         new_env := env;
+      new_tenv := add_scope(tenv);
+      new_env := add_scope(env);
 
       it := n^.list^.first;
       while it <> nil do begin
@@ -322,6 +307,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
       new_env^.stack_index := stack_index;
       n^.env := new_env;
+      n^.tenv := new_tenv;
       check_let := type_check(n^.right, stack_index, nest, new_env, new_tenv);
    end;
 
