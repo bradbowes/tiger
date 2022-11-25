@@ -535,21 +535,21 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          name := value^.name;
          fc := find_check(name);
          if fc = nil then
-            err(name^.id + ' field doesn''t exist', value^.line, value ^.col);
+            err('''' + name^.id + ''' field doesn''t exist', value^.line, value ^.col);
          if fc^.check then
-            err(name^.id + ' field appears more than once.', value^.line, value^.col);
+            err('''' + name^.id + ''' field appears more than once.', value^.line, value^.col);
          field_ty := type_check(value^.left, si + n^.list^.length, nest, env, tenv);
          if compatible(field_ty, fc^.f^.ty) then
             fc^.check := true
          else
-            err(name^.id + ' field is wrong type', value^.line, value^.col);
+            err('''' + name^.id + ''' field is wrong type', value^.line, value^.col);
          it  := it^.next;
       end;
 
       fc := checks;
       while fc <> nil do begin
          if not fc^.check then
-            err(fc^.f^.name^.id + ' field is missing from record', n^.line, n^.col);
+            err('''' + fc^.f^.name^.id + ''' field is missing from record', n^.line, n^.col);
          fc := fc^.next;
       end;
 

@@ -6,7 +6,7 @@ output.s
 ppas.sh
 compile
 print
-tests/test*.tiger
+tests/test*.tig
 tests/test*.s
 tests/test*.out
 lib/*.h

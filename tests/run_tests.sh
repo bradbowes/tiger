@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 count=1
-rm -f test*.out test*.s test*.tiger
+rm -f test*.out test*.s test*.tig
 
 test_code () {
-   src=test$count.tiger
+   src=test$count.tig
    output=test$count.s
    exe=test$count.out
    echo

@@ -39,7 +39,6 @@
 - access to command line arguments
 - enum
 - case expressions
-- multi-dimensional arrays
 - array literals
 - overloaded functions
 - garbage collector

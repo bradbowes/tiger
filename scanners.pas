@@ -115,7 +115,7 @@ procedure scan(s: scanner);
 
    procedure skip_white;
    begin
-      while s^.ch in [' ', chr(9) .. chr(13)] do
+      while s^.ch in [' ', #9 .. #13] do
          next;
    end;
 
@@ -148,9 +148,11 @@ procedure scan(s: scanner);
          if s^.ch = '\' then begin
             next;
             case s^.ch of
-               't': escape := chr(9);   (* tab *)
-               'n': escape := chr(10);  (* newline *)
-               'r': escape := chr(13);  (* carriage return *)
+               't': escape := #9;  (* tab *)
+               'n': escape := #10; (* newline *)
+               'v': escape := #11; (* vertical tab *)
+               'f': escape := #12; (* form feed *)
+               'r': escape := #13; (* carriage return *)
                '\': escape := '\';
                '"': escape := '"';
                '''': escape := '''';

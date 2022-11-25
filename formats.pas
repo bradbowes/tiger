@@ -21,10 +21,12 @@ begin
       case s[i] of
          #9: out := out + '\t';
          #10: out := out + '\n';
+         #11: out := out + '\v';
+         #12: out := out + '\f';
          #13: out := out + '\r';
          '\': out := out + '\\';
          '"': out := out + '\"';
-         #0..#8, #11, #12, #14..#31, #127..#255: out := out + '\' + formatfloat('000', ord(s[i]));
+         #0..#8, #14..#31, #127..#255: out := out + '\' + formatfloat('000', ord(s[i]));
          else out := out + s[i];
       end;
    escape := out;

@@ -32,6 +32,7 @@ uninstall:
 
 clean:
 	rm -f compile
+	rm -f print
 	rm -f *.o
 	rm -f *.s
 	rm -f a.out
@@ -39,7 +40,7 @@ clean:
 	rm -f *.ppu
 	rm -f lib/lib.o
 	rm -f tests/test*.s
-	rm -f tests/test*.tiger
+	rm -f tests/test*.tig
 	rm -f tests/test*.out
 	rm -f examples/a.out
 	rm -f examples/output.s

@@ -1,0 +1,35 @@
+/*
+   Count the lines, words and characters in standard input
+*/
+
+let
+   ch = getchar()
+   lc = 0
+   wc = 0
+   cc = 0
+   inword = false
+in
+   while ch <> chr(-1) do
+      begin
+         cc := cc + 1;
+         if ch = #" " or (ch >= #"\t" and ch <= #"\r") then
+            begin
+               if ch = #"\n" then
+                  lc := lc + 1;
+               inword := false
+            end
+         else if inword = false then
+            begin
+               inword := true;
+               wc := wc + 1
+            end;
+         ch := getchar()
+      end;
+
+   putchar(#"\t");
+   write(str(lc));
+   putchar(#"\t");
+   write(str(wc));
+   putchar(#"\t");
+   print(str(cc))
+end

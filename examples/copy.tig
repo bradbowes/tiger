@@ -2,7 +2,6 @@
    Copy stdin to stdout until end of file
 */
 
-/*
 let
    ch = getchar()
 in
@@ -11,15 +10,4 @@ in
          putchar(ch);
          ch := getchar()
       end
-end
-*/
-
-let
-   copy(ch: char) =
-      if ch <> chr(-1) then begin
-         putchar(ch);
-         copy(getchar())
-      end
-in
-   copy(getchar())
 end
