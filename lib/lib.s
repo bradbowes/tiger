@@ -31,8 +31,6 @@ _main:
    movq %rdi, 32(%r14)                 // argc
    movq %rsi, 24(%r14)                 // argv
    xorq %rax, %rax
-   movq %rax, 16(%r14)                 // input_count
-   movq %rax, 8(%r14)                  // input_position
    movq $heap_size, %rdi               // allocate heap
    call _malloc
    cmpq $0, %rax                       // check for null

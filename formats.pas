@@ -158,7 +158,13 @@ begin
       end;
       let_node: begin
          s := 'let' + format_list(n^.list, '', true) + newline + 'in ';
-         s := s + format_list(n^.right^.list, ';', true);
+         if n^.right^.tag = sequence_node then
+            s := s + format_list(n^.right^.list, ';', true)
+         else begin
+            indent;
+            s := s + newline + format(n^.right);
+            dedent;
+         end;
          format := s + newline + 'end';
       end;
       sequence_node: begin

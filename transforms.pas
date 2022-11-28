@@ -10,7 +10,7 @@ function transform(n: node): node;
 
 implementation
 
-uses symbols, ops, bindings, types, semant;
+uses sysutils, symbols, ops, bindings, types, semant;
 
 function trans1(n: node): node; forward;
 function trans2(n: node): node; forward;
@@ -18,6 +18,16 @@ function trans2(n: node): node; forward;
 var
    tf1: tf_function = @trans1;
    tf2: tf_function = @trans2;
+   next_tmp_id: longint = 1;
+
+   function tmp(): symbol;
+   var
+      s: string;
+   begin
+      s := 'T$_' + inttostr(next_tmp_id);
+      next_tmp_id := next_tmp_id + 1;
+      tmp := intern(s);
+   end;
 
 
 procedure delete_tree(t: tree);
@@ -110,7 +120,7 @@ end;
 function transform(n: node): node;
 
 var
-   ast1, ast2, ast3, ast4: node;
+   ast1, ast2, ast3, ast4, ast5, ast6: node;
 
    procedure check(n: node);
    begin
@@ -130,6 +140,10 @@ begin
    ast4 := trans2(ast3);
    delete_node(ast3);
    check(ast4);
+(*
+   ast5 := trans3(ast4);
+   check(ast5);
+   *)
    transform := ast4;
 end;
 
@@ -137,8 +151,10 @@ function trans1(n: node): node;
 var
    line, col: longint;
    bind: binding;
-   e1, e2, cond, left, right: node;
+   e1, e2, cond, left, right, decl: node;
    op: op_tag;
+   decls: node_list;
+   it: node_list_item;
 
 begin
    line := n^.line;
@@ -285,6 +301,27 @@ begin
          else
             trans1 := copy_node(n, tf1);
       end;
+      let_node: begin
+         e2 := trans1(n^.right);
+         decls := make_list();
+         it := n^.list^.first;
+         while it <> nil do begin
+            decl := it^.node;
+            if (decl^.binding <> nil) and ((decl^.binding^.mutates) or (not decl^.binding^.const_value)) then
+            append(decls, trans1(decl));
+            it := it^.next;
+         end;
+         if decls^.length > 0 then
+            trans1 := make_let_node(decls, e2, line, col)
+         else
+            trans1 := e2;
+      end;
+      sequence_node:
+         case n^.list^.length of
+            0: trans1 := make_empty_node(line, col);
+            1: trans1 := trans1(n^.list^.first^.node);
+            else trans1 := copy_node(n, tf1);
+         end;
       else
          trans1 := copy_node(n, tf1);
    end;
@@ -292,14 +329,73 @@ end;
 
 
 function trans2(n: node): node;
+var
+   t1, t2: symbol;
+   e1, e2: node;
+   decls: node_list;
+
+   function compound(n: node): boolean;
+   begin
+      compound := not (n^.tag in [empty_node, let_node, simple_var_node, integer_node, char_node, string_node, boolean_node, nil_node]);
+   end;
+
 begin
-   if n^.tag = var_decl_node then
-      if (n^.binding <> nil) and (not n^.binding^.mutates) and (n^.binding^.const_value) then
-         trans2 := make_empty_node(n^.line, n^.col)
-      else
-         trans2 := copy_node(n, tf2)
+   e1 := nil;
+   e2 := nil;
+   decls := nil;
+   case n^.tag of
+      binary_op_node: begin
+         if compound(n^.left) then begin
+            t1 := tmp();
+            e1 := make_var_decl_node(t1, nil, trans2(n^.left), n^.line, n^.col);
+         end;
+         if compound(n^.right) then begin
+            t2 := tmp();
+            e2 := make_var_decl_node(t2, nil, trans2(n^.right), n^.right^.line, n^.right^.col);
+         end;
+         if (e1 <> nil) or (e2 <> nil) then begin
+            decls := make_list();
+            if e1 <> nil then begin
+               append(decls, e1);
+               if e2 <> nil then begin
+                  append(decls, e2);
+                  trans2 := make_let_node(decls,
+                                          make_binary_op_node(n^.op,
+                                                              make_simple_var_node(t1, n^.line, n^.col),
+                                                              make_simple_var_node(t2, n^.right^.line, n^.right^.col),
+                                                              n^.line,
+                                                              n^.col),
+                                          n^.line,
+                                          n^.col);
+               end
+               else
+                  trans2 := make_let_node(decls,
+                                          make_binary_op_node(n^.op,
+                                                               make_simple_var_node(t1, n^.line, n^.col),
+                                                               trans2(n^.right),
+                                                               n^.line,
+                                                               n^.col),
+                                          n^.line,
+                                          n^.col);
+            end
+            else begin
+               append(decls, e2);
+               trans2 := make_let_node(decls,
+                                       make_binary_op_node(n^.op,
+                                                           trans2(n^.left),
+                                                           make_simple_var_node(t2, n^.right^.line, n^.right^.col),
+                                                           n^.line,
+                                                           n^.col),
+                                       n^.line,
+                                       n^.col);
+            end;
+         end
+         else
+            trans2 := copy_node(n, tf2);
+      end;
    else
       trans2 := copy_node(n, tf2);
+   end;
 end;
 
 end.
