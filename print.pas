@@ -1,6 +1,6 @@
 program print;
 uses
-   nodes, formats, parsers, transforms, externals;
+   nodes, formats, parser, transforms, externals;
 var
    ast: node;
 begin

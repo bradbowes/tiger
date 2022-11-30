@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses symbols, types;
+uses math, symbols, types;
 
 type
    binding = ^binding_t;
@@ -24,6 +24,7 @@ type
    tree_t = record
       binding: binding;
       left, right: tree;
+      height: integer;
    end;
 
    scope = ^scope_t;
@@ -41,6 +42,7 @@ const
 
 
 function add_scope(env: scope): scope;
+procedure delete_scope(var env: scope);
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
 function lookup(env: scope; key: symbol; line, col: longint): binding;
 
@@ -64,57 +66,58 @@ begin
 end;
 
 
-function make_tree(binding: binding; left, right: tree): tree;
+function make_tree(binding: binding): tree;
 var
    t: tree;
 begin
    new(t);
    t^.binding := binding;
-   t^.left := left;
-   t^.right := right;
+   t^.left := nil;
+   t^.right := nil;
+   t^.height := 1;
    make_tree := t;
 end;
 
 
 function height(t: tree): Integer;
-var
-   l, r: integer;
 begin
-   l := 0; r := 0;
-   if not (t = nil) then begin
-      if not (t^.left = nil) then l := 1 + height(t^.left);
-      if not (t^.right = nil) then r := 1 + height(t^.right);
-   end;
-   if l > r then height := l else height := r
+   if t = nil then height := 0
+   else height := t^.height;
 end;
 
 
 function balance(t: tree): Integer;
 begin
    if t = nil then balance := 0
-   else balance := height (t^.left) - height (t^.right);
+   else balance := height(t^.left) - height(t^.right);
 end;
 
 
 function rotate_left(t: tree): tree;
+var
+   t1, tmp: tree;
 begin
-   rotate_left := make_tree(t^.right^.binding,
-                            make_tree(t^.binding,
-                                      t^.left,
-                                      t^.right^.left),
-                            t^.right^.right);
-   dispose(t);
+   t1 := t^.right;
+   tmp := t1^.left;
+   t1^.left := t;
+   t^.right := tmp;
+   t^.height := max(height(t^.left), height(t^.right)) + 1;
+   t1^.height := max(height(t1^.left), height(t1^.right)) + 1;
+   rotate_left := t1;
 end;
 
 
 function rotate_right(t: tree): tree;
+var
+   t1, tmp: tree;
 begin
-   rotate_right := make_tree(t^.left^.binding,
-                             t^.left^.left,
-                             make_tree(t^.binding,
-                                       t^.left^.right,
-                                       t^.right));
-   dispose(t);
+   t1 := t^.left;
+   tmp := t1^.right;
+   t1^.right := t;
+   t^.left := tmp;
+   t^.height := max(height(t^.left), height(t^.right)) + 1;
+   t1^.height := max(height(t1^.left), height(t1^.right)) + 1;
+   rotate_right := t1;
 end;
 
 
@@ -133,28 +136,33 @@ end;
 
 function insert(t: tree; b: binding) : tree;
 var
-   new_t: tree = nil;
    bal: Integer;
 begin
    if t = nil then
-      new_t := make_tree(b, nil, nil)
+      t := make_tree(b)
    else if b^.key < t^.binding^.key then
-      new_t := make_tree(t^.binding,
-                         insert(t^.left, b),
-                         t^.right)
+      t^.left := insert(t^.left, b)
    else
-      new_t := make_tree(t^.binding,
-                         t^.left,
-                         insert(t^.right, b));
+      t^.right := insert(t^.right, b);
 
-   bal := balance(new_t);
-   while (bal < -1) or (bal > 1) do begin
-      if bal > 1 then new_t := rotate_right(new_t)
-      else if bal < -1 then new_t := rotate_left(new_t);
-      bal := balance(new_t);
-   end;
+   bal := balance(t);
 
-   insert := new_t;
+   if (bal > 1) and (b^.key < t^.left^.binding^.key) then
+      t := rotate_right(t)
+   else if (bal < -1) and (b^.key > t^.right^.binding^.key) then
+      t := rotate_left(t)
+   else if (bal > 1) and (b^.key >  T^.left^.binding^.key) then
+      begin
+         t^.left := rotate_left(t^.left);
+         t := rotate_right(t);
+      end
+   else if (bal < -1) and (b^.key <  t^.right^.binding^.key) then
+      begin
+         t^.right := rotate_right(t^.right);
+         t := rotate_left(t);
+      end;
+
+   insert := t;
 end;
 
 
@@ -195,5 +203,24 @@ begin
       lookup := b;
 end;
 
+
+procedure delete_tree(t: tree);
+begin
+   if t^.left <> nil then delete_tree(t^.left);
+   if t^.right <> nil then delete_tree(t^.right);
+   dispose(t^.binding);
+   dispose(t);
+end;
+
+
+procedure delete_scope(var env: scope);
+begin
+   if (env <> global_env) and (env <> global_tenv) then begin
+      if (env^.bindings <> nil) then
+         delete_tree(env^.bindings);
+      dispose(env);
+      env := nil;
+   end;
+end;
 
 end.

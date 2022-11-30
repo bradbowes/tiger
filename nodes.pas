@@ -69,6 +69,8 @@ type
       tenv: scope;
    end;
 
+   tf_function = function(n: node): node;
+
 
 function make_list(): node_list;
 procedure append(list: node_list; n: node);
@@ -100,6 +102,8 @@ function make_let_node(decls: node_list; body: node; line, col: longint): node;
 function make_sequence_node(sequence: node_list; line, col: longint): node;
 function make_record_node(ty: symbol; fields: node_list; line, col: longint): node;
 function make_array_node(ty: symbol; size, value: node; line, col: longint): node;
+procedure delete_node(var n: node);
+function copy_node(n: node; tf: tf_function): node;
 
 
 implementation
@@ -433,6 +437,71 @@ begin
    n^.right := value;
    make_array_node := n;
 end;
+
+
+procedure delete_node(var n: node);
+var
+   it, tmp: node_list_item;
+begin
+   if n^.cond <> nil then delete_node(n^.cond);
+   if n^.left <> nil then delete_node(n^.left);
+   if n^.right <> nil then delete_node(n^.right);
+   if n^.list <> nil then begin
+      it := n^.list^.first;
+      while it <> nil do begin
+         tmp := it^.next;
+         if it^.node <> nil then delete_node(it^.node);
+         dispose(it);
+         it := tmp;
+      end;
+      dispose(n^.list);
+   end;
+   if n^.tenv <> nil then delete_scope(n^.tenv);
+   if n^.env <> nil then delete_scope(n^.env);
+   dispose(n);
+   n := nil;
+end;
+
+
+function copy_node(n: node; tf: tf_function): node;
+
+   function cp(n: node): node;
+   begin
+      if n = nil then
+         cp := nil
+      else
+         cp := tf(n);
+   end;
+
+var
+   new_node, tmp: node;
+   ls: node_list;
+   it: node_list_item;
+begin
+   new_node := make_node(n^.tag, n^.line, n^.col);
+   new_node^.int_val := n^.int_val;
+   new_node^.string_val := n^.string_val;
+   new_node^.bool_val := n^.bool_val;
+   new_node^.name := n^.name;
+   new_node^.type_name := n^.type_name;
+   new_node^.cond := cp(n^.cond);
+   new_node^.left := cp(n^.left);
+   new_node^.right := cp(n^.right);
+   new_node^.op := n^.op;
+   if n^.list <> nil then begin
+      ls := make_list();
+      it := n^.list^.first;
+      while it <> nil do begin
+         tmp := tf(it^.node);
+         if tmp^.tag <> empty_node then
+            append(ls, tmp);
+         it := it^.next;
+      end;
+      new_node^.list := ls
+   end;
+   copy_node := new_node;
+end;
+
 
 end.
 

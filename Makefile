@@ -1,14 +1,14 @@
 all:	compile print lib.o
 
-compile:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
-	parsers.pas bindings.pas types.pas semant.pas externals.pas \
-	transforms.pas compile.pas
+compile:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
+	parser.pas bindings.pas types.pas semant.pas externals.pas \
+	transforms.pas pass1.pas pass2.pas pass3.pas compile.pas
 	fpc -Sh -Px86_64 -O3 compile
 	strip compile
 
-print:	utils.pas symbols.pas scanners.pas ops.pas nodes.pas \
-	parsers.pas bindings.pas types.pas semant.pas externals.pas \
-	transforms.pas formats.pas print.pas
+print:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
+	parser.pas bindings.pas types.pas semant.pas externals.pas \
+	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas print.pas
 	fpc -Sh -Px86_64 -O3 print
 	strip print
 

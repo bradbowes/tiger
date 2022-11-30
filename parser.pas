@@ -1,8 +1,8 @@
-unit parsers;
+unit parser;
 
 interface
 
-uses utils, scanners, symbols, ops, nodes;
+uses utils, scanner, symbols, ops, nodes;
 
 function parse(file_name: string): node;
 
@@ -10,15 +10,15 @@ implementation
 
 function parse(file_name: string): node;
 var
-   the_scanner: scanner;
+   the_source: source;
 
    function get_expression: node; forward;
 
    procedure next;
    begin
-      scan(the_scanner);
+      scan(the_source);
       while token.tag = comment_token do
-         scan(the_scanner);
+         scan(the_source);
    end;
 
    function get_identifier: symbol;
@@ -644,7 +644,7 @@ var
 *)
 
 begin
-   the_scanner := make_scanner(file_name);
+   the_source := load_source(file_name);
    next;
    parse := get_expression();
    if token.tag <> eof_token then

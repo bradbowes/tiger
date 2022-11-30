@@ -12,6 +12,7 @@ uses utils, ops, symbols;
 
 function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
+
    function compatible(a, b: spec): boolean;
    begin
       compatible := (a = b) or
@@ -82,6 +83,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          err('initializer doesn''t match type spec', line, col);
 
       b := bind(env, n^.name, ty2, offset, nest, line, col);
+
       if  right^.tag in [integer_node, char_node, string_node, boolean_node] then
          begin
             b^.const_value := true;

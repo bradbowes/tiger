@@ -2,7 +2,7 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parsers, nodes, utils, ops, bindings, types, transforms, externals;
+uses sysutils, symbols, parser, nodes, utils, ops, bindings, types, transforms, externals;
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -129,9 +129,9 @@ begin
       f := fl^.fun;
       emit(lineending +
            '   .align 3' + lineending +
-           'f%d$_%s:' + lineending +
+           '%s:' + lineending +
            '   pushq %%rbp' + lineending +
-           '   movq %%rsp, %%rbp', [f^.binding^.id, f^.name^.id]);
+           '   movq %%rsp, %%rbp', [f^.name^.id]);
       emit_expression(f^.right, -8, f^.binding^.nesting_level + 1);
       emit('   popq %%rbp' + lineending +
            '   ret', []);
@@ -381,7 +381,7 @@ var
       if n^.binding^.external then
          emit('   call f$_%s', [n^.name^.id])
       else
-         emit('   call f%d$_%s', [n^.binding^.id, n^.name^.id]);
+         emit('   call %s', [n^.name^.id]);
       emit('   addq $%d, %%rsp', [stack_size]);
    end;
 

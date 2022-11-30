@@ -1,4 +1,4 @@
-unit scanners;
+unit scanner;
 
 interface
 
@@ -57,16 +57,16 @@ type
                 line, col: longint;
              end;
 
-   scanner = ^scanner_t;
-   scanner_t = record
+   source = ^source_t;
+   source_t = record
                   open: boolean;
                   src: text;
                   ch: char;
-                  x, y: longint;
+                  line, col: longint;
                end;
 
-function make_scanner(file_name: string): scanner;
-procedure scan(s: scanner);
+function load_source(file_name: string): source;
+procedure scan(s: source);
 
 var
    token: token_t;
@@ -76,7 +76,7 @@ implementation
 
 uses utils;
 
-procedure scan(s: scanner);
+procedure scan(s: source);
 
    procedure next;
    begin
@@ -88,10 +88,10 @@ procedure scan(s: scanner);
          end
          else begin
             read(s^.src, s^.ch);
-            s^.x := s^.x + 1;
+            s^.col := s^.col + 1;
             if s^.ch = chr(10) then begin
-               s^.y := s^.y + 1;
-               s^.x := 0;
+               s^.line := s^.line + 1;
+               s^.col := 0;
             end
          end
          else
@@ -163,7 +163,7 @@ procedure scan(s: scanner);
                   else if s^.ch in ['a'.. 'z'] then
                      escape := chr(ord(s^.ch) - 96)
                   else
-                     err('illegal escape sequence', s^.x, s^.y);
+                     err('illegal escape sequence', s^.line, s^.col);
                end;
                '0'..'9': begin
                   code := s^.ch;
@@ -171,15 +171,15 @@ procedure scan(s: scanner);
                   if s^.ch in ['0'..'9'] then
                      code := code + s^.ch
                   else
-                     err('illegal escape sequence', s^.x, s^.y);
+                     err('illegal escape sequence', s^.line, s^.col);
                   next;
                   if s^.ch in ['0'..'9'] then
                      code := code + s^.ch
                   else
-                     err('illegal escape sequence',  s^.x, s^.y);
+                     err('illegal escape sequence', s^.line, s^.col);
                   if code > '255' then
-                     err('illegal escape sequence',  s^.x, s^.y);
-                  escape := chr(atoi(code, s^.x, s^.y));
+                     err('illegal escape sequence', s^.line, s^.col);
+                  escape := chr(atoi(code, s^.line, s^.col));
                end;
                ' ', chr(9) .. chr(13): begin
                   skip_white;
@@ -188,10 +188,10 @@ procedure scan(s: scanner);
                      continue;
                   end
                   else
-                     err('illegal escape sequence',  s^.x, s^.y);
+                     err('illegal escape sequence', s^.line, s^.col);
                end;
                else
-                  err('illegal escape sequence',  s^.x, s^.y);
+                  err('illegal escape sequence', s^.line, s^.col);
             end;
             token.value := token.value + escape;
             next;
@@ -209,7 +209,7 @@ procedure scan(s: scanner);
       if s^.ch = '"' then
          get_string()
       else
-         err('illegal character literal', s^.x, s^.y);
+         err('illegal character literal', s^.line, s^.col);
       if length(token.value) <> 1 then
          err('illegal character literal', token.line, token.col);
       token.tag := char_token;
@@ -257,8 +257,8 @@ procedure scan(s: scanner);
 begin
    skip_white;
    token.value := '';
-   token.col := s^.x;
-   token.line := s^.y;
+   token.col := s^.col;
+   token.line := s^.line;
    if not s^.open then
    begin
       token.tag := eof_token;
@@ -315,17 +315,17 @@ begin
 end;
 
 
-function make_scanner(file_name: string): scanner;
-var s: scanner;
+function load_source(file_name: string): source;
+var s: source;
 begin
    new(s);
    assign(s^.src, file_name);
    reset(s^.src);
    s^.open := true;
    read(s^.src, s^.ch);
-   s^.x := 1;
-   s^.y := 1;
-   make_scanner := s;
+   s^.col := 1;
+   s^.line := 1;
+   load_source := s;
 end;
 
 
