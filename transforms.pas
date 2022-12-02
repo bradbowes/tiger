@@ -16,25 +16,29 @@ begin
 end;
 
 
+function opt(n: node; tf: tf_function): node;
+var
+   ast: node;
+begin
+   ast := tf(n);
+   delete_node(n);
+   opt := ast;
+   check(opt);
+end;
+
+
 function transform(n: node): node;
 
 var
-   ast1, ast2, ast3, ast4, ast5: node;
-
+   ast: node;
 begin
-   ast1 := n;
-   check(ast1);
-   ast2 := trans1(ast1);
-   check(ast2);
-   ast3:= trans1(ast2);
-   check(ast3);
-   delete_node(ast1);
-   delete_node(ast2);
-   ast4 := trans2(ast3);
-   check(ast4);
-   ast5 := trans3(ast4);
-   check(ast5);
-   transform := ast5;
+   ast := n;
+   check(ast);
+   ast := opt(ast, @trans1);
+   ast := opt(ast, @trans1);
+   ast := opt(ast, @trans2);
+   ast := opt(ast, @trans3);
+   transform := ast;
 end;
 
 end.

@@ -467,7 +467,7 @@ function copy_node(n: node; tf: tf_function): node;
 
    function cp(n: node): node;
    begin
-      if n = nil then
+      if (n = nil) or (n^.tag = empty_node) then
          cp := nil
       else
          cp := tf(n);
