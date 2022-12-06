@@ -17,7 +17,7 @@
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
 - sequences are enclosed in `begin` and `end` instead of
   parentheses.
-- let and begin bodies must contain at least one expression.
+- semicolon separators are optional between expressions in sequences.
 - variable declarations: `var` keyword not used, format is
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used, format is
@@ -54,7 +54,7 @@
 
 - read(): string
 - write(s: string)
-- print(s: string)              (appends newline to write output)
+- writeln(s: string)
 - getchar(): char
 - putchar(c: char)
 

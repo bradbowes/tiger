@@ -27,6 +27,6 @@ in
          c := 1000 - (a + b)
       end;
 
-   print(str(a * b * c))
+   writeln(str(a * b * c))
 
 end

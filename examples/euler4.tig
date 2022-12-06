@@ -36,5 +36,5 @@ in
             a := a + 1
       end;
 
-   print(str(answer))
+   writeln(str(answer))
 end

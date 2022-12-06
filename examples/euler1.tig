@@ -21,5 +21,5 @@ in
             sum := sum + n;
          n := n + 5
       end;
-   print(str(sum))
+   writeln(str(sum))
 end

@@ -17,5 +17,5 @@ let
       else
          sum
 in
-   print(str(even_sum(0, 1, 0)))
+   writeln(str(even_sum(0, 1, 0)))
 end

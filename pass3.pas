@@ -1,3 +1,9 @@
+(*
+  TODO:
+    need label, goto nodes to transform while, for loops
+    need address node for left side of asssignment
+*)
+
 unit pass3;
 interface
 
@@ -83,6 +89,31 @@ var
       expand_if_else := expand(make_if_else_node(cond, trans3(n^.left), trans3(n^.right), line, col));
    end;
 
+   function expand_if(): node;
+   var
+      cond: node;
+   begin
+      cond := reduce(n^.cond);
+      expand_if := expand(make_if_node(cond, trans3(n^.left), line, col));
+   end;
+
+   function expand_assign(): node;
+   var
+      right: node;
+   begin
+      right := reduce(n^.right);
+      expand_assign := expand(make_assign_node(trans3(n^.left), right, line, col));
+   end;
+
+   function expand_for(): node;
+   var
+      left, cond: node;
+   begin
+      left := reduce(n^.left);
+      cond := reduce(n^.cond);
+      expand_for := expand(make_for_node(n^.name, left, cond, trans3(n^.right), line, col));
+   end;
+
 begin
    line := n^.line;
    col := n^.col;
@@ -91,9 +122,11 @@ begin
    case n^.tag of
       call_node, tail_call_node: trans3 := expand_call();
       if_else_node: trans3 := expand_if_else();
+      if_node: trans3 := expand_if();
+      assign_node: trans3 := expand_assign();
       binary_op_node: trans3 := expand_binary_op();
-      else
-         trans3 := copy_node(n, tf);
+      for_node: trans3 := expand_for();
+      else trans3 := copy_node(n, tf);
    end;
 end;
 

@@ -34,7 +34,7 @@ let
          write("stretch tree of depth ");
          write(str(stretch_depth));
          write("\t check: ");
-         print(str(check(create(stretch_depth))));
+         writeln(str(check(create(stretch_depth))));
 
          long_lived_tree := create(max_depth);
 
@@ -54,7 +54,7 @@ let
                write("\t trees of depth ");
                write(str(n));
                write("\t check: ");
-               print(str(total))
+               writeln(str(total))
             end;
             n := n + 2
          end;
@@ -62,7 +62,7 @@ let
          write("long lived tree of depth ");
          write(str(max_depth));
          write("\t check: ");
-         print(str(check(long_lived_tree)))
+         writeln(str(check(long_lived_tree)))
       end
 
 in

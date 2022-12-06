@@ -47,6 +47,6 @@ let
          sequence
       end
 in
-   print(str(longest()))
+   writeln(str(longest()))
 end
 

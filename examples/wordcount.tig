@@ -31,5 +31,5 @@ in
    putchar(#"\t");
    write(str(wc));
    putchar(#"\t");
-   print(str(cc))
+   writeln(str(cc))
 end

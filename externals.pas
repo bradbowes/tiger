@@ -40,10 +40,10 @@ begin
    add_param(s, intern('s'), string_type, 0, 0);
    bind_external('write', s);
 
-   (* print *)
+   (* writeln *)
    s := make_function_type(void_type);
    add_param(s, intern('s'), string_type, 0, 0);
-   bind_external('print', s);
+   bind_external('writeln', s);
 
    (* putchar *)
    s := make_function_type(void_type);

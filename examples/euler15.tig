@@ -29,5 +29,5 @@ let
          g[n][n]
       end
 in
-   print(str(solve(20)))
+   writeln(str(solve(20)))
 end

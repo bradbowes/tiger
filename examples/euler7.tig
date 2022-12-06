@@ -30,5 +30,5 @@ in
             count := count + 1
       end;
 
-   print(str(n))
+   writeln(str(n))
 end

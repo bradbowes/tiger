@@ -42,6 +42,6 @@ in
             answer := product
       end;
 
-   print(str(answer))
+   writeln(str(answer))
 end
 

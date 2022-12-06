@@ -116,6 +116,7 @@ done_input:
    ret
 
 
+/*
 .align 3
 .global f$_putchar
 f$_putchar:
@@ -127,7 +128,18 @@ f$_putchar:
    movq $SYS_WRITE, %rax
    syscall
    ret
+*/
 
+.align 3
+.globl f$_putchar
+f$_putchar:
+   movq $STD_OUTPUT, %rdi
+   leaq 16(%rsp), %rsi
+   movq $1, %rdx
+   movq $SYS_WRITE, %rax
+   syscall
+   ret
+   
 
 .align 3
 .globl f$_write
@@ -146,8 +158,8 @@ f$_write:
 
 
 .align 3
-.globl f$_print
-f$_print:
+.globl f$_writeln
+f$_writeln:
    movq 16(%rsp), %rax
    movq %rax, 8(%rsp)
    call f$_write

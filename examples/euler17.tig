@@ -132,10 +132,9 @@ in
 
    for i := 1 to 1000 do
       begin
-         /* print(wordify(i)); */
          total := total + count(i)
       end;
 
-   print(str(total))
+   writeln(str(total))
 
 end

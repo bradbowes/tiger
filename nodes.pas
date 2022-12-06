@@ -484,21 +484,21 @@ begin
    new_node^.bool_val := n^.bool_val;
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
-   new_node^.cond := cp(n^.cond);
-   new_node^.left := cp(n^.left);
-   new_node^.right := cp(n^.right);
    new_node^.op := n^.op;
    if n^.list <> nil then begin
       ls := make_list();
       it := n^.list^.first;
       while it <> nil do begin
-         tmp := tf(it^.node);
-         if tmp^.tag <> empty_node then
+         tmp := cp(it^.node);
+         if tmp <> nil then
             append(ls, tmp);
          it := it^.next;
       end;
       new_node^.list := ls
    end;
+   new_node^.cond := cp(n^.cond);
+   new_node^.left := cp(n^.left);
+   new_node^.right := cp(n^.right);
    copy_node := new_node;
 end;
 

@@ -146,8 +146,8 @@ in
 
    sum := add_all();
 
-   print(sum);
-   print(substring(sum, 0, 10))
+   writeln(sum);
+   writeln(substring(sum, 0, 10))
 
 end
 
