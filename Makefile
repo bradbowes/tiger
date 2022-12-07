@@ -37,9 +37,7 @@ clean:
 	rm -f ppas.sh
 	rm -f *.ppu
 	rm -f lib/lib.o
-	rm -f tests/test*.s
-	rm -f tests/test*.tig
-	rm -f tests/test*.out
+	rm -f tests/test*
 	rm -f examples/*.o
 	rm -f examples/*.s
 	rm -f examples/binary_trees

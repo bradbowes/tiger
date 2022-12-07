@@ -2,11 +2,10 @@
 *.o
 *.ppu
 a.out
-output.s
+*.s
 ppas.sh
 compile
 print
-tests/test*.tig
-tests/test*.s
-tests/test*.out
+tests/test*
 lib/*.h
+

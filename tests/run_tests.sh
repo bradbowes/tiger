@@ -1,18 +1,15 @@
 #!/bin/zsh
 
 count=1
-rm -f test*.out test*.s test*.tig
+rm -f test*.o test*.s test*.tig test*
 
 test_code () {
    src=test$count.tig
-   output=test$count.s
-   exe=test$count.out
+   exe=test$count
    echo
    echo '\e[0;33mtesting' \#$count ...'\e[0m'
    echo $1 > $src
    ../compile $src
-   mv output.s $output
-   cc -o $exe ../lib/lib.s $output
    echo $1 '=>' $2
    if [ "$(./$exe)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m'
