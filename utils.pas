@@ -9,7 +9,7 @@ implementation
 
 procedure err(msg : string; line, col : longint);
 begin
-   writeln('Error: ', msg, ', line: ', line, ', col: ', col);
+   writeln(StdErr, 'Error: ', msg, ', line: ', line, ', col: ', col);
    halt(1);
 end;
 
@@ -21,10 +21,11 @@ begin
    val(s, i, c);
    if c = 0 then
       atoi := i
-   else begin
-      atoi := 0;
-      err('Bad integer format: ''' + s + '''', line, col);
-   end;
+   else
+      begin
+         atoi := 0;
+         err('Bad integer format: ''' + s + '''', line, col);
+      end;
 end;
 
 end.

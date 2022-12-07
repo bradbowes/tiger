@@ -76,12 +76,13 @@ begin
    fl^.next := nil;
    if functions = nil then
       functions := fl
-   else begin
-      next := functions;
-      while next^.next <> nil do
-         next := next^.next;
-      next^.next := fl;
-   end;
+   else
+      begin
+         next := functions;
+         while next^.next <> nil do
+            next := next^.next;
+         next^.next := fl;
+      end;
 end;
 
 
@@ -106,17 +107,18 @@ var
 begin
    emit(lineending + '.data', []);
    sl := strings;
-   while sl <> nil do begin
-      s := sl^.sym^.id;
-      l := length(s);
-      s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
-      emit(lineending +
-           '   .align 3' + lineending +
-           'tiger$_string_%d:' + lineending +
-           '   .quad %d' + lineending +
-           '   .asciz "%s"', [sl^.id, l, s]);
-      sl := sl^.next;
-   end;
+   while sl <> nil do
+      begin
+         s := sl^.sym^.id;
+         l := length(s);
+         s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
+         emit(lineending +
+              '   .align 3' + lineending +
+              'tiger$_string_%d:' + lineending +
+              '   .quad %d' + lineending +
+              '   .asciz "%s"', [sl^.id, l, s]);
+         sl := sl^.next;
+      end;
 end;
 
 
@@ -126,18 +128,19 @@ var
    f: node;
 begin
    fl := functions;
-   while fl <> nil do begin
-      f := fl^.fun;
-      emit(lineending +
-           '   .align 3' + lineending +
-           '%s:' + lineending +
-           '   pushq %%rbp' + lineending +
-           '   movq %%rsp, %%rbp', [f^.name^.id]);
-      emit_expression(f^.right, -8, f^.binding^.nesting_level + 1);
-      emit('   popq %%rbp' + lineending +
-           '   ret', []);
-      fl := fl^.next;
-   end;
+   while fl <> nil do
+      begin
+         f := fl^.fun;
+         emit(lineending +
+              '   .align 3' + lineending +
+              '%s:' + lineending +
+              '   pushq %%rbp' + lineending +
+              '   movq %%rsp, %%rbp', [f^.name^.id]);
+         emit_expression(f^.right, -8, f^.binding^.nesting_level + 1);
+         emit('   popq %%rbp' + lineending +
+              '   ret', []);
+         fl := fl^.next;
+      end;
 end;
 
 
@@ -152,10 +155,11 @@ var
    begin
       stack_index := n^.env^.stack_index * -8 - 8; (* room for pushed %rbp *)
       it := n^.list^.first;
-      while it <> nil do begin
-         emit_expression(it^.node, stack_index, nest);
-         it := it^.next;
-      end;
+      while it <> nil do
+         begin
+            emit_expression(it^.node, stack_index, nest);
+            it := it^.next;
+         end;
       emit_expression(n^.right, stack_index, nest);
    end;
 
@@ -236,13 +240,14 @@ var
       if offset > 0 then offset := offset + 8; (* space for %rbp pushed *)
       if n^.binding^.nesting_level = nest then
          emit('   movq %d(%%rbp), %%rax', [offset])
-      else begin
-         emit('   movq %%rbp, %%rbx' + lineending +
-              '   movq 16(%%rbx), %%rbx', []);
-         for i := nest - 2 downto n^.binding^.nesting_level do
-            emit('   movq 16(%%rbx), %%rbx', []);
-         emit('   movq %d(%%rbx), %%rax', [offset]);
-      end;
+      else
+         begin
+            emit('   movq %%rbp, %%rbx' + lineending +
+                 '   movq 16(%%rbx), %%rbx', []);
+            for i := nest - 2 downto n^.binding^.nesting_level do
+               emit('   movq 16(%%rbx), %%rbx', []);
+            emit('   movq %d(%%rbx), %%rax', [offset]);
+         end;
    end;
 
 
@@ -258,13 +263,14 @@ var
       if offset > 0 then offset := offset + 8; (* space for pushed %rbp *)
       if b^.nesting_level = nest then
          emit('   movq %%rax, %d(%%rbp)', [offset])
-      else begin
-         emit('   movq %%rbp, %%rbx' + lineending +
-              '   movq 16(%%rbx), %%rbx', []);
-         for i := nest - 2 downto b^.nesting_level do
-            emit('   movq 16(%%rbx), %%rbx', []);
-         emit('   movq %%rax, %d(%%rbx)', [offset]);
-      end;
+      else
+         begin
+            emit('   movq %%rbp, %%rbx' + lineending +
+                 '   movq 16(%%rbx), %%rbx', []);
+            for i := nest - 2 downto b^.nesting_level do
+               emit('   movq 16(%%rbx), %%rbx', []);
+            emit('   movq %%rax, %d(%%rbx)', [offset]);
+         end;
    end;
 
 
@@ -326,21 +332,23 @@ var
       if not n^.binding^.external then
          if target = nest then
             emit('   movq %%rbp, %d(%%rbp)', [pos])
-         else begin
-            emit('   movq %%rbp, %%rbx' + lineending +
-                 '   movq 16(%%rbx), %%rbx', []);
-            for i := nest - 3 downto target do
-               emit('   movq 16(%%rbx), %%rbx', []);
-            emit('   movq %%rbx, %d(%%rbp)', [pos]);
-         end;
+         else
+            begin
+               emit('   movq %%rbp, %%rbx' + lineending +
+                    '   movq 16(%%rbx), %%rbx', []);
+               for i := nest - 3 downto target do
+                  emit('   movq 16(%%rbx), %%rbx', []);
+               emit('   movq %%rbx, %d(%%rbp)', [pos]);
+            end;
       pos := pos + 8;
       arg := n^.list^.first;
-      while arg <> nil do begin
-         emit_expression(arg^.node, -8, nest);
-         emit('   movq %%rax, %d(%%rbp)', [pos]);
-         pos := pos + 8;
-         arg := arg^.next;
-      end;
+      while arg <> nil do
+         begin
+            emit_expression(arg^.node, -8, nest);
+            emit('   movq %%rax, %d(%%rbp)', [pos]);
+            pos := pos + 8;
+            arg := arg^.next;
+         end;
       emit('   popq %%rbp', []);
       if n^.binding^.external then
          emit('   jmp f$_%s', [n^.name^.id])
@@ -363,21 +371,23 @@ var
       if not n^.binding^.external then
          if target = nest then
             emit('   movq %%rbp, %d(%%rbp)', [pos])
-         else begin
-            emit('   movq %%rbp, %%rbx' + lineending +
-                 '   movq 16(%%rbx), %%rbx', []);
-            for i := nest - 2 downto target do
-               emit('   movq 16(%%rbx), %%rbx', []);
-            emit('   movq %%rbx, %d(%%rbp)', [pos]);
-         end;
+         else
+            begin
+               emit('   movq %%rbp, %%rbx' + lineending +
+                    '   movq 16(%%rbx), %%rbx', []);
+               for i := nest - 2 downto target do
+                  emit('   movq 16(%%rbx), %%rbx', []);
+               emit('   movq %%rbx, %d(%%rbp)', [pos]);
+            end;
       pos := pos + 8;
       arg := n^.list^.first;
-      while arg <> nil do begin
-         emit_expression(arg^.node, -(stack_size + 8), nest);
-         emit('   movq %%rax, %d(%%rbp)', [pos]);
-         pos := pos + 8;
-         arg := arg^.next;
-      end;
+      while arg <> nil do
+         begin
+            emit_expression(arg^.node, -(stack_size + 8), nest);
+            emit('   movq %%rax, %d(%%rbp)', [pos]);
+            pos := pos + 8;
+            arg := arg^.next;
+         end;
       emit('   subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
          emit('   call f$_%s', [n^.name^.id])
@@ -392,10 +402,11 @@ var
       it: node_list_item;
    begin
       it := n^.list^.first;
-      while it <> nil do begin
-         emit_expression(it^.node, si, nest);
-         it := it^.next;
-      end;
+      while it <> nil do
+         begin
+            emit_expression(it^.node, si, nest);
+            it := it^.next;
+         end;
    end;
 
 
@@ -429,17 +440,19 @@ var
       stack_index := si + (size * -8);
       ty := n^.binding^.ty;
       it := n^.list^.first;
-      while it <> nil do begin
-         value := it^.node;
-         emit_expression(value^.left, stack_index, nest);
-         offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
-         emit('   movq %%rax, %d(%%rbp)', [si - offset * 8]);
-         it := it^.next;
-      end;
-      for i := 0 to size - 1 do begin
-         emit('   movq %d(%%rbp), %%rax', [si - i * 8]);
-         emit('   movq %%rax, %d(%%r15)', [i * 8]);
-      end;
+      while it <> nil do
+         begin
+            value := it^.node;
+            emit_expression(value^.left, stack_index, nest);
+            offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
+            emit('   movq %%rax, %d(%%rbp)', [si - offset * 8]);
+            it := it^.next;
+         end;
+      for i := 0 to size - 1 do
+         begin
+            emit('   movq %d(%%rbp), %%rax', [si - i * 8]);
+            emit('   movq %%rax, %d(%%r15)', [i * 8]);
+         end;
       emit('   movq %%r15, %%rax' + lineending +
            '   addq $%d, %%r15', [size * 8]);
    end;
@@ -532,71 +545,75 @@ begin
    case n^.tag of
       integer_node, char_node:
          emit('   movq $%d, %%rax', [n^.int_val]);
-      unary_op_node: begin
-         emit_expression(n^.left, si, nest);
-         emit('   negq %%rax', []);
-      end;
-      binary_op_node: begin
-         case n^.op of
-            and_op:
-               emit_and();
-            or_op:
-               emit_or();
-            else
-               tmp := inttostr(si) + '(%rbp)';
-               emit_expression(n^.right, si, nest);
-               emit('   movq %%rax, %s', [tmp]);
-               emit_expression(n^.left, si - 8, nest);
-               case n^.op of
-                  plus_op:
-                     emit('   addq %s, %%rax', [tmp]);
-                  minus_op:
-                     emit('   subq %s, %%rax', [tmp]);
-                  mul_op:
-                     emit('   imulq %s, %%rax', [tmp]);
-                  div_op:
-                     emit('   cqto' + lineending +
-                          '   idivq %s', [tmp]);
-                  mod_op:
-                     emit('   cqto' + lineending +
-                          '   idivq %s' + lineending +
-                          '   movq %%rdx, %%rax', [tmp]);
-                  eq_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   sete %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-      	         neq_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   setne %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-      	         lt_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   setl %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-      	         leq_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   setle %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-      	         gt_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   setg %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-      	         geq_op:
-                     emit('   cmpq %s, %%rax' + lineending +
-                          '   setge %%al' + lineending +
-                          '   andq $1, %%rax', [tmp]);
-                  else begin
-                     writeln(n^.op);
-                     err('emit: operator not implemented yet!', n^.line, n^.col);
-                  end;
-               end;
+      unary_op_node:
+         begin
+            emit_expression(n^.left, si, nest);
+            emit('   negq %%rax', []);
          end;
-      end;
-      boolean_node: begin
-         emit('   xorq %%rax, %%rax', []);
-         if n^.bool_val then
-            emit('   incq %%rax', []);
-      end;
+      binary_op_node:
+         begin
+            case n^.op of
+               and_op:
+                  emit_and();
+               or_op:
+                  emit_or();
+               else
+                  tmp := inttostr(si) + '(%rbp)';
+                  emit_expression(n^.right, si, nest);
+                  emit('   movq %%rax, %s', [tmp]);
+                  emit_expression(n^.left, si - 8, nest);
+                  case n^.op of
+                     plus_op:
+                        emit('   addq %s, %%rax', [tmp]);
+                     minus_op:
+                        emit('   subq %s, %%rax', [tmp]);
+                     mul_op:
+                        emit('   imulq %s, %%rax', [tmp]);
+                     div_op:
+                        emit('   cqto' + lineending +
+                             '   idivq %s', [tmp]);
+                     mod_op:
+                        emit('   cqto' + lineending +
+                             '   idivq %s' + lineending +
+                             '   movq %%rdx, %%rax', [tmp]);
+                     eq_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   sete %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+         	         neq_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   setne %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+         	         lt_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   setl %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+         	         leq_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   setle %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+         	         gt_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   setg %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+         	         geq_op:
+                        emit('   cmpq %s, %%rax' + lineending +
+                             '   setge %%al' + lineending +
+                             '   andq $1, %%rax', [tmp]);
+                     else
+                        begin
+                           writeln(n^.op);
+                           err('emit: operator not implemented yet!', n^.line, n^.col);
+                        end;
+                  end;
+            end;
+         end;
+      boolean_node:
+         begin
+            emit('   xorq %%rax, %%rax', []);
+            if n^.bool_val then
+               emit('   incq %%rax', []);
+         end;
       string_node:
          emit_string();
       nil_node:
@@ -605,10 +622,11 @@ begin
          (* nothing to do *);
       let_node:
          emit_let();
-      var_decl_node: begin
-         emit_expression(n^.right, si, nest);
-         emit('   movq %%rax, %d(%%rbp)', [n^.binding^.stack_index * -8]);
-      end;
+      var_decl_node:
+         begin
+            emit_expression(n^.right, si, nest);
+            emit('   movq %%rax, %d(%%rbp)', [n^.binding^.stack_index * -8]);
+         end;
       fun_decl_node:
          if n^.right <> nil then
             add_function(n);
@@ -642,10 +660,11 @@ begin
          emit_for();
       while_node:
          emit_while();
-      else begin
-         writeln(n^.tag);
-         err('emit: feature not supported yet!', n^.line, n^.col);
-      end;
+      else
+         begin
+            writeln(n^.tag);
+            err('emit: feature not supported yet!', n^.line, n^.col);
+         end;
    end;
 end;
 
@@ -701,6 +720,5 @@ begin
       exe := base
    else
       exe := base + '.out';
-   writeln(exe);
    runcommand('ld', ['-o', exe, '-lSystem', obj, '/usr/local/share/tiger/lib/lib.o'], output);
 end.

@@ -54,10 +54,10 @@ var
       list := make_list();
       append(list, get_expression());
       while token.tag = comma_token do
-      begin
-         next;
-         append(list, get_expression());
-      end;
+         begin
+            next;
+            append(list, get_expression());
+         end;
       get_expression_list := list;
    end;
 
@@ -237,133 +237,119 @@ var
       get_factor := factor;
    end;
 
-   function get_product: node;
+
+   function get_product(): node;
    var
       line, col: longint;
-
-      function helper(left: node): node;
-
-         function make_node(op: op_tag): node;
-         begin
-            next;
-            make_node := make_binary_op_node(op, left, get_factor, line, col);
-         end;
-
-      begin
-         case token.tag of
-            mul_token: helper := helper(make_node(mul_op));
-            div_token: helper := helper(make_node(div_op));
-            mod_token: helper := helper(make_node(mod_op));
-            else helper := left;
-         end;
-      end;
-
+      left: node;
+      op: op_tag = nul_op;
    begin
       line := token.line;
       col := token.col;
-      get_product := helper(get_factor);
-   end; { get_product }
+      left := get_factor();
 
-   function get_sum: node;
-   var
-      line, col: longint;
-
-      function helper(left: node): node;
-
-         function make_node(op: op_tag): node;
+      while token.tag in [mul_token, div_token, mod_token] do
          begin
-            next;
-            make_node := make_binary_op_node(op, left, get_product, line, col);
+            case token.tag of
+               mul_token: op := mul_op;
+               div_token: op := div_op;
+               mod_token: op := mod_op;
+            end;
+            next();
+            left := make_binary_op_node(op, left, get_factor(), line, col);
          end;
 
-      begin
-         case token.tag of
-            plus_token: helper := helper(make_node(plus_op));
-            minus_token: helper := helper(make_node(minus_op));
-            else helper := left;
-         end;
-      end;
-
-   begin
-      line := token.line;
-      col := token.col;
-      get_sum := helper(get_product);
-   end; { get_sum }
-
-
-   function get_boolean: node;
-   var
-      line, col: longint;
-
-      function helper(left: node): node;
-
-         function make_node(op: op_tag): node;
-         begin
-            next;
-            make_node := make_binary_op_node(op, left, get_sum, line, col);
-         end;
-
-      begin
-         case token.tag of
-            eq_token: helper := helper(make_node(eq_op));
-            neq_token: helper := helper(make_node(neq_op));
-            lt_token: helper := helper(make_node(lt_op));
-            leq_token: helper := helper(make_node(leq_op));
-            gt_token: helper := helper(make_node(gt_op));
-            geq_token: helper := helper(make_node(geq_op));
-            else helper := left;
-         end;
-      end;
-
-   begin
-      line := token.line;
-      col := token.col;
-      get_boolean := helper(get_sum);
+      get_product := left;
    end;
 
 
-   function get_conjunction: node;
+   function get_sum(): node;
    var
       line, col: longint;
-
-      function helper(left: node): node;
-      begin
-         if token.tag = and_token then
-            begin
-               next;
-               helper := helper(make_binary_op_node(
-                     and_op, left, get_boolean, line, col));
-            end
-         else
-            helper := left;
-      end;
-
+      left: node;
+      op: op_tag = nul_op;
    begin
       line := token.line;
       col := token.col;
-      get_conjunction := helper(get_boolean);
+      left := get_product();
+
+      while token.tag in [plus_token, minus_token] do
+         begin
+            case token.tag of
+               plus_token: op := plus_op;
+               minus_token: op := minus_op;
+            end;
+            next();
+            left := make_binary_op_node(op, left, get_product(), line, col);
+         end;
+
+      get_sum := left;
    end;
 
-   function get_disjunction: node;
+
+   function get_boolean(): node;
    var
       line, col: longint;
-
-      function helper(left: node): node;
-      begin
-         if token.tag = or_token then
-            begin
-               next;
-               helper := helper(make_binary_op_node(
-                     or_op, left, get_conjunction, line, col));
-            end
-         else
-            helper := left;
-      end;
-
+      left: node;
+      op: op_tag = nul_op;
    begin
       line := token.line;
       col := token.col;
-      get_disjunction := helper(get_conjunction);
+      left := get_sum();
+
+      while token.tag in [eq_token, neq_token, lt_token, leq_token, gt_token, geq_token] do
+         begin
+            case token.tag of
+               eq_token: op := eq_op;
+               neq_token: op := neq_op;
+               lt_token: op := lt_op;
+               leq_token: op := leq_op;
+               gt_token: op := gt_op;
+               geq_token: op := geq_op;
+            end;
+            next();
+            left := make_binary_op_node(op, left, get_sum(), line, col);
+         end;
+
+      get_boolean := left;
+   end;
+
+
+   function get_conjunction(): node;
+   var
+      line, col: longint;
+      left: node;
+   begin
+      line := token.line;
+      col := token.col;
+      left := get_boolean();
+
+      while token.tag = and_token do
+         begin
+            next();
+            left := make_binary_op_node(and_op, left, get_boolean(), line, col);
+         end;
+
+      get_conjunction := left;
+   end;
+
+
+   function get_disjunction(): node;
+   var
+      line, col: longint;
+      left: node;
+   begin
+      line := token.line;
+      col := token.col;
+      left := get_conjunction();
+
+      while token.tag = or_token do
+         begin
+            next();
+            left := make_binary_op_node(or_op, left, get_conjunction(), line, col);
+         end;
+
+      get_disjunction := left;
    end;
 
 

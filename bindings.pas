@@ -215,12 +215,14 @@ end;
 
 procedure delete_scope(var env: scope);
 begin
-   if (env <> global_env) and (env <> global_tenv) then begin
-      if (env^.bindings <> nil) then
-         delete_tree(env^.bindings);
-      dispose(env);
-      env := nil;
-   end;
+   if (env <> global_env) and (env <> global_tenv) then
+      begin
+         if (env^.bindings <> nil) then
+            delete_tree(env^.bindings);
+         dispose(env);
+         env := nil;
+      end;
 end;
+
 
 end.

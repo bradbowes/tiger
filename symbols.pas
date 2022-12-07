@@ -17,13 +17,8 @@ implementation
 const
    hash_size = 1021;
 
-
-type
-   hash_table = array [0 .. hash_size - 1] of symbol;
-
-
 var
-   tbl : hash_table;
+   tbl : array [0 .. hash_size - 1] of symbol;
 
 
 function hash(s: string): integer;
@@ -54,18 +49,21 @@ var
    sym: symbol;
 begin
    h := hash (s);
-   if tbl[h] = nil then begin
-      tbl[h] := make_symbol(s);
-      sym := tbl[h];
-   end
-   else begin
-      sym := tbl[h];
-      while sym^.id <> s do begin
-         if sym^.next = nil then
-            sym^.next := make_symbol(s);
-         sym := sym^.next;
+   if tbl[h] = nil then
+      begin
+         tbl[h] := make_symbol(s);
+         sym := tbl[h];
+      end
+   else
+      begin
+         sym := tbl[h];
+         while sym^.id <> s do
+            begin
+               if sym^.next = nil then
+                  sym^.next := make_symbol(s);
+               sym := sym^.next;
+            end;
       end;
-   end;
    intern := sym;
 end;
 

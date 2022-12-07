@@ -78,22 +78,25 @@ uses utils;
 
 procedure scan(s: source);
 
-   procedure next;
+   procedure next();
    begin
       if s^.open then
-         if eof(s^.src) then begin
-            s^.ch := chr(4);
-            close(s^.src);
-            s^.open := false;
-         end
-         else begin
-            read(s^.src, s^.ch);
-            s^.col := s^.col + 1;
-            if s^.ch = chr(10) then begin
-               s^.line := s^.line + 1;
-               s^.col := 0;
+         if eof(s^.src) then
+            begin
+               s^.ch := chr(4);
+               close(s^.src);
+               s^.open := false;
             end
-         end
+         else
+            begin
+               read(s^.src, s^.ch);
+               s^.col := s^.col + 1;
+               if s^.ch = chr(10) then
+                  begin
+                     s^.line := s^.line + 1;
+                     s^.col := 0;
+                  end
+            end
          else
             err('Read past end of file', token.line, token.col);
    end;
@@ -145,57 +148,62 @@ procedure scan(s: source);
    begin
       next;
       while s^.ch <> '"' do
-         if s^.ch = '\' then begin
-            next;
-            case s^.ch of
-               't': escape := #9;  (* tab *)
-               'n': escape := #10; (* newline *)
-               'v': escape := #11; (* vertical tab *)
-               'f': escape := #12; (* form feed *)
-               'r': escape := #13; (* carriage return *)
-               '\': escape := '\';
-               '"': escape := '"';
-               '''': escape := '''';
-               '^': begin
-                  next;
-                  if s^.ch in ['A'..'Z'] then
-                     escape := chr(ord(s^.ch) - 64)
-                  else if s^.ch in ['a'.. 'z'] then
-                     escape := chr(ord(s^.ch) - 96)
+         if s^.ch = '\' then
+            begin
+               next;
+               case s^.ch of
+                  't': escape := #9;  (* tab *)
+                  'n': escape := #10; (* newline *)
+                  'v': escape := #11; (* vertical tab *)
+                  'f': escape := #12; (* form feed *)
+                  'r': escape := #13; (* carriage return *)
+                  '\': escape := '\';
+                  '"': escape := '"';
+                  '''': escape := '''';
+                  '^':
+                     begin
+                        next;
+                        if s^.ch in ['A'..'Z'] then
+                           escape := chr(ord(s^.ch) - 64)
+                        else if s^.ch in ['a'.. 'z'] then
+                           escape := chr(ord(s^.ch) - 96)
+                        else
+                           err('illegal escape sequence', s^.line, s^.col);
+                     end;
+                  '0'..'9':
+                     begin
+                        code := s^.ch;
+                        next;
+                        if s^.ch in ['0'..'9'] then
+                           code := code + s^.ch
+                        else
+                           err('illegal escape sequence', s^.line, s^.col);
+                        next;
+                        if s^.ch in ['0'..'9'] then
+                           code := code + s^.ch
+                        else
+                           err('illegal escape sequence', s^.line, s^.col);
+                        if code > '255' then
+                           err('illegal escape sequence', s^.line, s^.col);
+                        escape := chr(atoi(code, s^.line, s^.col));
+                     end;
+                  ' ', chr(9) .. chr(13):
+                     begin
+                        skip_white;
+                        if s^.ch = '\' then
+                           begin
+                              next;
+                              continue;
+                           end
+                        else
+                           err('illegal escape sequence', s^.line, s^.col);
+                     end;
                   else
                      err('illegal escape sequence', s^.line, s^.col);
                end;
-               '0'..'9': begin
-                  code := s^.ch;
-                  next;
-                  if s^.ch in ['0'..'9'] then
-                     code := code + s^.ch
-                  else
-                     err('illegal escape sequence', s^.line, s^.col);
-                  next;
-                  if s^.ch in ['0'..'9'] then
-                     code := code + s^.ch
-                  else
-                     err('illegal escape sequence', s^.line, s^.col);
-                  if code > '255' then
-                     err('illegal escape sequence', s^.line, s^.col);
-                  escape := chr(atoi(code, s^.line, s^.col));
-               end;
-               ' ', chr(9) .. chr(13): begin
-                  skip_white;
-                  if s^.ch = '\' then begin
-                     next;
-                     continue;
-                  end
-                  else
-                     err('illegal escape sequence', s^.line, s^.col);
-               end;
-               else
-                  err('illegal escape sequence', s^.line, s^.col);
-            end;
-            token.value := token.value + escape;
-            next;
-         end
+               token.value := token.value + escape;
+               next;
+            end
          else
             push_char;
       next;
@@ -260,58 +268,62 @@ begin
    token.col := s^.col;
    token.line := s^.line;
    if not s^.open then
-   begin
-      token.tag := eof_token;
-      token.value := '<EOF>';
-   end
+      begin
+         token.tag := eof_token;
+         token.value := '<EOF>';
+      end
    else
-   begin
-      case s^.ch of
-         ',': recognize(comma_token);
-         ';': recognize(semicolon_token);
-         '.': recognize(dot_token);
-         '(': recognize(lparen_token);
-         ')': recognize(rparen_token);
-         '[': recognize(lbracket_token);
-         ']': recognize(rbracket_token);
-         '{': recognize(lbrace_token);
-         '}': recognize(rbrace_token);
-         '+': recognize(plus_token);
-         '-': recognize(minus_token);
-         '*': recognize(mul_token);
-         '/': begin
-            push_char;
-            if s^.ch = '*' then skip_comment
-            else token.tag := div_token;
+      begin
+         case s^.ch of
+            ',': recognize(comma_token);
+            ';': recognize(semicolon_token);
+            '.': recognize(dot_token);
+            '(': recognize(lparen_token);
+            ')': recognize(rparen_token);
+            '[': recognize(lbracket_token);
+            ']': recognize(rbracket_token);
+            '{': recognize(lbrace_token);
+            '}': recognize(rbrace_token);
+            '+': recognize(plus_token);
+            '-': recognize(minus_token);
+            '*': recognize(mul_token);
+            '/':
+               begin
+                  push_char;
+                  if s^.ch = '*' then skip_comment
+                  else token.tag := div_token;
+               end;
+            '=': recognize(eq_token);
+            '<':
+               begin
+                  push_char;
+                  case s^.ch of
+                     '>': recognize(neq_token);
+                     '=': recognize(leq_token);
+                  else
+                     token.tag:= lt_token;
+                  end;
+               end;
+            '>':
+               begin
+                  push_char;
+                  if s^.ch = '=' then recognize(geq_token)
+                  else token.tag := gt_token;
+               end;
+            ':':
+               begin
+                  push_char;
+                  if s^.ch = '=' then recognize(assign_token)
+                  else token.tag := colon_token;
+               end;
+            '0'..'9': get_number;
+            '"': get_string;
+            '#': get_char;
+            'a'..'z', 'A'..'Z': get_id;
+         else
+            err('Illegal token ''' + s^.ch + '''', token.line, token.col);
          end;
-         '=': recognize(eq_token);
-         '<': begin
-            push_char;
-            case s^.ch of
-               '>': recognize(neq_token);
-               '=': recognize(leq_token);
-            else
-               token.tag:= lt_token;
-            end;
-         end;
-         '>': begin
-            push_char;
-            if s^.ch = '=' then recognize(geq_token)
-            else token.tag := gt_token;
-         end;
-         ':': begin
-            push_char;
-            if s^.ch = '=' then recognize(assign_token)
-            else token.tag := colon_token;
-         end;
-         '0'..'9': get_number;
-         '"': get_string;
-         '#': get_char;
-         'a'..'z', 'A'..'Z': get_id;
-      else
-         err('Illegal token ''' + s^.ch + '''', token.line, token.col);
       end;
-   end;
 end;
 
 

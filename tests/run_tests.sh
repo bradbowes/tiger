@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
@@ -70,7 +70,7 @@ test_code "writeln(if 2 + 2 = 4 = true then \"true\" else \"false\")" "true"
 test_code "writeln(if nil = nil then \"true\" else \"false\")" "true"
 test_code "writeln(if nil <> nil then \"true\" else \"false\")" "false"
 
-END_COMMENT
+# END_COMMENT
 
 test_code "let a = 10 in
    let b = a * 2 in

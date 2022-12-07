@@ -74,10 +74,11 @@ var
    begin
       args := make_list();
       it := n^.list^.first;
-      while it <> nil do begin
-         append(args, reduce(it^.node));
-         it := it^.next;
-      end;
+      while it <> nil do
+         begin
+            append(args, reduce(it^.node));
+            it := it^.next;
+         end;
       expand_call := expand(make_call_node(n^.name, args, line, col));
    end;
 

@@ -446,16 +446,18 @@ begin
    if n^.cond <> nil then delete_node(n^.cond);
    if n^.left <> nil then delete_node(n^.left);
    if n^.right <> nil then delete_node(n^.right);
-   if n^.list <> nil then begin
-      it := n^.list^.first;
-      while it <> nil do begin
-         tmp := it^.next;
-         if it^.node <> nil then delete_node(it^.node);
-         dispose(it);
-         it := tmp;
+   if n^.list <> nil then
+      begin
+         it := n^.list^.first;
+         while it <> nil do
+            begin
+               tmp := it^.next;
+               if it^.node <> nil then delete_node(it^.node);
+               dispose(it);
+               it := tmp;
+            end;
+         dispose(n^.list);
       end;
-      dispose(n^.list);
-   end;
    if n^.tenv <> nil then delete_scope(n^.tenv);
    if n^.env <> nil then delete_scope(n^.env);
    dispose(n);
@@ -485,17 +487,19 @@ begin
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
    new_node^.op := n^.op;
-   if n^.list <> nil then begin
-      ls := make_list();
-      it := n^.list^.first;
-      while it <> nil do begin
-         tmp := cp(it^.node);
-         if tmp <> nil then
-            append(ls, tmp);
-         it := it^.next;
+   if n^.list <> nil then
+      begin
+         ls := make_list();
+         it := n^.list^.first;
+         while it <> nil do
+            begin
+               tmp := cp(it^.node);
+               if tmp <> nil then
+                  append(ls, tmp);
+               it := it^.next;
+            end;
+         new_node^.list := ls
       end;
-      new_node^.list := ls
-   end;
    new_node^.cond := cp(n^.cond);
    new_node^.left := cp(n^.left);
    new_node^.right := cp(n^.right);
