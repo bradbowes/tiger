@@ -2,7 +2,7 @@ unit semant;
 
 interface
 
-uses bindings, types, nodes;
+uses bindings, datatypes, nodes;
 
 function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 

@@ -10,9 +10,9 @@ let
 in
    for i := 1 to 100 do
       begin
-         sum_squares := sum_squares + i * i;
+         sum_squares := sum_squares + i * i
          sum := sum + i
-      end;
+      end
 
    writeln(str(sum * sum - sum_squares))
 end

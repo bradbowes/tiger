@@ -25,16 +25,16 @@ in
          in
             if n = reverse(n, 0) then
                answer := n
-         end;
+         end
 
          if a = b then
             begin
-               b := b + 1;
+               b := b + 1
                a := if answer = 0 then 900 else answer / b
             end
          else
             a := a + 1
-      end;
+      end
 
    writeln(str(answer))
 end

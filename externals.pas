@@ -6,7 +6,7 @@ procedure load_externals();
 
 implementation
 
-uses bindings, symbols, types;
+uses bindings, symbols, datatypes;
 
 
 procedure load_externals();

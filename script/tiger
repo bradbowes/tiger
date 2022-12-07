@@ -1,9 +1,0 @@
-#!/bin/sh
-
-compile $1
-cc output.s /usr/local/share/tiger/lib/lib.o
-./a.out
-rm -r output.s a.out
-
-
-

@@ -7,7 +7,7 @@ let
 in
    while ch <> chr(-1) do
       begin
-         putchar(ch);
+         putchar(ch)
          ch := getchar()
       end
 end

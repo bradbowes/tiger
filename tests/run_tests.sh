@@ -156,7 +156,7 @@ end" "30"
 test_code "let
    a = 0
 in
-   a := 5;
+   a := 5
    writeln(str(a))
 end" "5"
 
@@ -191,7 +191,7 @@ test_code "let
    type int_array = array of int
    a = int_array[3] of 42
 in
-   a[0] := 50;
+   a[0] := 50
    writeln(str(a[0] + a[1] + a[2]))
 end" "134"
 
@@ -208,7 +208,7 @@ test_code "let
    a = int_array[5] of 0
 in
    for i := 0 to 4 do
-      a[i] := (i + 1) * 2;
+      a[i] := (i + 1) * 2
 
    for i := 0 to 4 do
       writeln(str(a[i]))
@@ -248,7 +248,7 @@ test_code "let
    n = 1
 in
    while n < 10 do begin
-      writeln(str(n));
+      writeln(str(n))
       n := n + 1
    end
 end" "1
@@ -266,7 +266,7 @@ test_code "let
    i = 0
    update() = i := i + 1
 in
-   update();
+   update()
    writeln(str(i))
 end" "1"
 
@@ -285,10 +285,10 @@ test_code "let
    numbers = int_matrix[3] of nil
 in
    for i := 0 to 2 do begin
-      numbers[i] := int_array[3] of 0;
+      numbers[i] := int_array[3] of 0
       for j := 0 to 2 do
          numbers[i][j] := i * 10 + j
-   end;
+   end
 
    for i := 0 to 2 do
       for j := 0 to 2 do
@@ -311,7 +311,7 @@ test_code "let
    ss1 = substring(s, 7, 5)
    ss2 = substring(s, 0, 5)
 in
-   writeln(ss1);
+   writeln(ss1)
    writeln(ss2)
 end" "world
 hello"
@@ -364,9 +364,9 @@ test_code "let
    a = person { name = \"Harry Potter\", age = 19 }
    b = person { name = \"Dumbledore\", age = 153 }
 in
-   writeln(a.name);
-   writeln(str(a.age));
-   writeln(b.name);
+   writeln(a.name)
+   writeln(str(a.age))
+   writeln(b.name)
    writeln(str(b.age))
 end" "Harry Potter
 19
@@ -384,20 +384,20 @@ test_code "let
    type person = { name: string, age: int }
    a = person { name = \"Harry Potter\", age = 19 }
 in
-   writeln(a.name);
-   writeln(str(a.age));
-   a.age := 20;
+   writeln(a.name)
+   writeln(str(a.age))
+   a.age := 20
    writeln(str(a.age))
 end" "Harry Potter
 19
 20"
 
-test_code "true or (begin writeln(\"x\"); false end)" ""
-test_code "false or (begin writeln(\"x\"); false end)" "x"
-test_code "true and (begin writeln(\"x\"); false end)" "x"
-test_code "false and (begin writeln(\"x\"); false end)" ""
-test_code "true or (begin writeln(\"x\"); false end) or (begin writeln(\"y\"); true end)" ""
-test_code "false or (begin writeln(\"x\"); false end) or (begin writeln(\"y\"); true end)" "x
+test_code "true or (begin writeln(\"x\") false end)" ""
+test_code "false or (begin writeln(\"x\") false end)" "x"
+test_code "true and (begin writeln(\"x\") false end)" "x"
+test_code "false and (begin writeln(\"x\") false end)" ""
+test_code "true or (begin writeln(\"x\") false end) or (begin writeln(\"y\") true end)" ""
+test_code "false or (begin writeln(\"x\") false end) or (begin writeln(\"y\") true end)" "x
 y"
 
 test_code "writeln(if 1 = 1 or 1 = 2 then \"true\" else \"false\")" "true"
@@ -424,7 +424,7 @@ in
          len = length(s)
          x = 0
       in
-         writeln(str(i));
+         writeln(str(i))
          for j := 0 to len - 1 do
             writeln(str(ord(s[j])))
       end
@@ -444,7 +444,7 @@ end" "1
 test_code "let
    s = string_concat(\"hello\", \" world\")
 in
-   writeln(s);
+   writeln(s)
    writeln(str(length(s)))
 end" "hello world
 11"
@@ -455,7 +455,7 @@ test_code "let
    ss1 = substring(s, 7, 5)
    ss2 = substring(s, 0, 5)
 in
-   writeln(ss1);
+   writeln(ss1)
    writeln(ss2)
 end" "world
 hello"
@@ -466,14 +466,14 @@ test_code "let
    sa = s_array[5] of \"hello\"
    ia = i_array[5] of 0
 in
-   sa[0] := \"one\";
-   sa[1] := \"two\";
-   sa[2] := \"three\";
-   sa[3] := \"four\";
-   sa[4] := \"five\";
+   sa[0] := \"one\"
+   sa[1] := \"two\"
+   sa[2] := \"three\"
+   sa[3] := \"four\"
+   sa[4] := \"five\"
 
    for i := 0 to 4 do
-      ia[i] := length(sa[i]);
+      ia[i] := length(sa[i])
 
    for i := 0 to 4 do
       writeln(str(ia[i]))
@@ -492,7 +492,7 @@ in
 end" "59"
 
 test_code "begin
-   writeln(str(ord(#\"\\^D\")));
+   writeln(str(ord(#\"\\^D\")))
    writeln(str(ord(#\"\\^d\")))
 end" "4
 4"
@@ -505,10 +505,10 @@ test_code "let
             let
                c(z: int): int =
                   begin
-                     writeln(str(w));
-                     writeln(str(x));
-                     writeln(str(y));
-                     writeln(str(z));
+                     writeln(str(w))
+                     writeln(str(x))
+                     writeln(str(y))
+                     writeln(str(z))
                      w + x + y + z
                   end
             in

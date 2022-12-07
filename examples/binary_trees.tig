@@ -31,12 +31,12 @@ let
          long_lived_tree: node = nil
          n = min_depth
       in
-         write("stretch tree of depth ");
-         write(str(stretch_depth));
-         write("\t check: ");
-         writeln(str(check(create(stretch_depth))));
+         write("stretch tree of depth ")
+         write(str(stretch_depth))
+         write("\t check: ")
+         writeln(str(check(create(stretch_depth))))
 
-         long_lived_tree := create(max_depth);
+         long_lived_tree := create(max_depth)
 
          while n <= max_depth do begin
             let
@@ -48,20 +48,20 @@ let
                      node = create(n)
                   in
                      total := total + check(node)
-                  end;
+                  end
 
-               write(str(iterations));
-               write("\t trees of depth ");
-               write(str(n));
-               write("\t check: ");
+               write(str(iterations))
+               write("\t trees of depth ")
+               write(str(n))
+               write("\t check: ")
                writeln(str(total))
-            end;
+            end
             n := n + 2
-         end;
+         end
 
-         write("long lived tree of depth ");
-         write(str(max_depth));
-         write("\t check: ");
+         write("long lived tree of depth ")
+         write(str(max_depth))
+         write("\t check: ")
          writeln(str(check(long_lived_tree)))
       end
 

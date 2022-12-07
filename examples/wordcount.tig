@@ -11,25 +11,25 @@ let
 in
    while ch <> chr(-1) do
       begin
-         cc := cc + 1;
+         cc := cc + 1
          if ch = #" " or (ch >= #"\t" and ch <= #"\r") then
             begin
                if ch = #"\n" then
-                  lc := lc + 1;
+                  lc := lc + 1
                inword := false
             end
          else if inword = false then
             begin
-               inword := true;
+               inword := true
                wc := wc + 1
-            end;
+            end
          ch := getchar()
-      end;
+      end
 
-   putchar(#"\t");
-   write(str(lc));
-   putchar(#"\t");
-   write(str(wc));
-   putchar(#"\t");
+   putchar(#"\t")
+   write(str(lc))
+   putchar(#"\t")
+   write(str(wc))
+   putchar(#"\t")
    writeln(str(cc))
 end

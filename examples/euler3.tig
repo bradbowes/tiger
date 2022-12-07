@@ -16,9 +16,9 @@ let
       in
          while i * i <= n and isprime do
             begin
-               isprime := n mod i <> 0;
+               isprime := n mod i <> 0
                i := i + (if i = 2 then 1 else 2)
-            end;
+            end
 
          isprime
       end
@@ -27,9 +27,9 @@ in
    while i * i <= n do
       begin
          if prime(i) and n mod i = 0 then
-            p := i;
+            p := i
          i := i + (if i = 2 then 1 else 2)
-      end;
+      end
 
    writeln(str(p))
 end

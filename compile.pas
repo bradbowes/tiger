@@ -2,7 +2,8 @@ program compile;
 {$mode objfpc}
 {$H+}
 
-uses sysutils, symbols, parser, nodes, utils, ops, bindings, types, transforms, externals;
+uses sysutils, strutils, process, symbols, parser, nodes,
+     utils, ops, bindings, datatypes, transforms, externals;
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -649,10 +650,44 @@ begin
 end;
 
 
+function source_name(s: string): string;
+begin
+   source_name := '';
+   if (fileexists(s)) and ((endsstr('.tig', s)) or (endsstr('.tiger', s))) then
+      source_name := s
+   else if fileexists(s + '.tig') then
+      source_name := s + '.tig'
+   else if fileexists(s + '.tiger') then
+      source_name := s + '.tiger'
+   else if fileexists(s) then
+      source_name := s
+   else
+      err('input file not found', 0, 0);
+end;
+
+
+function base_name(s: string): string;
+begin
+   if endsstr('.tig', s) then
+      base_name := copy(s, 1, length(s) - 4)
+   else if endsstr('.tiger', s) then
+      base_name := copy(s, 1, length(s) - 6)
+   else
+      base_name := s;
+end;
+
+
+var
+   source, base, assem, obj, exe, output: string;
+
+
 begin
    load_externals();
-   ast := transform(parse(paramstr(1)));
-   assign(f, 'output.s');
+   source := source_name(paramstr(1));
+   ast := transform(parse(source));
+   base := base_name(source);
+   assem := base + '.s';
+   assign(f, assem);
    rewrite(f);
    emit(prologue, []);
    emit_expression(ast, -8, 1);
@@ -660,4 +695,12 @@ begin
    emit_functions();
    emit_data();
    close(f);
+   obj := base + '.o';
+   runcommand('as', ['-o', obj, assem], output);
+   if base <> source then
+      exe := base
+   else
+      exe := base + '.out';
+   writeln(exe);
+   runcommand('ld', ['-o', exe, '-lSystem', obj, '/usr/local/share/tiger/lib/lib.o'], output);
 end.

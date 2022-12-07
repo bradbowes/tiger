@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses math, symbols, types;
+uses math, symbols, datatypes;
 
 type
    binding = ^binding_t;
