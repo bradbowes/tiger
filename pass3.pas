@@ -1,7 +1,6 @@
 (*
   TODO:
     need label, goto nodes to transform while, for loops
-    need address node for left side of asssignment
 *)
 
 unit pass3;
@@ -67,6 +66,14 @@ var
       expand_binary_op := expand(make_binary_op_node(n^.op, left, right, line, col));
    end;
 
+   function expand_unary_op(): node;
+   var
+      left: node;
+   begin
+      left := reduce(n^.left);
+      expand_unary_op := expand(make_unary_op_node(n^.op, left, line, col));
+   end;
+
    function expand_call(): node;
    var
       args: node_list;
@@ -100,10 +107,23 @@ var
 
    function expand_assign(): node;
    var
-      right: node;
+      left, lleft, right: node;
    begin
+      left := n^.left;
+      if compound(left) then
+         begin
+            lleft := reduce(left^.left);
+            case left^.tag of
+               indexed_var_node:
+                  left := make_indexed_var_node(lleft, reduce(left^.right), line, col);
+               field_var_node:
+                  left := make_field_var_node(lleft, left^.name, line, col);
+            end;
+         end
+      else
+         left := trans3(n^.left);
       right := reduce(n^.right);
-      expand_assign := expand(make_assign_node(trans3(n^.left), right, line, col));
+      expand_assign := expand(make_assign_node(left, right, line, col));
    end;
 
    function expand_for(): node;
@@ -113,6 +133,41 @@ var
       left := reduce(n^.left);
       cond := reduce(n^.cond);
       expand_for := expand(make_for_node(n^.name, left, cond, trans3(n^.right), line, col));
+   end;
+
+   function expand_indexed_var(): node;
+   var
+      left, right: node;
+   begin
+      left := reduce(n^.left);
+      right := reduce(n^.right);
+      expand_indexed_var := expand(make_indexed_var_node(left, right, line, col));
+   end;
+
+   function expand_field_var(): node;
+   var
+      left: node;
+   begin
+      left := reduce(n^.left);
+      expand_field_var := expand(make_field_var_node(left, n^.name, line, col));
+   end;
+
+   function expand_record(): node;
+   var
+      field, value: node;
+      list: node_list;
+      it: node_list_item;
+   begin
+      list := make_list();
+      it := n^.list^.first;
+      while it <> nil do
+         begin
+            field := it^.node;
+            value := reduce(field^.left);
+            append(list, make_field_node(field^.name, value, field^.line, field^.col));
+            it := it^.next;
+         end;
+      expand_record := expand(make_record_node(n^.type_name, list, n^.line, n^.col));
    end;
 
 begin
@@ -125,8 +180,12 @@ begin
       if_else_node: trans3 := expand_if_else();
       if_node: trans3 := expand_if();
       assign_node: trans3 := expand_assign();
+      unary_op_node: trans3 := expand_unary_op();
       binary_op_node: trans3 := expand_binary_op();
       for_node: trans3 := expand_for();
+      indexed_var_node: trans3 := expand_indexed_var();
+      field_var_node: trans3 := expand_field_var();
+      record_node: trans3 := expand_record();
       else trans3 := copy_node(n, tf);
    end;
 end;
