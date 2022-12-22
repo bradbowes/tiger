@@ -105,21 +105,21 @@ procedure scan(s: source);
    procedure push_char();
    begin
       token.value := token.value + s^.ch;
-      next;
+      next();
    end;
 
 
-   procedure recognize(TType: token_tag);
+   procedure recognize(tag: token_tag);
    begin
       push_char;
-      token.tag := TType;
+      token.tag := tag;
    end;
 
 
    procedure skip_white;
    begin
       while s^.ch in [' ', #9 .. #13] do
-         next;
+         next();
    end;
 
 
@@ -128,14 +128,14 @@ procedure scan(s: source);
       token.value := '/*';
       repeat
          repeat
-            next;
+            next();
             token.value := token.value + s^.ch;
          until s^.ch = '*';
-         next;
+         next();
          while s^.ch = '*' do
-            next;
+            next();
       until s^.ch = '/';
-      next;
+      next();
       token.value := token.value + '/';
       token.tag := comment_token;
    end;
@@ -146,11 +146,11 @@ procedure scan(s: source);
       escape: string = '';
       code: string;
    begin
-      next;
+      next();
       while s^.ch <> '"' do
          if s^.ch = '\' then
             begin
-               next;
+               next();
                case s^.ch of
                   't': escape := #9;  (* tab *)
                   'n': escape := #10; (* newline *)
@@ -162,7 +162,7 @@ procedure scan(s: source);
                   '''': escape := '''';
                   '^':
                      begin
-                        next;
+                        next();
                         if s^.ch in ['A'..'Z'] then
                            escape := chr(ord(s^.ch) - 64)
                         else if s^.ch in ['a'.. 'z'] then
@@ -173,12 +173,12 @@ procedure scan(s: source);
                   '0'..'9':
                      begin
                         code := s^.ch;
-                        next;
+                        next();
                         if s^.ch in ['0'..'9'] then
                            code := code + s^.ch
                         else
                            err('illegal escape sequence', s^.line, s^.col);
-                        next;
+                        next();
                         if s^.ch in ['0'..'9'] then
                            code := code + s^.ch
                         else
@@ -192,7 +192,7 @@ procedure scan(s: source);
                         skip_white;
                         if s^.ch = '\' then
                            begin
-                              next;
+                              next();
                               continue;
                            end
                         else
@@ -202,18 +202,18 @@ procedure scan(s: source);
                      err('illegal escape sequence', s^.line, s^.col);
                end;
                token.value := token.value + escape;
-               next;
+               next();
             end
          else
             push_char;
-      next;
+      next();
       token.tag := string_token;
    end;
 
 
    procedure get_char();
    begin
-      next;
+      next();
       if s^.ch = '"' then
          get_string()
       else
@@ -320,6 +320,7 @@ begin
             '"': get_string;
             '#': get_char;
             'a'..'z', 'A'..'Z': get_id;
+         else if eof(s^.src) then next()
          else
             err('Illegal token ''' + s^.ch + '''', token.line, token.col);
          end;
