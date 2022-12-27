@@ -9,7 +9,7 @@ test_code () {
    echo
    echo '\e[0;33mtesting' \#$count ...'\e[0m'
    echo $1 > $src
-   ../compile $src
+   ../tc $src
    echo $1 '=>' $2
    if [ "$(./$exe)" = "$2" ]; then
       echo '\e[0;32mOK\e[0m'

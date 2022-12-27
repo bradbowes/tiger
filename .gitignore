@@ -4,8 +4,8 @@
 a.out
 *.s
 ppas.sh
-compile
-print
+tc
+tprint
 tests/test*
 lib/*.h
 

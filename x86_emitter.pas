@@ -1,9 +1,18 @@
-program compile;
 {$mode objfpc}
 {$H+}
+unit x86_emitter;
 
-uses sysutils, strutils, process, symbols, parser, nodes,
-     utils, ops, bindings, datatypes, transforms, externals;
+interface
+
+uses nodes;
+
+procedure emit_x86(ast: node; file_name: string);
+
+implementation
+
+uses sysutils, symbols, parser,
+     utils, ops, bindings, datatypes;
+
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -39,7 +48,6 @@ type
 
 var
    f: textfile;
-   ast: node;
    strings: string_list = nil;
    functions: function_list = nil;
    next_string_id: integer = 1;
@@ -669,44 +677,9 @@ begin
 end;
 
 
-function source_name(s: string): string;
+procedure emit_x86(ast: node; file_name: string);
 begin
-   source_name := '';
-   if (fileexists(s)) and ((endsstr('.tig', s)) or (endsstr('.tiger', s))) then
-      source_name := s
-   else if fileexists(s + '.tig') then
-      source_name := s + '.tig'
-   else if fileexists(s + '.tiger') then
-      source_name := s + '.tiger'
-   else if fileexists(s) then
-      source_name := s
-   else
-      err('input file not found', 0, 0);
-end;
-
-
-function base_name(s: string): string;
-begin
-   if endsstr('.tig', s) then
-      base_name := copy(s, 1, length(s) - 4)
-   else if endsstr('.tiger', s) then
-      base_name := copy(s, 1, length(s) - 6)
-   else
-      base_name := s;
-end;
-
-
-var
-   source, base, assem, obj, exe, output: string;
-
-
-begin
-   load_externals();
-   source := source_name(paramstr(1));
-   ast := transform(parse(source));
-   base := base_name(source);
-   assem := base + '.s';
-   assign(f, assem);
+   assign(f, file_name);
    rewrite(f);
    emit(prologue, []);
    emit_expression(ast, -8, 1);
@@ -714,11 +687,6 @@ begin
    emit_functions();
    emit_data();
    close(f);
-   obj := base + '.o';
-   runcommand('as', ['-o', obj, assem], output);
-   if base <> source then
-      exe := base
-   else
-      exe := base + '.out';
-   runcommand('ld', ['-o', exe, '-lSystem', obj, '/usr/local/share/tiger/lib/lib.o'], output);
+end;
+
 end.

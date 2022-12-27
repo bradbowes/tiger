@@ -1,36 +1,38 @@
-all:	compile print lib.o
+all:	tc tprint lib.o
 
-compile:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
+tc:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
 	parser.pas bindings.pas datatypes.pas semant.pas externals.pas \
-	transforms.pas pass1.pas pass2.pas pass3.pas compile.pas
-	fpc -Sh -Px86_64 -O3 compile
-	strip compile
+	transforms.pas pass1.pas pass2.pas pass3.pas x86_emitter.pas tc.pas
+	fpc -Sh -Px86_64 -O3 tc
+	strip tc
 
-print:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
+tprint:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
 	parser.pas bindings.pas datatypes.pas semant.pas externals.pas \
-	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas print.pas
-	fpc -Sh -Px86_64 -O3 print
-	strip print
+	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas tprint.pas
+	fpc -Sh -Px86_64 -O3 tprint
+	strip tprint
 
-test:	compile print lib.o
+test:	tc tprint lib.o
 	cd tests; ./run_tests.sh; cd ..
 
 lib.o:	lib/lib.s
 	as -o lib.o lib/lib.s
 
-install:	compile lib.o
+install:	tc lib.o
 	install -d /usr/local/bin/
 	install -d /usr/local/share/tiger/lib/
-	install compile /usr/local/bin/
+	install tc /usr/local/bin/
+	install tprint /usr/local/bin/
 	install lib.o /usr/local/share/tiger/lib/
 
 uninstall:
-	rm -f /usr/local/bin/compile
+	rm -f /usr/local/bin/tc
+	rm -f /usr/local/bin/tprint
 	rm -rf /usr/local/share/tiger
 
 clean:
-	rm -f compile
-	rm -f print
+	rm -f tc
+	rm -f tprint
 	rm -f *.o
 	rm -f *.s
 	rm -f a.out
