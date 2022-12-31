@@ -11,6 +11,9 @@ implementation
 function parse(file_name: string): node;
 var
    the_source: source;
+   lib: node_list;
+   expr: node;
+
 
    function get_expression(): node; forward;
 
@@ -20,6 +23,7 @@ var
       while token.tag = comment_token do
          scan(the_source);
    end;
+
 
    function get_identifier(): symbol;
    var
@@ -108,6 +112,7 @@ var
          end;
       get_field_list := list;
    end;
+
 
    function get_factor(): node;
    var
@@ -489,6 +494,7 @@ var
       line, col: longint;
       ty: symbol = nil;
       params: node_list;
+      body: node = nil;
    begin
       line := token.line;
       col := token.col;
@@ -501,8 +507,12 @@ var
             next();
             ty := get_identifier();
          end;
-      advance(eq_token, '=');
-      get_function_declaration := make_fun_decl_node(name, params, ty, get_expression(), line, col);
+      if token.tag = eq_token then
+         begin
+            next();
+            body := get_expression
+         end;
+      get_function_declaration := make_fun_decl_node(name, params, ty, body, line, col);
    end;
 
 
@@ -608,12 +618,17 @@ var
 
 
 begin
+   the_source := load_source('/usr/local/share/tiger/lib/core.tlib');
+   next();
+   lib := get_declaration_list();
+   next();
    the_source := load_source(file_name);
    next();
-   parse := get_expression();
+   expr := get_expression();
+   parse := make_let_node(lib, expr, expr^.line, expr^.col);
    if token.tag <> eof_token then
       err('extraneous input', token.line, token.col);
-end; 
+end;
 
 
 end.

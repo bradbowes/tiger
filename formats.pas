@@ -109,10 +109,13 @@ begin
                  '(' + format_list(n^.list, ', ', false) + ')';
             if n^.type_name <> nil then
                s := s + ': ' + n^.type_name^.id;
-            s := s + ' = ';
-            indent;
-            s := s + newline + format(n^.right);
-            dedent;
+            if n^.right <> nil then
+               begin
+                  s := s + ' = ';
+                  indent;
+                  s := s + newline + format(n^.right);
+                  dedent;
+               end;
             format := s + newline;
          end;
       record_desc_node:

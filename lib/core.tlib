@@ -1,0 +1,13 @@
+putchar(c: char)
+getchar(): char
+read(): string
+write(s: string)
+writeln(s: string)
+str(n: int): string
+length(s: string): int
+ord(c: char): int
+chr(n: int): char
+substring(s: string, start: int, length: int): string
+string_concat(s1: string, s2: string): string
+string_compare(s1: string, s2: string): int
+toh(): int

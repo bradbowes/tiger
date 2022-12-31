@@ -176,19 +176,24 @@ begin
       let_node:
          begin
             e2 := trans1(n^.right);
-            list := make_list();
-            it := n^.list^.first;
-            while it <> nil do
-               begin
-                  e1 := it^.node;
-                  if (e1^.binding <> nil) and ((e1^.binding^.mutates) or (not e1^.binding^.const_value)) then
-                  append(list, trans1(e1));
-                  it := it^.next;
-               end;
-            if list^.length > 0 then
-               trans1 := make_let_node(list, e2, line, col)
+            if (e2 = nil) or (e2^.tag = empty_node) then
+               trans1 := make_empty_node(line, col)
             else
-               trans1 := e2;
+               begin
+                  list := make_list();
+                  it := n^.list^.first;
+                  while it <> nil do
+                     begin
+                        e1 := it^.node;
+                        if (e1^.binding <> nil) and ((e1^.binding^.mutates) or (not e1^.binding^.const_value)) then
+                        append(list, trans1(e1));
+                        it := it^.next;
+                     end;
+                  if list^.length > 0 then
+                     trans1 := make_let_node(list, e2, line, col)
+                  else
+                     trans1 := e2;
+               end;
          end;
       sequence_node:
          case n^.list^.length of

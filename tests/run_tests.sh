@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
@@ -69,8 +69,6 @@ test_code "writeln(if 2 + 2 = 4 = true then \"true\" else \"false\")" "true"
 # test_code "writeln(if true = 2 + 2 = 4 then \"true\" else \"false\")" ""
 test_code "writeln(if nil = nil then \"true\" else \"false\")" "true"
 test_code "writeln(if nil <> nil then \"true\" else \"false\")" "false"
-
-# END_COMMENT
 
 test_code "let a = 10 in
    let b = a * 2 in
@@ -401,6 +399,9 @@ test_code "writeln(if 1 = 1 or 1 = 2 then \"true\" else \"false\")" "true"
 test_code "writeln(if 2 = 3 or 2 = 2 then \"true\" else \"false\")" "true"
 test_code "writeln(if 2 = 3 or 3 = 4 then \"true\" else \"false\")" "false"
 test_code "writeln(if 2 = 2 or 1 = 1 then \"true\" else \"false\")" "true"
+
+END_COMMENT
+
 test_code "if false then writeln(\"hello\")" ""
 
 test_code "let s = \"hello\"

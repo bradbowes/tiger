@@ -70,7 +70,6 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty2 := nil;
       if ty1 = void_type then
          err(n^.name^.id + ' variable initializer doesn''t produce a value', right^.line, right^.col);
-
       if (n^.type_name = nil) then
          if  (ty1 = nil_type) then
             err('variable with nil initializer needs explicit type', line, col)
@@ -157,14 +156,16 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    var
       ty, body_type: spec;
    begin
-      ty := n^.binding^.ty;
       if n^.right <> nil then
          begin
+            ty := n^.binding^.ty;
             body_type := type_check(n^.right, si, nest + 1, n^.env, tenv);
             if not compatible(ty^.base, body_type) then
                err('function return type doesn''t match declaration', n^.line, n^.col);
             find_tail_calls(n^.right);
-         end;
+         end
+      else
+         n^.binding^.external := true;
    end;
 
 

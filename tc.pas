@@ -1,9 +1,9 @@
 {$mode objfpc}
 {$H+}
-program compile;
+program tc;
 
 
-uses utils, nodes, parser, sysutils, strutils, process, transforms, externals, x86_emitter;
+uses utils, nodes, parser, sysutils, strutils, process, transforms, x86_emitter;
 
 var
    ast: node;
@@ -22,7 +22,7 @@ begin
    else if fileexists(s) then
       source_name := s
    else
-      err('input file not found', 0, 0);
+      err('input file not found');
 end;
 
 
@@ -38,7 +38,6 @@ end;
 
 
 begin
-   load_externals();
    source := source_name(paramstr(1));
    ast := transform(parse(source));
    base := base_name(source);

@@ -1,10 +1,9 @@
-program print;
+program tprint;
 uses
-   nodes, formats, parser, transforms, externals;
+   nodes, formats, parser, transforms;
 var
    ast: node;
 begin
-   load_externals();
    ast := transform(parse(paramstr(1)));
    writeln(format(ast));
 end.

@@ -2,15 +2,24 @@ unit utils;
 
 interface
 
-procedure err(msg : string; line, col : longint);
+procedure err(msg: string);
+procedure err(msg: string; line, col: longint);
 function atoi(s: string; line, col: longint): int64;
 
 implementation
 
-procedure err(msg : string; line, col : longint);
+uses sysutils;
+
+procedure err(msg: string);
 begin
-   writeln(StdErr, 'Error: ', msg, ', line: ', line, ', col: ', col);
+   writeln(stderr, 'Error: ', msg);
    halt(1);
+end;
+
+
+procedure err(msg: string; line, col: longint);
+begin
+   err('line ' + inttostr(line) + ', column ' + inttostr(col) + ': ' + msg);
 end;
 
 
@@ -27,5 +36,6 @@ begin
          err('Bad integer format: ''' + s + '''', line, col);
       end;
 end;
+
 
 end.

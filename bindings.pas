@@ -225,4 +225,9 @@ begin
 end;
 
 
+begin
+   bind(global_tenv, intern('int'), int_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('string'), string_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('bool'), bool_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('char'), char_type, 0, 0, 0, 0);
 end.

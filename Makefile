@@ -1,13 +1,17 @@
+BINDIR   = /usr/local/bin/
+TIGERDIR = /usr/local/share/tiger/
+LIBDIR   = $(TIGERDIR)lib/
+
 all:	tc tprint lib.o
 
 tc:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
-	parser.pas bindings.pas datatypes.pas semant.pas externals.pas \
+	parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas x86_emitter.pas tc.pas
 	fpc -Sh -Px86_64 -O3 tc
 	strip tc
 
 tprint:	utils.pas symbols.pas scanner.pas ops.pas nodes.pas \
-	parser.pas bindings.pas datatypes.pas semant.pas externals.pas \
+	parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas tprint.pas
 	fpc -Sh -Px86_64 -O3 tprint
 	strip tprint
@@ -18,17 +22,18 @@ test:	tc tprint lib.o
 lib.o:	lib/lib.s
 	as -o lib.o lib/lib.s
 
-install:	tc lib.o
-	install -d /usr/local/bin/
-	install -d /usr/local/share/tiger/lib/
-	install tc /usr/local/bin/
-	install tprint /usr/local/bin/
-	install lib.o /usr/local/share/tiger/lib/
+install:	tc tprint lib/core.tlib lib.o
+	install -d $(BINDIR)
+	install -d $(LIBDIR)
+	install tc $(BINDIR)
+	install tprint $(BINDIR)
+	install lib.o $(LIBDIR)
+	install lib/core.tlib $(LIBDIR)
 
 uninstall:
-	rm -f /usr/local/bin/tc
-	rm -f /usr/local/bin/tprint
-	rm -rf /usr/local/share/tiger
+	rm -f $(BINDIR)tc
+	rm -f $(BINDIR)tprint
+	rm -rf $(TIGERDIR)
 
 clean:
 	rm -f tc
