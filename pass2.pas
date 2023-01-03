@@ -42,10 +42,10 @@ begin
    case n^.tag of
       call_node, tail_call_node:
          begin
-            list := make_list();
+            list := make_node_list();
             it := n^.list^.first;
             while it <> nil do begin
-               append(list, trans2(it^.node));
+               append_node(list, trans2(it^.node));
                it := it^.next;
             end;
             trans2 := make_call_node(fun_name(b), list, line, col);
@@ -60,12 +60,12 @@ begin
             trans2 := copy_node(n, tf)
          else
             begin
-               list := make_list();
+               list := make_node_list();
                it := n^.list^.first;
                while it <> nil do
                   begin
                      arg := it^.node;
-                     append(list, make_field_desc_node(var_name(lookup(n^.env, arg^.name, line, col)), arg^.type_name, line, col));
+                     append_node(list, make_field_desc_node(var_name(lookup(n^.env, arg^.name, line, col)), arg^.type_name, line, col));
                      it := it^.next;
                   end;
                trans2 := make_fun_decl_node(fun_name(b), list, n^.type_name, trans2(n^.right), line, col);

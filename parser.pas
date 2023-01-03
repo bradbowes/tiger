@@ -55,12 +55,12 @@ var
    var
       list: node_list;
    begin
-      list := make_list();
-      append(list, get_expression());
+      list := make_node_list();
+      append_node(list, get_expression());
       while token.tag = comma_token do
          begin
             next();
-            append(list, get_expression());
+            append_node(list, get_expression());
          end;
       get_expression_list := list;
    end;
@@ -73,18 +73,12 @@ var
    begin
       line := token.line;
       col := token.col;
-      list := make_list();
+      list := make_node_list();
       while token.tag <> end_token do
          begin
-            append(list, get_expression());
+            append_node(list, get_expression());
             if token.tag = semicolon_token then next();
          end;
-      (*
-      repeat
-         append(list, get_expression());
-         if token.tag = semicolon_token then next();
-      until token.tag = end_token;
-      *)
       next();
       get_sequence := make_sequence_node(list, line, col);
    end;
@@ -107,14 +101,14 @@ var
    var
       list: node_list;
    begin
-      list := make_list();
+      list := make_node_list();
       if not (token.tag in [rparen_token, rbrace_token]) then
          begin
-            append(list, get_field);
+            append_node(list, get_field);
             while token.tag = comma_token do
                begin
                   next();
-                  append(list, get_field());
+                  append_node(list, get_field());
                end;
          end;
       get_field_list := list;
@@ -184,7 +178,7 @@ var
                      begin
                         next();
                         if token.tag = rparen_token then
-                           list := make_list()
+                           list := make_node_list()
                         else
                            list := get_expression_list();
                         advance(rparen_token, ')');
@@ -454,14 +448,14 @@ var
    var
       list: node_list;
    begin
-      list := make_list();
+      list := make_node_list();
       if not (token.tag in [rparen_token, rbrace_token]) then
          begin
-            append(list, get_field_desc);
+            append_node(list, get_field_desc);
             while token.tag = comma_token do
                begin
                   next();
-                  append(list, get_field_desc());
+                  append_node(list, get_field_desc());
                end;
          end;
       get_field_desc_list := list;
@@ -588,9 +582,9 @@ var
    var
       decls: node_list;
    begin
-      decls := make_list();
+      decls := make_node_list();
       while token.tag in [id_token, type_token] do
-         append(decls, get_declaration());
+         append_node(decls, get_declaration());
       get_declaration_list := decls
    end;
 

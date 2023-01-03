@@ -84,14 +84,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       b := bind(env, n^.name, ty2, offset, nest, line, col);
 
       if  right^.tag in [integer_node, char_node, string_node, boolean_node] then
-         begin
-            b^.const_value := true;
-            case right^.tag of
-               integer_node, char_node: b^.int_val := right^.int_val;
-               string_node: b^.string_val := right^.string_val;
-               boolean_node: b^.bool_val := right^.bool_val;
-            end;
-         end;
+         b^.value := right^.value;
+
       n^.binding := b;
    end;
 
@@ -242,7 +236,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          case state of
             var_state:
                if new_state <> var_state then
-                  group := make_list();
+                  group := make_node_list();
 
             fun_state:
                if new_state <> fun_state then
@@ -255,7 +249,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                         end;
                      dispose_group();
                      if new_state = type_state then
-                        group := make_list();
+                        group := make_node_list();
                   end;
 
             type_state:
@@ -270,7 +264,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                         end;
                      dispose_group();
                      if new_state = fun_state then
-                        group := make_list();
+                        group := make_node_list();
                   end;
          end;
          state := new_state;
@@ -306,13 +300,13 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
                   begin
                      update_state(fun_state);
                      check_fun_decl(it^.node, stack_index, new_env, new_tenv);
-                     append(group, it^.node);
+                     append_node(group, it^.node);
                   end;
                type_decl_node:
                   begin
                      update_state(type_state);
                      check_type_decl(it^.node, new_tenv);
-                     append(group, it^.node);
+                     append_node(group, it^.node);
                   end;
             end;
             it := it^.next;

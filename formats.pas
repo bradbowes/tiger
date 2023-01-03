@@ -83,15 +83,15 @@ begin
          format := format(n^.left) + '[' + format(n^.right) + ']';
       integer_node:
          begin
-            str(n^.int_val, s);
+            str(n^.value^.int_val, s);
             format := s;
          end;
       string_node:
-         format := '"' + escape(n^.string_val^.id) + '"';
+         format := '"' + escape(n^.value^.string_val^.id) + '"';
       char_node:
-         format := '#"' + escape(chr(n^.int_val)) + '"';
+         format := '#"' + escape(chr(n^.value^.int_val)) + '"';
       boolean_node:
-         if n^.bool_val then format := 'true' else format := 'false';
+         if n^.value^.bool_val then format := 'true' else format := 'false';
       nil_node:
          format := 'nil';
       type_decl_node:

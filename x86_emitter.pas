@@ -234,7 +234,7 @@ var
       slabel: string;
       sl: string_list;
    begin
-      sl := add_string(n^.string_val);
+      sl := add_string(n^.value^.string_val);
       slabel := 'tiger$_string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('   movq %s, %%rax', [slabel]);
    end;
@@ -553,7 +553,7 @@ var
 begin
    case n^.tag of
       integer_node, char_node:
-         emit('   movq $%d, %%rax', [n^.int_val]);
+         emit('   movq $%d, %%rax', [n^.value^.int_val]);
       unary_op_node:
          begin
             emit_expression(n^.left, si, nest);
@@ -620,7 +620,7 @@ begin
       boolean_node:
          begin
             emit('   xorq %%rax, %%rax', []);
-            if n^.bool_val then
+            if n^.value^.bool_val then
                emit('   incq %%rax', []);
          end;
       string_node:

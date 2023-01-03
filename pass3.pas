@@ -50,7 +50,7 @@ var
       if compound(n) then
          begin
             v := tmp();
-            append(decls, make_var_decl_node(v, nil, trans3(n), n^.line, n^.col));
+            append_node(decls, make_var_decl_node(v, nil, trans3(n), n^.line, n^.col));
             reduce := make_simple_var_node(v, n^.line, n^.col);
          end
       else
@@ -79,11 +79,11 @@ var
       args: node_list;
       it: node_list_item;
    begin
-      args := make_list();
+      args := make_node_list();
       it := n^.list^.first;
       while it <> nil do
          begin
-            append(args, reduce(it^.node));
+            append_node(args, reduce(it^.node));
             it := it^.next;
          end;
       expand_call := expand(make_call_node(n^.name, args, line, col));
@@ -158,13 +158,13 @@ var
       list: node_list;
       it: node_list_item;
    begin
-      list := make_list();
+      list := make_node_list();
       it := n^.list^.first;
       while it <> nil do
          begin
             field := it^.node;
             value := reduce(field^.left);
-            append(list, make_field_node(field^.name, value, field^.line, field^.col));
+            append_node(list, make_field_node(field^.name, value, field^.line, field^.col));
             it := it^.next;
          end;
       expand_record := expand(make_record_node(n^.type_name, list, n^.line, n^.col));
@@ -173,7 +173,7 @@ var
 begin
    line := n^.line;
    col := n^.col;
-   decls := make_list();
+   decls := make_node_list();
 
    case n^.tag of
       call_node, tail_call_node: trans3 := expand_call();

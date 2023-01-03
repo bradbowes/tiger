@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses math, symbols, datatypes;
+uses math, symbols, values, datatypes;
 
 type
    binding = ^binding_t;
@@ -14,10 +14,7 @@ type
       nesting_level: longint;
       mutates: boolean;
       escapes: boolean;
-      const_value: boolean;
-      string_val: symbol;
-      int_val: int64;
-      bool_val: boolean;
+      value: value;
    end;
 
    tree = ^tree_t;
@@ -184,7 +181,7 @@ begin
    b^.external := false;
    b^.mutates := false;
    b^.escapes := false;
-   b^.const_value := false;
+   b^.value := nil;
    env^.bindings := insert(t, b);
    bind := b;
 end;

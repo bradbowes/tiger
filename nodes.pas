@@ -2,7 +2,7 @@ unit nodes;
 
 interface
 
-uses symbols, ops, bindings;
+uses symbols, ops, values, bindings;
 
 type
    node_tag = (assign_node,
@@ -57,9 +57,7 @@ type
    node_t = record
       tag: node_tag;
       line, col: longint;
-      int_val: int64;
-      string_val: symbol;
-      bool_val: boolean;
+      value: value;
       binding: binding;
       name, type_name: symbol;
       cond, left, right: node;
@@ -72,8 +70,8 @@ type
    tf_function = function(n: node): node;
 
 
-function make_list(): node_list;
-procedure append(list: node_list; n: node);
+function make_node_list(): node_list;
+procedure append_node(list: node_list; n: node);
 function make_assign_node(variable, expr: node; line, col: longint): node;
 function make_call_node(name: symbol; args: node_list; line, col: longint): node;
 function make_simple_var_node(name: symbol; line, col: longint): node;
@@ -109,14 +107,14 @@ function copy_node(n: node; tf: tf_function): node;
 implementation
 
 
-function make_list(): node_list;
+function make_node_list(): node_list;
 var list: node_list;
 begin
    new(list);
    list^.first := nil;
    list^.last := nil;
    list^.length := 0;
-   make_list := list;
+   make_node_list := list;
 end;
 
 
@@ -130,7 +128,7 @@ begin
 end;
 
 
-procedure append(list: node_list; n: node);
+procedure append_node(list: node_list; n: node);
 var item: node_list_item;
 begin
    item := make_list_item(n);
@@ -150,9 +148,7 @@ begin
    n^.tag := tag;
    n^.line := line;
    n^.col := col;
-   n^.int_val := 0;
-   n^.string_val := nil;
-   n^.bool_val := false;
+   n^.value := nil;
    n^.binding := nil;
    n^.name := nil;
    n^.type_name := nil;
@@ -220,7 +216,7 @@ function make_integer_node(val: int64; line, col: longint): node;
 var n: node;
 begin
    n := make_node(integer_node, line, col);
-   n^.int_val := val;
+   n^.value := make_integer_value(val);
    make_integer_node := n;
 end;
 
@@ -229,7 +225,7 @@ function make_string_node(val: symbol; line, col: longint): node;
 var n: node;
 begin
    n := make_node(string_node, line, col);
-   n^.string_val := val;
+   n^.value := make_string_value(val);
    make_string_node := n;
 end;
 
@@ -238,7 +234,7 @@ function make_char_node(val, line, col: longint): node;
 var n: node;
 begin
    n := make_node(char_node, line, col);
-   n^.int_val := val;
+   n^.value := make_integer_value(val);
    make_char_node := n;
 end;
 
@@ -247,7 +243,7 @@ function make_boolean_node(val: boolean; line, col: longint): node;
 var n: node;
 begin
    n := make_node(boolean_node, line, col);
-   n^.bool_val := val;
+   n^.value := make_boolean_value(val);
    make_boolean_node := n;
 end;
 
@@ -481,21 +477,19 @@ var
    it: node_list_item;
 begin
    new_node := make_node(n^.tag, n^.line, n^.col);
-   new_node^.int_val := n^.int_val;
-   new_node^.string_val := n^.string_val;
-   new_node^.bool_val := n^.bool_val;
+   new_node^.value := n^.value;
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
    new_node^.op := n^.op;
    if n^.list <> nil then
       begin
-         ls := make_list();
+         ls := make_node_list();
          it := n^.list^.first;
          while it <> nil do
             begin
                tmp := cp(it^.node);
                if tmp <> nil then
-                  append(ls, tmp);
+                  append_node(ls, tmp);
                it := it^.next;
             end;
          new_node^.list := ls
