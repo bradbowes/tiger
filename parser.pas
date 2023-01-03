@@ -74,10 +74,17 @@ var
       line := token.line;
       col := token.col;
       list := make_list();
+      while token.tag <> end_token do
+         begin
+            append(list, get_expression());
+            if token.tag = semicolon_token then next();
+         end;
+      (*
       repeat
          append(list, get_expression());
          if token.tag = semicolon_token then next();
       until token.tag = end_token;
+      *)
       next();
       get_sequence := make_sequence_node(list, line, col);
    end;

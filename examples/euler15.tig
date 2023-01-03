@@ -8,25 +8,23 @@
 let
    solve(n: int): int =
       let
+         points = n + 1
          type int_array = array of int
-         type grid = array of int_array
-
-         g = grid[n + 1] of nil
+         grid = int_array[points * points] of 0
+         get(x: int, y: int): int = grid[x * points + y]
+         set(x: int, y: int, value: int) = grid[x * points + y] := value
       in
-         for i := 0 to n do
-            g[i] := int_array[n + 1] of 0
-
          for i := 1 to n do
             begin
-               g[i][0] := 1
-               g[0][i] := 1
+               set(i, 0, 1)
+               set(0, i, 1)
             end
 
          for x := 1 to n do
             for y := 1 to n do
-               g[x][y] :=  g[x - 1][y] + g[x][y - 1]
+               set(x, y, get(x - 1, y) + get(x, y - 1))
 
-         g[n][n]
+         get(n, n)
       end
 in
    writeln(str(solve(20)))

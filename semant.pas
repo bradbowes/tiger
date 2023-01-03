@@ -322,7 +322,10 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       new_env^.stack_index := stack_index;
       n^.env := new_env;
       n^.tenv := new_tenv;
-      check_let := type_check(n^.right, stack_index, nest, new_env, new_tenv);
+      if n^.right = nil then
+         check_let := void_type
+      else
+         check_let := type_check(n^.right, stack_index, nest, new_env, new_tenv);
    end;
 
 

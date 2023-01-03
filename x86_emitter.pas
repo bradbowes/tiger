@@ -168,7 +168,8 @@ var
             emit_expression(it^.node, stack_index, nest);
             it := it^.next;
          end;
-      emit_expression(n^.right, stack_index, nest);
+      if n^.right <> nil then
+         emit_expression(n^.right, stack_index, nest);
    end;
 
 
