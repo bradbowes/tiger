@@ -57,6 +57,8 @@
 - writeln(s: string)
 - getchar(): char
 - putchar(c: char)
+- command_argcount(): int
+- command_getarg(n: int): string
 
 ## Conversion
 

@@ -1,8 +1,38 @@
 putchar(c: char)
+
 getchar(): char
+
 read(): string
-write(s: string)
-writeln(s: string)
+
+write(s: string) =
+   for i := 0 to length(s) - 1 do
+      putchar(s[i])
+
+writeln(s: string) =
+   begin
+      write(s)
+      putchar(#"\n")
+   end
+
+writeint(i: int) =
+   let
+      f(i: int) =
+         if i > 0 then
+            begin
+               f(i / 10)
+               putchar(chr(i - i / 10 * 10) + #"0")
+            end
+   in
+      if i < 0 then
+         begin
+            putchar(#"-")
+            f(-1)
+         end
+      else
+         if i > 0 then f(i)
+         else putchar(#"0")
+   end
+
 str(n: int): string
 length(s: string): int
 ord(c: char): int
@@ -11,3 +41,5 @@ substring(s: string, start: int, length: int): string
 string_concat(s1: string, s2: string): string
 string_compare(s1: string, s2: string): int
 toh(): int
+command_argcount(): int
+command_getarg(i: int): string

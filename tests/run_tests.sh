@@ -400,8 +400,6 @@ test_code "writeln(if 2 = 3 or 2 = 2 then \"true\" else \"false\")" "true"
 test_code "writeln(if 2 = 3 or 3 = 4 then \"true\" else \"false\")" "false"
 test_code "writeln(if 2 = 2 or 1 = 1 then \"true\" else \"false\")" "true"
 
-END_COMMENT
-
 test_code "if false then writeln(\"hello\")" ""
 
 test_code "let s = \"hello\"
@@ -535,3 +533,8 @@ test_code "let
 in
    writeln(str(outer(5)))
 end" "5"
+
+END_COMMENT
+
+test_code "writeln(str(command_argcount()))" "1"
+test_code "writeln(command_getarg(0))" "./test2"

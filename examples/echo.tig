@@ -1,0 +1,14 @@
+/*
+   print command line argments to standard output
+*/
+
+let
+   last = command_argcount() - 1
+in
+   for i := 1 to last do
+      begin
+         write(command_getarg(i))
+         if i < last then putchar(#" ")
+      end
+   putchar(#"\n")
+end

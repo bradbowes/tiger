@@ -116,20 +116,6 @@ done_input:
    ret
 
 
-/*
-.align 3
-.global f$_putchar
-f$_putchar:
-   movb 16(%rsp), %al
-   movq $STD_OUTPUT, %rdi
-   movq output_buffer@GOTPCREL(%rip), %rsi
-   movb %al, (%rsi)
-   movq $1, %rdx
-   movq $SYS_WRITE, %rax
-   syscall
-   ret
-*/
-
 .align 3
 .globl f$_putchar
 f$_putchar:
@@ -139,8 +125,9 @@ f$_putchar:
    movq $SYS_WRITE, %rax
    syscall
    ret
-   
 
+
+/*
 .align 3
 .globl f$_write
 f$_write:
@@ -166,6 +153,7 @@ f$_writeln:
    movq newline@GOTPCREL(%rip), %rax
    movq %rax, 16(%rsp)
    jmp f$_write
+*/
 
 
 .align 3
@@ -304,6 +292,37 @@ compare_done:
 .globl f$_toh
 f$_toh:
    movq %r15, %rax
+   ret
+
+
+.align 3
+.globl f$_command_argcount
+f$_command_argcount:
+   movq 32(%r14), %rax
+   ret
+
+
+.align 3
+.globl f$_command_getarg
+f$_command_getarg:
+   movq 16(%rsp), %rbx                 // argv number
+   movq 24(%r14), %rsi                 // get pointer to argv
+   movq (%rsi, %rbx, 8), %rsi          // get offset
+   leaq 8(%r15), %rdi                  // copy string here
+   xorq %rbx, %rbx
+getarg_loop:
+   cmpb $0, (%rsi, %rbx, 1)            // end of string?
+   je getarg_done
+   movb (%rsi, %rbx, 1), %al           // copy char
+   movb %al, (%rdi, %rbx, 1)
+   incq %rbx                           // next char
+   jmp getarg_loop
+getarg_done:
+   movq %rbx, (%r15)                   // string length
+   movq %r15, %rax
+   addq $15, %rbx                      // add space for length plus alignment
+   addq %rbx, %r15                     // update heap pointer
+   andq $0xfffffffffffffff8, %r15      // align 8 bytes
    ret
 
 
