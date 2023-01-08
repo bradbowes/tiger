@@ -1,14 +1,14 @@
 putc(file: int, c: char)
 getc(file: int): char
 
-STDIN = 1
-STDOUT = 2
+STD_INPUT = 0
+STD_OUTPUT = 1
 
 getchar(): char =
-   getc(STDIN)
+   getc(STD_INPUT)
 
 putchar(c: char) =
-   putc(STDOUT, c)
+   putc(STD_OUTPUT, c)
 
 read(): string
 
