@@ -96,10 +96,10 @@ f$_read:
 
 
 .align 3
-.globl f$_getchar
-f$_getchar:
+.globl f$_getc
+f$_getc:
+   movq 16(%rsp), %rdi
    subq $16, %rsp
-   movq $STD_INPUT, %rdi
    movq %rsp, %rsi
    movq $1, %rdx
    movq $SYS_READ, %rax
@@ -117,10 +117,10 @@ done_input:
 
 
 .align 3
-.globl f$_putchar
-f$_putchar:
-   movq $STD_OUTPUT, %rdi
-   leaq 16(%rsp), %rsi
+.globl f$_putc
+f$_putc:
+   movq 16(%rsp), %rdi
+   leaq 24(%rsp), %rsi
    movq $1, %rdx
    movq $SYS_WRITE, %rax
    syscall

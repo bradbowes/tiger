@@ -1,6 +1,14 @@
-putchar(c: char)
+putc(file: int, c: char)
+getc(file: int): char
 
-getchar(): char
+STDIN = 1
+STDOUT = 2
+
+getchar(): char =
+   getc(STDIN)
+
+putchar(c: char) =
+   putc(STDOUT, c)
 
 read(): string
 
@@ -43,3 +51,5 @@ string_compare(s1: string, s2: string): int
 toh(): int
 command_argcount(): int
 command_getarg(i: int): string
+open_input(path: string): int
+close(file: int)
