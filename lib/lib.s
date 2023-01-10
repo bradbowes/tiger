@@ -47,7 +47,7 @@ _main:
 
 main_fail:
    movq $STD_ERR, %rdi
-   movq heap_err_msg@GOTPCREL(%rip), %rsi
+   leaq heap_err_msg(%rip), %rsi
    movq $25, %rdx
    movq $SYS_WRITE, %rax
    syscall
@@ -61,99 +61,57 @@ main_done:
 .align 3
 .globl f$_open_input
 f$_open_input:
-   movq 16(%rsp), %rdi                 // path
+   movq 16(%rsp), %rdi
    addq $8, %rdi
-   movq $O_RDONLY, %rsi
-   movq $SYS_OPEN, %rax
-   syscall
+   leaq read_mode(%rip), %rsi
+   call _fopen
    ret
 
 
 .align 3
-.globl f$_close
-f$_close:
+.globl f$_close_file
+f$_close_file:
    movq 16(%rsp), %rdi
-   movq $SYS_CLOSE, %rax
-   syscall
+   call _fclose
    ret
 
 
 .align 3
-.globl f$_read
-f$_read:
-   movq $STD_INPUT, %rdi
-   leaq 8(%r15), %rsi                  // read buffer (top of heap plus space for string length)
-   movq $4096, %rdx                    // buffer length
-   movq $SYS_READ, %rax
-   syscall
-   movq %rax, (%r15)                   // string length
-   movq %rax, %rbx                     // save string length
-   movq %r15, %rax                     // return address in RAX
-   addq $15, %rbx                      // add space for length plus alignment
-   addq %rbx, %r15                     // update heap pointer
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+.globl f$_getchar_file
+f$_getchar_file:
+   movq 16(%rsp), %rdi                 // FILE *
+   call _fgetc
+   movsx %eax, %rax                    // sign-extend int (EOF = -1)
    ret
 
 
 .align 3
-.globl f$_getc
-f$_getc:
+.globl f$_getchar
+f$_getchar:
+	movq ___stdinp@GOTPCREL(%rip), %rax
+	movq (%rax), %rdi
+   call _fgetc
+   movsx %eax, %rax
+   ret
+
+
+.align 3
+.globl f$_putchar_file
+f$_putchar_file:
    movq 16(%rsp), %rdi
-   subq $16, %rsp
-   movq %rsp, %rsi
-   movq $1, %rdx
-   movq $SYS_READ, %rax
-   syscall
-   cmpq $0, %rax
-   jne got_input
-   movq $-1, %rax
-   jmp done_input
-got_input:
-   movb (%rsi), %al
-   andq $0x00000000000000ff, %rax
-done_input:
-   addq $16, %rsp
+   movq 24(%rsp), %rsi
+   call _fputc
    ret
 
 
 .align 3
-.globl f$_putc
-f$_putc:
+.globl f$_putchar
+f$_putchar:
    movq 16(%rsp), %rdi
-   leaq 24(%rsp), %rsi
-   movq $1, %rdx
-   movq $SYS_WRITE, %rax
-   syscall
-   ret
-
-
-/*
-.align 3
-.globl f$_write
-f$_write:
-   pushq %rbx
-   pushq %rcx
-   movq $STD_OUTPUT, %rdi
-   movq 32(%rsp), %rbx                  // string parameter
-   movq (%rbx), %rdx                    // string length field
-   leaq 8(%rbx), %rsi                   // start of string
-   movq $SYS_WRITE, %rax
-   syscall
-   popq %rcx
-   popq %rbx
-   ret
-
-
-.align 3
-.globl f$_writeln
-f$_writeln:
-   movq 16(%rsp), %rax
-   movq %rax, 8(%rsp)
-   call f$_write
-   movq newline@GOTPCREL(%rip), %rax
-   movq %rax, 16(%rsp)
-   jmp f$_write
-*/
+	movq ___stdoutp@GOTPCREL(%rip), %rax
+	movq (%rax), %rsi
+	call _fputc
+	ret
 
 
 .align 3
@@ -162,7 +120,7 @@ f$_str:
    pushq %rbx
    pushq %rcx
    leaq 8(%r15), %rdi                   // output string
-   movq str_fmt@GOTPCREL(%rip), %rsi    // format string
+   leaq str_fmt(%rip), %rsi             // format string
    movq 32(%rsp), %rdx                  // number
    xorq %rax, %rax                      // no float args
    call _sprintf
@@ -287,7 +245,6 @@ compare_done:
    ret
 
 
-
 .align 3
 .globl f$_toh
 f$_toh:
@@ -332,6 +289,18 @@ getarg_done:
 newline:
    .quad 1
    .asciz "\n"
+
+.align 3
+read_mode:
+   .asciz "r"
+
+.align 3
+write_mode:
+   .asciz "w"
+
+.align 3
+append_mode:
+   .asciz "a"
 
 .align 3
 heap_err_msg:

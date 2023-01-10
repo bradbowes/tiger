@@ -5,22 +5,22 @@
 
 let
    file =
-      if command_argcount() = 1 then STD_INPUT
+      if command_argcount() < 2 then 0
       else open_input(command_getarg(1))
    ch =
-      if file >= 0 then
-         getc(file)
+      if file <> 0 then
+         getchar_file(file)
       else
          begin
             writeln("ERROR: can't open file!")
             chr(-1)
          end
-
 in
    while ch <> chr(-1) do
       begin
          putchar(ch)
-         ch := getc(file)
+         ch := getchar_file(file)
       end
-   close(file)
+
+   close_file(file)
 end

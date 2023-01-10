@@ -1,16 +1,21 @@
-putc(file: int, c: char)
-getc(file: int): char
+str(n: int): string
+length(s: string): int
+ord(c: char): int
+chr(n: int): char
+getchar_file(file: int): char
+getchar(): char
+putchar_file(c: char, file: int)
+putchar(c: char)
+substring(s: string, start: int, length: int): string
+string_concat(s1: string, s2: string): string
+string_compare(s1: string, s2: string): int
+toh(): int
+command_argcount(): int
+command_getarg(i: int): string
+open_input(path: string): int
+close_file(file: int)
 
-STD_INPUT = 0
-STD_OUTPUT = 1
-
-getchar(): char =
-   getc(STD_INPUT)
-
-putchar(c: char) =
-   putc(STD_OUTPUT, c)
-
-read(): string
+EOF = chr(-1)
 
 write(s: string) =
    for i := 0 to length(s) - 1 do
@@ -41,15 +46,3 @@ writeint(i: int) =
          else putchar(#"0")
    end
 
-str(n: int): string
-length(s: string): int
-ord(c: char): int
-chr(n: int): char
-substring(s: string, start: int, length: int): string
-string_concat(s1: string, s2: string): string
-string_compare(s1: string, s2: string): int
-toh(): int
-command_argcount(): int
-command_getarg(i: int): string
-open_input(path: string): int
-close(file: int)

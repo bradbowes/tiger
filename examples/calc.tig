@@ -9,7 +9,7 @@ let
    type token = { op: char, value: int }
    ch = #" "
 
-   quit = chr(-1)
+   quit = EOF
    num = #"0"
    plus = #"+"
    minus = #"-"
@@ -141,7 +141,7 @@ let
 
    value = sum()
 in
-   while t.op <> quit do
+   while ch <> EOF do
       begin
          if t.op = err then
             writeln(msg)
@@ -158,7 +158,4 @@ in
          value := sum()
       end
 
-   /* consume any extra input */
-   while ch <> newline do
-      ch := getchar()
 end
