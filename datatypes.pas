@@ -5,7 +5,7 @@ interface
 uses symbols;
 
 type
-   type_tag = (primitive_type, record_type, array_type, function_type);
+   type_tag = (primitive_type, record_type, array_type, function_type, pointer_type);
 
    spec = ^spec_t;
    field = ^field_t;
@@ -35,9 +35,11 @@ const
    _bool_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
    bool_type: spec = @_bool_type;
    _string_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
-   string_type: spec = @string_type;
+   string_type: spec = @_string_type;
    _char_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
-   char_type: spec = @char_type;
+   char_type: spec = @_char_type;
+   _file_type: spec_t = (tag: pointer_type; fields: nil; base: nil; length: 0);
+   file_type: spec = @_file_type;
 
 
 procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);

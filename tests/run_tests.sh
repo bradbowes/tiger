@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
@@ -534,7 +534,9 @@ in
    writeln(str(outer(5)))
 end" "5"
 
-END_COMMENT
 
 test_code "writeln(str(command_argcount()))" "1"
 test_code "writeln(command_getarg(0))" "./test2"
+
+# END_COMMENT
+

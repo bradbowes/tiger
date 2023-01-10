@@ -2,20 +2,30 @@ str(n: int): string
 length(s: string): int
 ord(c: char): int
 chr(n: int): char
-getchar_file(file: int): char
-getchar(): char
-putchar_file(c: char, file: int)
-putchar(c: char)
+get_stdin_ptr(): file
+get_stdout_ptr(): file
+get_stderr_ptr(): file
+getchar_file(file: file): char
+putchar_file(c: char, file: file)
 substring(s: string, start: int, length: int): string
 string_concat(s1: string, s2: string): string
 string_compare(s1: string, s2: string): int
 toh(): int
 command_argcount(): int
 command_getarg(i: int): string
-open_input(path: string): int
-close_file(file: int)
+open_input(path: string): file
+close_file(f: file)
 
+STD_INPUT = get_stdin_ptr()
+STD_OUTPUT = get_stdout_ptr()
+STD_ERROR = get_stderr_ptr()
 EOF = chr(-1)
+
+getchar(): char =
+   getchar_file(STD_INPUT)
+
+putchar(c: char) =
+   putchar_file(c, STD_OUTPUT)
 
 write(s: string) =
    for i := 0 to length(s) - 1 do

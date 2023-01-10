@@ -16,8 +16,8 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    function compatible(a, b: spec): boolean;
    begin
       compatible := (a = b) or
-                    ((b = nil_type) and (a^.tag <> primitive_type)) or
-                    ((a = nil_type) and (b^.tag <> primitive_type));
+                    ((b = nil_type) and not (a^.tag in [primitive_type, function_type])) or
+                    ((a = nil_type) and not (b^.tag in [primitive_type, function_type]));
    end;
 
 

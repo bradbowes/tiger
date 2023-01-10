@@ -1,30 +1,8 @@
-MAC_OS =          0x02000000
-SYS_EXIT =        MAC_OS | 1
-SYS_FORK =        MAC_OS | 2
-SYS_READ =        MAC_OS | 3
-SYS_WRITE =       MAC_OS | 4
-SYS_OPEN =        MAC_OS | 5
-SYS_CLOSE =       MAC_OS | 6
-
-STD_INPUT =       0x0000
-STD_OUTPUT =      0x0001
-STD_ERR =         0x0002
-
-O_RDONLY =        0x0000
-O_WRONLY =        0x0001
-O_RDWR =          0x0002
-
-O_CREAT =         0x00000200      /* create if nonexistant */
-O_TRUNC =         0x00000400      /* truncate to zero length */
-O_EXCL =          0x00000800      /* error if already exists */
-
-
 heap_size = 16 * 1024 * 1024
 
 .text
 .align 3
 .globl _main
-
 _main:
    subq $40, %rsp                      // space for global variables
    movq %rsp, %r14                     // save global var pointer
@@ -46,11 +24,10 @@ _main:
    jmp main_done
 
 main_fail:
-   movq $STD_ERR, %rdi
-   leaq heap_err_msg(%rip), %rsi
-   movq $25, %rdx
-   movq $SYS_WRITE, %rax
-   syscall
+   leaq heap_err_msg(%rip), %rdi       // print error message
+	movq ___stderrp@GOTPCREL(%rip), %rax
+	movq (%rax), %rsi
+   call _fputs
 
 main_done:
    addq $40, %rsp
@@ -77,6 +54,30 @@ f$_close_file:
 
 
 .align 3
+.globl f$_get_stdin_ptr
+f$_get_stdin_ptr:
+	movq ___stdinp@GOTPCREL(%rip), %rax
+	movq (%rax), %rax
+   ret
+
+
+.align 3
+.globl f$_get_stdout_ptr
+f$_get_stdout_ptr:
+	movq ___stdoutp@GOTPCREL(%rip), %rax
+	movq (%rax), %rax
+   ret
+
+
+.align 3
+.globl f$_get_stderr_ptr
+f$_get_stderr_ptr:
+	movq ___stderrp@GOTPCREL(%rip), %rax
+	movq (%rax), %rax
+   ret
+
+
+.align 3
 .globl f$_getchar_file
 f$_getchar_file:
    movq 16(%rsp), %rdi                 // FILE *
@@ -85,6 +86,7 @@ f$_getchar_file:
    ret
 
 
+/*
 .align 3
 .globl f$_getchar
 f$_getchar:
@@ -93,7 +95,7 @@ f$_getchar:
    call _fgetc
    movsx %eax, %rax
    ret
-
+*/
 
 .align 3
 .globl f$_putchar_file
@@ -103,7 +105,7 @@ f$_putchar_file:
    call _fputc
    ret
 
-
+/*
 .align 3
 .globl f$_putchar
 f$_putchar:
@@ -112,7 +114,7 @@ f$_putchar:
 	movq (%rax), %rsi
 	call _fputc
 	ret
-
+*/
 
 .align 3
 .globl f$_str
@@ -309,18 +311,4 @@ heap_err_msg:
 .align 3
 str_fmt:
    .asciz "%ld"
-
-.align 3
-input_count:
-   .quad 0
-input_pos:
-   .quad 0
-
-.align 3
-input_buffer:
-   .skip 4096, 0
-
-.align 3
-output_buffer:
-   .skip 4096, 0
 

@@ -4,7 +4,6 @@
 - written in Free Pascal.
 - compiles to inefficient as assembly language for Mac OS X86_64.
 - hand written recursive descent lexer and parser.
-- integers are int64
 
 # Differences from the Tiger book
 
@@ -15,6 +14,7 @@
   `false` are keyword literals.
 - char data type. Char literals are `#` followed by a single letter in
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
+- file data type (C `FILE*` pointer) 
 - sequences are enclosed in `begin` and `end` instead of
   parentheses.
 - semicolon separators are optional between expressions in sequences.
@@ -35,12 +35,8 @@
 - tail call optimization
 - anonymous functions, first class functions
 - closures
-- file type
-- access to command line arguments
 - enum
-- case expressions
 - array literals
-- overloaded functions
 - garbage collector
 - polymorphic types and functions
 - modules, separate compilation
@@ -52,11 +48,23 @@
 
 ## IO
 
-- read(): string
-- write(s: string)
-- writeln(s: string)
+### Constants
+
+- STD_INPUT
+- STD_OUTPUT
+- STD_ERROR
+- EOF
+
+### Functions
+
+- open_input(path: string): file
+- close_file(f: file)
 - getchar(): char
 - putchar(c: char)
+- getchar_file(f: file): char
+- putchar_file(c: char, f: file)
+- write(s: string)
+- writeln(s: string)
 - command_argcount(): int
 - command_getarg(n: int): string
 

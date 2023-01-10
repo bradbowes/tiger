@@ -4,23 +4,23 @@
 */
 
 let
-   file =
-      if command_argcount() < 2 then 0
+   input =
+      if command_argcount() < 2 then STD_INPUT
       else open_input(command_getarg(1))
    ch =
-      if file <> 0 then
-         getchar_file(file)
+      if input <> nil then
+         getchar_file(input)
       else
          begin
             writeln("ERROR: can't open file!")
-            chr(-1)
+            EOF
          end
 in
-   while ch <> chr(-1) do
+   while ch <> EOF do
       begin
          putchar(ch)
-         ch := getchar_file(file)
+         ch := getchar_file(input)
       end
 
-   close_file(file)
+   close_file(input)
 end
