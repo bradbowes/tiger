@@ -148,7 +148,7 @@ begin
       t := rotate_right(t)
    else if (bal < -1) and (b^.key > t^.right^.binding^.key) then
       t := rotate_left(t)
-   else if (bal > 1) and (b^.key >  T^.left^.binding^.key) then
+   else if (bal > 1) and (b^.key >  t^.left^.binding^.key) then
       begin
          t^.left := rotate_left(t^.left);
          t := rotate_right(t);

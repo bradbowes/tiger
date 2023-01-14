@@ -10,10 +10,12 @@ putchar_file(c: char, file: file)
 substring(s: string, start: int, length: int): string
 string_concat(s1: string, s2: string): string
 string_compare(s1: string, s2: string): int
+string_buffer(size: int): string
 toh(): int
 command_argcount(): int
-command_getarg(i: int): string
+command_arg(i: int): string
 open_input(path: string): file
+open_output(path: string): file
 close_file(f: file)
 
 STD_INPUT = get_stdin_ptr()
@@ -36,23 +38,3 @@ writeln(s: string) =
       write(s)
       putchar(#"\n")
    end
-
-writeint(i: int) =
-   let
-      f(i: int) =
-         if i > 0 then
-            begin
-               f(i / 10)
-               putchar(chr(i - i / 10 * 10) + #"0")
-            end
-   in
-      if i < 0 then
-         begin
-            putchar(#"-")
-            f(-1)
-         end
-      else
-         if i > 0 then f(i)
-         else putchar(#"0")
-   end
-

@@ -1,4 +1,8 @@
 heap_size = 16 * 1024 * 1024
+SEEK_SET	= 0
+SEEK_CUR = 1
+SEEK_END = 2
+
 
 .text
 .align 3
@@ -25,8 +29,8 @@ _main:
 
 main_fail:
    leaq heap_err_msg(%rip), %rdi       // print error message
-	movq ___stderrp@GOTPCREL(%rip), %rax
-	movq (%rax), %rsi
+   movq ___stderrp@GOTPCREL(%rip), %rax
+   movq (%rax), %rsi
    call _fputs
 
 main_done:
@@ -41,6 +45,16 @@ f$_open_input:
    movq 16(%rsp), %rdi
    addq $8, %rdi
    leaq read_mode(%rip), %rsi
+   call _fopen
+   ret
+
+
+.align 3
+.globl f$_open_output
+f$_open_output:
+   movq 16(%rsp), %rdi
+   addq $8, %rdi
+   leaq write_mode(%rip), %rsi
    call _fopen
    ret
 
@@ -86,17 +100,6 @@ f$_getchar_file:
    ret
 
 
-/*
-.align 3
-.globl f$_getchar
-f$_getchar:
-	movq ___stdinp@GOTPCREL(%rip), %rax
-	movq (%rax), %rdi
-   call _fgetc
-   movsx %eax, %rax
-   ret
-*/
-
 .align 3
 .globl f$_putchar_file
 f$_putchar_file:
@@ -105,16 +108,6 @@ f$_putchar_file:
    call _fputc
    ret
 
-/*
-.align 3
-.globl f$_putchar
-f$_putchar:
-   movq 16(%rsp), %rdi
-	movq ___stdoutp@GOTPCREL(%rip), %rax
-	movq (%rax), %rsi
-	call _fputc
-	ret
-*/
 
 .align 3
 .globl f$_str
@@ -138,12 +131,32 @@ f$_str:
 
 
 .align 3
+.globl f$_string_buffer
+f$_string_buffer:
+   movq 16(%rsp), %rbx
+   movq %rbx, (%r15)
+   addq $15, %rbx
+   shrq $3, %rbx
+   xorq %rax, %rax
+buffer_loop:
+   cmpq $0, %rbx
+   je buffer_done
+   movq %rax, 8(%r15, %rbx, 8)
+   decq %rbx
+   jmp buffer_loop
+buffer_done:
+   movq %r15, %rax
+   addq (%r15), %r15
+   addq $15, %r15
+   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   ret
+
+
+.align 3
 .globl f$_length
 f$_length:
-   pushq %rsi
-   movq 24(%rsp), %rsi
-   movq (%rsi), %rax
-   popq %rsi
+   movq 16(%rsp), %rax
+   movq (%rax), %rax
    ret
 
 
@@ -262,8 +275,8 @@ f$_command_argcount:
 
 
 .align 3
-.globl f$_command_getarg
-f$_command_getarg:
+.globl f$_command_arg
+f$_command_arg:
    movq 16(%rsp), %rbx                 // argv number
    movq 24(%r14), %rsi                 // get pointer to argv
    movq (%rsi, %rbx, 8), %rsi          // get offset

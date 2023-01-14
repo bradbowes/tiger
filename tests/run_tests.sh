@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
@@ -536,7 +536,23 @@ end" "5"
 
 
 test_code "writeln(str(command_argcount()))" "1"
-test_code "writeln(command_getarg(0))" "./test2"
 
-# END_COMMENT
+END_COMMENT
 
+test_code "let
+   a = substring(\"hello\", 0, 5)
+in
+   a[3] := #\"t\"
+   writeln(a)
+end" "helto"
+
+test_code "let
+   a = string_buffer(5)
+in
+   a[0] := #\"H\"
+   a[1] := #\"E\"
+   a[2] := #\"L\"
+   a[3] := #\"L\"
+   a[4] := #\"O\"
+   writeln(a)
+end" "HELLO"

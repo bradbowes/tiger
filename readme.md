@@ -2,7 +2,7 @@
 
 - compiler for Andrew Appel's Tiger language with a few tweaks.
 - written in Free Pascal.
-- compiles to inefficient as assembly language for Mac OS X86_64.
+- compiles to inefficient assembly language for Mac OS X86_64.
 - hand written recursive descent lexer and parser.
 
 # Differences from the Tiger book
@@ -58,6 +58,7 @@
 ### Functions
 
 - open_input(path: string): file
+- open_output(path: string): file
 - close_file(f: file)
 - getchar(): char
 - putchar(c: char)
@@ -66,7 +67,7 @@
 - write(s: string)
 - writeln(s: string)
 - command_argcount(): int
-- command_getarg(n: int): string
+- command_arg(n: int): string
 
 ## Conversion
 

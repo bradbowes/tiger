@@ -6,7 +6,7 @@
 let
    input =
       if command_argcount() < 2 then STD_INPUT
-      else open_input(command_getarg(1))
+      else open_input(command_arg(1))
    ch =
       if input <> nil then
          getchar_file(input)

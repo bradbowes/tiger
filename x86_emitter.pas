@@ -284,8 +284,11 @@ var
 
 
    procedure emit_indexed_assign();
+   var
+      arr: node;
    begin
-      emit_expression(n^.left^.left, si - 16, nest);
+      arr := n^.left^.left;
+      emit_expression(arr, si - 16, nest);
       emit('   movq %%rax, %%rsi', []);
       emit('   movq %%rsi, %d(%%rbp)', [si - 8]);
       emit_expression(n^.left^.right, si - 16, nest);
@@ -294,7 +297,10 @@ var
       emit_expression(n^.right, si - 16, nest);
       emit('   movq %d(%%rbp), %%rbx',  [si]);
       emit('   movq %d(%%rbp), %%rsi',  [si - 8]);
-      emit('   movq %%rax, 8(%%rsi, %%rbx, 8)', []);
+      if ((arr^.binding <> nil) and (arr^.binding^.ty = string_type)) then
+         emit('   movb %%al, 8(%%rsi, %%rbx, 1)', [])
+      else
+         emit('   movq %%rax, 8(%%rsi, %%rbx, 8)', []);
    end;
 
 

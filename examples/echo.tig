@@ -7,7 +7,7 @@ let
 in
    for i := 1 to last do
       begin
-         write(command_getarg(i))
+         write(command_arg(i))
          if i < last then putchar(#" ")
       end
    putchar(#"\n")
