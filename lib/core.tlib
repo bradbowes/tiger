@@ -5,8 +5,8 @@ chr(n: int): char
 get_stdin_ptr(): file
 get_stdout_ptr(): file
 get_stderr_ptr(): file
-getchar_file(file: file): char
-putchar_file(c: char, file: file)
+file_getchar(file: file): char
+file_putchar(c: char, file: file)
 substring(s: string, start: int, length: int): string
 string_concat(s1: string, s2: string): string
 string_compare(s1: string, s2: string): int
@@ -24,10 +24,10 @@ STD_ERROR = get_stderr_ptr()
 EOF = chr(-1)
 
 getchar(): char =
-   getchar_file(STD_INPUT)
+   file_getchar(STD_INPUT)
 
 putchar(c: char) =
-   putchar_file(c, STD_OUTPUT)
+   file_putchar(c, STD_OUTPUT)
 
 write(s: string) =
    for i := 0 to length(s) - 1 do
@@ -37,4 +37,14 @@ writeln(s: string) =
    begin
       write(s)
       putchar(#"\n")
+   end
+
+file_write(s: string, f: file) =
+   for i := 0 to length(s) - 1 do
+      file_putchar(s[i], f)
+
+file_writeln(s: string, f: file) =
+   begin
+      file_write(s, f)
+      file_putchar(#"\n", f)
    end

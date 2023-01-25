@@ -92,8 +92,8 @@ f$_get_stderr_ptr:
 
 
 .align 3
-.globl f$_getchar_file
-f$_getchar_file:
+.globl f$_file_getchar
+f$_file_getchar:
    movq 16(%rsp), %rdi                 // FILE *
    call _fgetc
    movsx %eax, %rax                    // sign-extend int (EOF = -1)
@@ -101,8 +101,8 @@ f$_getchar_file:
 
 
 .align 3
-.globl f$_putchar_file
-f$_putchar_file:
+.globl f$_file_putchar
+f$_file_putchar:
    movq 16(%rsp), %rdi
    movq 24(%rsp), %rsi
    call _fputc

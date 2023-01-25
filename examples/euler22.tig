@@ -126,23 +126,23 @@ let
 
    buf = string_buffer(64)
    f = open_input("p022_names.txt")
-   ch = getchar_file(f)
+   ch = file_getchar(f)
    n = 0
 in
    while ch <> EOF do
       begin
-         ch := getchar_file(f) /* eat quotation mark */
+         ch := file_getchar(f) /* eat quotation mark */
          n := 0
          while ch <> #"\"" do
             begin
                buf[n] := ch
                n := n + 1
-               ch := getchar_file(f)
+               ch := file_getchar(f)
             end
          tree := insert(substring(buf, 0, n), tree)
-         ch := getchar_file(f) /* eat quotation mark */
+         ch := file_getchar(f) /* eat quotation mark */
          if ch <> EOF then
-            ch := getchar_file(f) /* eat comma */
+            ch := file_getchar(f) /* eat comma */
       end
       writeln(str(tally(tree)))
 end

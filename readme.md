@@ -22,7 +22,7 @@
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
 - function declarations: `function` keyword not used, format is
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
-- strings can include linebreaks and span multiple lines.
+- strings can include line breaks and span multiple lines.
 - no nested comments
 - type aliases are not implemented.
 - `break` is not implemented.
@@ -62,10 +62,12 @@
 - close_file(f: file)
 - getchar(): char
 - putchar(c: char)
-- getchar_file(f: file): char
-- putchar_file(c: char, f: file)
+- file_getchar(f: file): char
+- file_putchar(c: char, f: file)
 - write(s: string)
 - writeln(s: string)
+- file_write(s: string, f: file)
+- file_writeln(s: string, f: file)
 - command_argcount(): int
 - command_arg(n: int): string
 
@@ -82,3 +84,4 @@
 - substring(s: string, start: int, len: int): string
 - string_concat(s1: string, s2: string): string
 - string_compare(s1: string, s2: string): int
+- string_buffer(size: int): string

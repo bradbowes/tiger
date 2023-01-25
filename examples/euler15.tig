@@ -3,6 +3,42 @@
    being able to move to the right and down, there are
    exactly 6 routes to the bottom right corner.
 
+   1  + - + - +
+              |
+      +   +   +
+              |
+      +   +   +
+
+   2  + - +   +
+          |
+      +   + - +
+              |
+      +   +   +
+
+   3  + - +   +
+          |
+      +   +   +
+          |
+      +   + - +
+
+   4  +   +   +
+      |
+      + - + - +
+              |
+      +   +   +
+
+   5  +   +   +
+      |
+      + - +   +
+          |
+      +   + - +
+
+   6  +   +   +
+      |
+      +   +   +
+      |
+      + - + - +
+
    How many such routes are there through a 20×20 grid?
 */
 let

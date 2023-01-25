@@ -9,17 +9,17 @@ let
       else open_input(command_arg(1))
    ch =
       if input <> nil then
-         getchar_file(input)
+         file_getchar(input)
       else
          begin
-            writeln("ERROR: can't open file!")
+            file_writeln("ERROR: can't open file!", STD_ERROR)
             EOF
          end
 in
    while ch <> EOF do
       begin
          putchar(ch)
-         ch := getchar_file(input)
+         ch := file_getchar(input)
       end
 
    close_file(input)
