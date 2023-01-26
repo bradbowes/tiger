@@ -65,16 +65,18 @@ type
                   line, col: longint;
                end;
 
+
 function load_source(file_name: string): source;
 procedure scan(s: source);
 
 var
    token: token_t;
+   current_file: string;
 
 
 implementation
 
-uses utils;
+uses sysutils, utils;
 
 procedure scan(s: source);
 
@@ -98,7 +100,7 @@ procedure scan(s: source);
                   end
             end
          else
-            err('Read past end of file', token.line, token.col);
+            err('Read past end of file', current_file, token.line, token.col);
    end;
 
 
@@ -168,7 +170,7 @@ procedure scan(s: source);
                         else if s^.ch in ['a'.. 'z'] then
                            escape := chr(ord(s^.ch) - 96)
                         else
-                           err('illegal escape sequence', s^.line, s^.col);
+                           err('illegal escape sequence', current_file, s^.line, s^.col);
                      end;
                   '0'..'9':
                      begin
@@ -177,15 +179,15 @@ procedure scan(s: source);
                         if s^.ch in ['0'..'9'] then
                            code := code + s^.ch
                         else
-                           err('illegal escape sequence', s^.line, s^.col);
+                           err('illegal escape sequence', current_file, s^.line, s^.col);
                         next();
                         if s^.ch in ['0'..'9'] then
                            code := code + s^.ch
                         else
-                           err('illegal escape sequence', s^.line, s^.col);
+                           err('illegal escape sequence', current_file, s^.line, s^.col);
                         if code > '255' then
-                           err('illegal escape sequence', s^.line, s^.col);
-                        escape := chr(atoi(code, s^.line, s^.col));
+                           err('illegal escape sequence', current_file, s^.line, s^.col);
+                        escape := chr(strtoint(code));
                      end;
                   ' ', chr(9) .. chr(13):
                      begin
@@ -196,10 +198,10 @@ procedure scan(s: source);
                               continue;
                            end
                         else
-                           err('illegal escape sequence', s^.line, s^.col);
+                           err('illegal escape sequence', current_file, s^.line, s^.col);
                      end;
                   else
-                     err('illegal escape sequence', s^.line, s^.col);
+                     err('illegal escape sequence', current_file, s^.line, s^.col);
                end;
                token.value := token.value + escape;
                next();
@@ -217,9 +219,9 @@ procedure scan(s: source);
       if s^.ch = '"' then
          get_string()
       else
-         err('illegal character literal', s^.line, s^.col);
+         err('illegal character literal', current_file, s^.line, s^.col);
       if length(token.value) <> 1 then
-         err('illegal character literal', token.line, token.col);
+         err('illegal character literal', current_file, token.line, token.col);
       token.tag := char_token;
    end;
 
@@ -265,8 +267,8 @@ procedure scan(s: source);
 begin
    skip_white;
    token.value := '';
-   token.col := s^.col;
    token.line := s^.line;
+   token.col := s^.col;
    if not s^.open then
       begin
          token.tag := eof_token;
@@ -322,7 +324,7 @@ begin
             'a'..'z', 'A'..'Z': get_id;
          else if eof(s^.src) then next()
          else
-            err('Illegal token ''' + s^.ch + '''', token.line, token.col);
+            err('Illegal token ''' + s^.ch + '''', current_file, token.line, token.col);
          end;
       end;
 end;
@@ -331,6 +333,7 @@ end;
 function load_source(file_name: string): source;
 var s: source;
 begin
+   current_file := file_name;
    new(s);
    assign(s^.src, file_name);
    reset(s^.src);

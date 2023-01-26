@@ -10,20 +10,27 @@ implementation
 
 function parse(file_name: string): node;
 var
-   the_source: source;
+   src: source;
    lib: node_list;
    expr: node;
 
 
-   function get_expression(): node; forward;
-
    procedure next();
    begin
-      scan(the_source);
+      scan(src);
       while token.tag = comment_token do
-         scan(the_source);
+         scan(src);
    end;
 
+
+   procedure set_source(file_name: string);
+   begin
+      src := load_source(file_name);
+      next();
+   end;
+
+
+   function get_expression(): node; forward;
 
    function get_identifier(): symbol;
    var
@@ -37,7 +44,7 @@ var
             next();
          end
       else
-         err('Expected identifier, got ''' + value + '''', token.line, token.col);
+         err('Expected identifier, got ''' + value + '''', current_file, token.line, token.col);
    end;
 
 
@@ -47,7 +54,7 @@ var
          next()
       else
          err('Expected ''' + display + ''', got ''' +
-             token.value + '''', token.line, token.col);
+             token.value + '''', current_file, token.line, token.col);
    end;
 
 
@@ -80,7 +87,7 @@ var
             if token.tag = semicolon_token then next();
          end;
       next();
-      get_sequence := make_sequence_node(list, line, col);
+      get_sequence := make_sequence_node(list, current_file, line, col);
    end;
 
 
@@ -93,7 +100,7 @@ var
       col := token.col;
       name := get_identifier();
       advance(eq_token, '=');
-      get_field := make_field_node(name, get_expression(), line, col);
+      get_field := make_field_node(name, get_expression(), current_file, line, col);
    end;
 
 
@@ -131,37 +138,37 @@ var
          number_token:
             begin
                next();
-               factor := make_integer_node(atoi(value, line, col), line, col);
+               factor := make_integer_node(atoi(value, current_file, line, col), current_file, line, col);
             end;
          string_token:
             begin
                next();
-               factor := make_string_node(intern(value), line, col);
+               factor := make_string_node(intern(value), current_file, line, col);
             end;
          true_token:
             begin
                next();
-               factor := make_boolean_node(true, line, col);
+               factor := make_boolean_node(true, current_file, line, col);
             end;
          false_token:
             begin
                next();
-               factor := make_boolean_node(false, line, col);
+               factor := make_boolean_node(false, current_file, line, col);
             end;
          nil_token:
             begin
                next();
-               factor := make_nil_node(line, col);
+               factor := make_nil_node(current_file, line, col);
             end;
          char_token:
             begin
                next();
-               factor := make_char_node(ord(value[1]), line, col);
+               factor := make_char_node(ord(value[1]), current_file, line, col);
             end;
          minus_token:
             begin
                next();
-               factor := make_unary_op_node(minus_op, get_factor(), line, col);
+               factor := make_unary_op_node(minus_op, get_factor(), current_file, line, col);
             end;
          id_token:
             begin
@@ -170,7 +177,7 @@ var
                   lbrace_token:
                      begin
                         next();
-                        get_factor := make_record_node(id, get_field_list(), line, col);
+                        get_factor := make_record_node(id, get_field_list(), current_file, line, col);
                         advance(rbrace_token, '}');
                         exit;
                      end;
@@ -182,7 +189,7 @@ var
                         else
                            list := get_expression_list();
                         advance(rparen_token, ')');
-                        factor := make_call_node(id, list, line, col);
+                        factor := make_call_node(id, list, current_file, line, col);
                      end;
                   lbracket_token:
                      begin
@@ -192,15 +199,15 @@ var
                         if token.tag = of_token then
                            begin
                               next();
-                              get_factor := make_array_node(id, factor, get_expression(), line, col);
+                              get_factor := make_array_node(id, factor, get_expression(), current_file, line, col);
                               exit;
                            end
                         else
-                           factor :=  make_indexed_var_node(make_simple_var_node(id, line, col), factor, line, col);
+                           factor :=  make_indexed_var_node(make_simple_var_node(id, current_file, line, col), factor, current_file, line, col);
                      end;
 
                   else
-                     factor := make_simple_var_node(id, line, col);
+                     factor := make_simple_var_node(id, current_file, line, col);
                end;
 
                while token.tag in [dot_token, lbracket_token] do
@@ -208,12 +215,12 @@ var
                     dot_token:
                        begin
                           next();
-                          factor := make_field_var_node(factor, get_identifier(), line, col);
+                          factor := make_field_var_node(factor, get_identifier(), current_file, line, col);
                        end;
                     lbracket_token:
                        begin
                           next();
-                          factor := make_indexed_var_node(factor, get_expression(), line, col);
+                          factor := make_indexed_var_node(factor, get_expression(), current_file, line, col);
                           advance(rbracket_token, '}');
                        end;
                   end;
@@ -227,7 +234,7 @@ var
          else
             begin
                next();
-               err('Expected expression, got ''' + value + '''', line, col);
+               err('Expected expression, got ''' + value + '''', current_file, line, col);
             end;
       end;
 
@@ -253,7 +260,7 @@ var
                mod_token: op := mod_op;
             end;
             next();
-            left := make_binary_op_node(op, left, get_factor(), line, col);
+            left := make_binary_op_node(op, left, get_factor(), current_file, line, col);
          end;
 
       get_product := left;
@@ -277,7 +284,7 @@ var
                minus_token: op := minus_op;
             end;
             next();
-            left := make_binary_op_node(op, left, get_product(), line, col);
+            left := make_binary_op_node(op, left, get_product(), current_file, line, col);
          end;
 
       get_sum := left;
@@ -305,7 +312,7 @@ var
                geq_token: op := geq_op;
             end;
             next();
-            left := make_binary_op_node(op, left, get_sum(), line, col);
+            left := make_binary_op_node(op, left, get_sum(), current_file, line, col);
          end;
 
       get_boolean := left;
@@ -324,7 +331,7 @@ var
       while token.tag = and_token do
          begin
             next();
-            left := make_binary_op_node(and_op, left, get_boolean(), line, col);
+            left := make_binary_op_node(and_op, left, get_boolean(), current_file, line, col);
          end;
 
       get_conjunction := left;
@@ -343,7 +350,7 @@ var
       while token.tag = or_token do
          begin
             next();
-            left := make_binary_op_node(or_op, left, get_conjunction(), line, col);
+            left := make_binary_op_node(or_op, left, get_conjunction(), current_file, line, col);
          end;
 
       get_disjunction := left;
@@ -363,10 +370,10 @@ var
    	    if left_side^.tag in [simple_var_node, field_var_node, indexed_var_node] then
             begin
                next();
-               get_assignment := make_assign_node(left_side, get_expression(), line, col);
+               get_assignment := make_assign_node(left_side, get_expression(), current_file, line, col);
             end
          else
-            err('Assignment to non-variable object', line, col)
+            err('Assignment to non-variable object', current_file, line, col)
       else
          get_assignment := left_side;
    end;
@@ -389,10 +396,10 @@ var
          begin
             next();
             get_if_expression := make_if_else_node(
-                  condition, consequent, get_expression(), line, col);
+                  condition, consequent, get_expression(), current_file, line, col);
          end
       else
-         get_if_expression := make_if_node(condition, consequent, line, col);
+         get_if_expression := make_if_node(condition, consequent, current_file, line, col);
    end;
 
 
@@ -407,7 +414,7 @@ var
       next();
       condition := get_expression();
       advance(do_token, 'do');
-      get_while_expression := make_while_node(condition, get_expression(), line, col);
+      get_while_expression := make_while_node(condition, get_expression(), current_file, line, col);
    end;
 
 
@@ -427,7 +434,7 @@ var
       finish := get_expression();
       advance(do_token, 'do');
       body := get_expression();
-      get_for_expression := make_for_node(iter, start, finish, body, line, col);
+      get_for_expression := make_for_node(iter, start, finish, body, current_file, line, col);
    end;
 
 
@@ -440,7 +447,7 @@ var
       col := token.col;
       name := get_identifier();
       advance(colon_token, ':');
-      get_field_desc := make_field_desc_node(name, get_identifier(), line, col);
+      get_field_desc := make_field_desc_node(name, get_identifier(), current_file, line, col);
    end;
 
 
@@ -473,18 +480,18 @@ var
          lbrace_token:
             begin
                next();
-               desc := make_record_desc_node(get_field_desc_list(), line, col);
+               desc := make_record_desc_node(get_field_desc_list(), current_file, line, col);
                advance(rbrace_token, '}');
             end;
          array_token:
             begin
                next();
                advance(of_token, 'of');
-               desc := make_array_desc_node(get_identifier(), line, col);
+               desc := make_array_desc_node(get_identifier(), current_file, line, col);
             end;
          else
             err('Expected type spec, got ''' +
-               token.value, token.line, token.col);
+               token.value, current_file, token.line, token.col);
       end;
       get_type_spec := desc;
    end;
@@ -513,7 +520,7 @@ var
             next();
             body := get_expression
          end;
-      get_function_declaration := make_fun_decl_node(name, params, ty, body, line, col);
+      get_function_declaration := make_fun_decl_node(name, params, ty, body, current_file, line, col);
    end;
 
 
@@ -544,8 +551,8 @@ var
             end
          else
             err('Expected '':'' or ''='', got ''' + token.value + '''',
-                token.line, token.col);
-         get_var_declaration := make_var_decl_node(name, ty, exp, line, col);
+                current_file, token.line, token.col);
+         get_var_declaration := make_var_decl_node(name, ty, exp, current_file, line, col);
       end;
    end;
 
@@ -560,7 +567,7 @@ var
       next();
       name := get_identifier();
       advance(eq_token, '=');
-      get_type_declaration := make_type_decl_node(name, get_type_spec(), line, col);
+      get_type_declaration := make_type_decl_node(name, get_type_spec(), current_file, line, col);
    end;
 
 
@@ -572,7 +579,7 @@ var
          type_token: get_declaration := get_type_declaration();
       else
          err('Expected declaration, got ''' + token.value + '''',
-             token.line, token.col);
+             current_file, token.line, token.col);
       end;
       if token.tag = semicolon_token then next();
    end;
@@ -601,7 +608,7 @@ var
       decls := get_declaration_list();
       advance(in_token, 'in');
       body := get_sequence();
-      get_let_expression := make_let_node(decls, body, line, col);
+      get_let_expression := make_let_node(decls, body, current_file, line, col);
    end;
 
 
@@ -619,16 +626,14 @@ var
 
 
 begin
-   the_source := load_source('/usr/local/share/tiger/lib/core.tlib');
-   next();
+   set_source('/usr/local/share/tiger/lib/core.tlib');
    lib := get_declaration_list();
    next();
-   the_source := load_source(file_name);
-   next();
+   set_source(file_name);
    expr := get_expression();
-   parse := make_let_node(lib, expr, expr^.line, expr^.col);
+   parse := make_let_node(lib, expr, expr^.loc^.file_name, expr^.loc^.line, expr^.loc^.col);
    if token.tag <> eof_token then
-      err('extraneous input', token.line, token.col);
+      err('extraneous input', current_file, token.line, token.col);
 end;
 
 

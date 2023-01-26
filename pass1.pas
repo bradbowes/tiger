@@ -16,6 +16,7 @@ var
 
 function trans1(n: node): node;
 var
+   file_name: string;
    line, col: longint;
    b: binding;
    e1, e2, cond, left, right: node;
@@ -24,8 +25,9 @@ var
    it: node_list_item;
 
 begin
-   line := n^.line;
-   col := n^.col;
+   file_name := n^.loc^.file_name;
+   line := n^.loc^.line;
+   col := n^.loc^.col;
    b := n^.binding;
    cond := n^.cond;
    left := n^.left;
@@ -36,13 +38,13 @@ begin
       simple_var_node:
          if (not b^.mutates) and (b^.value <> nil) then
             if b^.ty = int_type then
-               trans1 := make_integer_node(b^.value^.int_val, line, col)
+               trans1 := make_integer_node(b^.value^.int_val, file_name, line, col)
             else if b^.ty = char_type then
-               trans1 := make_char_node(b^.value^.int_val, line, col)
+               trans1 := make_char_node(b^.value^.int_val, file_name, line, col)
             else if b^.ty = bool_type then
-               trans1 := make_boolean_node(b^.value^.bool_val, line, col)
+               trans1 := make_boolean_node(b^.value^.bool_val, file_name, line, col)
             else if b^.ty = string_type then
-               trans1 := make_string_node(b^.value^.string_val, line, col)
+               trans1 := make_string_node(b^.value^.string_val, file_name, line, col)
             else
                trans1 := copy_node(n, tf)
          else
@@ -51,7 +53,7 @@ begin
          begin
             e1 := trans1(left);
             if e1^.tag = integer_node then
-               trans1 := make_integer_node(-(e1^.value^.int_val), line, col)
+               trans1 := make_integer_node(-(e1^.value^.int_val), file_name, line, col)
             else
                trans1 := copy_node(n, tf);
          end;
@@ -62,61 +64,61 @@ begin
             if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
                case op of
                   plus_op:
-                     trans1 := make_integer_node(e1^.value^.int_val + e2^.value^.int_val, line, col);
+                     trans1 := make_integer_node(e1^.value^.int_val + e2^.value^.int_val, file_name, line, col);
                   minus_op:
-                     trans1 := make_integer_node(e1^.value^.int_val - e2^.value^.int_val, line, col);
+                     trans1 := make_integer_node(e1^.value^.int_val - e2^.value^.int_val, file_name, line, col);
                   mul_op:
-                     trans1 := make_integer_node(e1^.value^.int_val * e2^.value^.int_val, line, col);
+                     trans1 := make_integer_node(e1^.value^.int_val * e2^.value^.int_val, file_name, line, col);
                   div_op:
-                     trans1 := make_integer_node(e1^.value^.int_val div e2^.value^.int_val, line, col);
+                     trans1 := make_integer_node(e1^.value^.int_val div e2^.value^.int_val, file_name, line, col);
                   mod_op:
-                     trans1 := make_integer_node(e1^.value^.int_val mod e2^.value^.int_val, line, col);
+                     trans1 := make_integer_node(e1^.value^.int_val mod e2^.value^.int_val, file_name, line, col);
                   lt_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val < e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val < e2^.value^.int_val, file_name, line, col);
                   leq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val <= e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val <= e2^.value^.int_val, file_name, line, col);
                   gt_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val > e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val > e2^.value^.int_val, file_name, line, col);
                   geq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val >= e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val >= e2^.value^.int_val, file_name, line, col);
                   eq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val = e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val = e2^.value^.int_val, file_name, line, col);
                   neq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val <> e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val <> e2^.value^.int_val, file_name, line, col);
                   else
                      trans1 := copy_node(n, tf);
                end
             else if (e1^.tag = char_node) and (e2^.tag = char_node) then
                case op of
                   plus_op:
-                     trans1 := make_char_node(e1^.value^.int_val + e2^.value^.int_val, line, col);
+                     trans1 := make_char_node(e1^.value^.int_val + e2^.value^.int_val, file_name, line, col);
                   minus_op:
-                     trans1 := make_char_node(e1^.value^.int_val - e2^.value^.int_val, line, col);
+                     trans1 := make_char_node(e1^.value^.int_val - e2^.value^.int_val, file_name, line, col);
                   lt_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val < e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val < e2^.value^.int_val, file_name, line, col);
                   leq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val <= e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val <= e2^.value^.int_val, file_name, line, col);
                   gt_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val > e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val > e2^.value^.int_val, file_name, line, col);
                   geq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val >= e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val >= e2^.value^.int_val, file_name, line, col);
                   eq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val = e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val = e2^.value^.int_val, file_name, line, col);
                   neq_op:
-                     trans1 := make_boolean_node(e1^.value^.int_val <> e2^.value^.int_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.int_val <> e2^.value^.int_val, file_name, line, col);
                   else
                      trans1 := copy_node(n, tf);
                end
             else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
                case op of
                   eq_op:
-                     trans1 := make_boolean_node(e1^.value^.bool_val = e2^.value^.bool_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.bool_val = e2^.value^.bool_val, file_name, line, col);
                   neq_op:
-                     trans1 := make_boolean_node(e1^.value^.bool_val <> e2^.value^.bool_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.bool_val <> e2^.value^.bool_val, file_name, line, col);
                   and_op:
-                     trans1 :=  make_boolean_node(e1^.value^.bool_val and e2^.value^.bool_val, line, col);
+                     trans1 :=  make_boolean_node(e1^.value^.bool_val and e2^.value^.bool_val, file_name, line, col);
                   or_op:
-                     trans1 := make_boolean_node(e1^.value^.bool_val or e2^.value^.bool_val, line, col);
+                     trans1 := make_boolean_node(e1^.value^.bool_val or e2^.value^.bool_val, file_name, line, col);
                   else
                      trans1 := copy_node(n, tf);
                end
@@ -150,7 +152,7 @@ begin
                if e1^.value^.bool_val then
                   trans1 := trans1(left)
                else
-                  trans1 := make_empty_node(line, col)
+                  trans1 := make_empty_node(file_name, line, col)
             else
                trans1 := copy_node(n, tf);
          end;
@@ -169,7 +171,7 @@ begin
          begin
             e1 := trans1(cond);
             if (e1^.tag = boolean_node) and (not e1^.value^.bool_val) then
-               trans1 := make_empty_node(line, col)
+               trans1 := make_empty_node(file_name, line, col)
             else
                trans1 := copy_node(n, tf);
          end;
@@ -186,13 +188,13 @@ begin
                   it := it^.next;
                end;
             if list^.length > 0 then
-               trans1 := make_let_node(list, e2, line, col)
+               trans1 := make_let_node(list, e2, file_name, line, col)
             else
                trans1 := e2;
          end;
       sequence_node:
          case n^.list^.length of
-            0: trans1 := make_empty_node(line, col);
+            0: trans1 := make_empty_node(file_name, line, col);
             1: trans1 := trans1(n^.list^.first^.node);
             else trans1 := copy_node(n, tf);
          end;

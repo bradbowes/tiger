@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses math, symbols, values, datatypes;
+uses utils, math, symbols, values, datatypes;
 
 type
    binding = ^binding_t;
@@ -40,12 +40,10 @@ const
 
 function add_scope(env: scope): scope;
 procedure delete_scope(var env: scope);
-function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
-function lookup(env: scope; key: symbol; line, col: longint): binding;
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: location): binding;
+function lookup(env: scope; key: symbol; loc: location): binding;
 
 implementation
-
-uses utils;
 
 
 var
@@ -163,14 +161,14 @@ begin
 end;
 
 
-function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level, line, col: longint): binding;
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: location): binding;
 var
    t: tree;
    b: binding;
 begin
    t := env^.bindings;
    if find(t, key) <> nil then
-      err('identifier ''' + key^.id + ''' was previously defined in scope', line, col);
+      err('identifier ''' + key^.id + ''' was previously defined in scope', loc);
    new(b);
    b^.key := key;
    b^.ty := ty;
@@ -187,15 +185,15 @@ begin
 end;
 
 
-function lookup(env: scope; key: symbol; line, col: longint): binding;
+function lookup(env: scope; key: symbol; loc: location): binding;
 var
    b: binding;
 begin
    if env = nil then
-      err('identifier ''' + key^.id + ''' is not defined', line, col);
+      err('identifier ''' + key^.id + ''' is not defined', loc);
    b := find(env^.bindings, key);
    if b = nil then
-      lookup := lookup(env^.next, key, line, col)
+      lookup := lookup(env^.next, key, loc)
    else
       lookup := b;
 end;
@@ -223,9 +221,9 @@ end;
 
 
 begin
-   bind(global_tenv, intern('int'), int_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('string'), string_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('bool'), bool_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('char'), char_type, 0, 0, 0, 0);
-   bind(global_tenv, intern('file'), file_type, 0, 0, 0, 0);
+   bind(global_tenv, intern('int'), int_type, 0, 0, nil);
+   bind(global_tenv, intern('string'), string_type, 0, 0, nil);
+   bind(global_tenv, intern('bool'), bool_type, 0, 0, nil);
+   bind(global_tenv, intern('char'), char_type, 0, 0, nil);
+   bind(global_tenv, intern('file'), file_type, 0, 0, nil);
 end.

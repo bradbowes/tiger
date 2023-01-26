@@ -312,7 +312,7 @@ var
    begin
       variable :=  n^.left;
       ty := variable^.left^.binding^.ty;
-      offset := get_field(ty, variable^.name, variable^.line, variable^.col)^.offset;
+      offset := get_field(ty, variable^.name, variable^.loc)^.offset;
       emit('   movq %%rsi, %d(%%rbp)', [si]);
       emit_expression(variable^.left, si - 8, nest);
       emit('   movq %%rax, %%rsi', []);
@@ -459,7 +459,7 @@ var
          begin
             value := it^.node;
             emit_expression(value^.left, stack_index, nest);
-            offset := get_field(ty, value^.name, value^.line, value^.col)^.offset;
+            offset := get_field(ty, value^.name, value^.loc)^.offset;
             emit('   movq %%rax, %d(%%rbp)', [si - offset * 8]);
             it := it^.next;
          end;
@@ -497,7 +497,7 @@ var
       offset: longint;
    begin
       ty := n^.left^.binding^.ty;
-      offset := get_field(ty, n^.name, n^.line, n^.col)^.offset;
+      offset := get_field(ty, n^.name, n^.loc)^.offset;
       emit_expression(n^.left, si, nest);
       emit('   movq %%rsi, %d(%%rbp)', [si]);
       emit('   movq %%rax, %%rsi', []);
@@ -618,7 +618,7 @@ begin
                      else
                         begin
                            writeln(n^.op);
-                           err('emit: operator not implemented yet!', n^.line, n^.col);
+                           err('emit: operator not implemented yet!', n^.loc);
                         end;
                   end;
             end;
@@ -678,7 +678,7 @@ begin
       else
          begin
             writeln(n^.tag);
-            err('emit: feature not supported yet!', n^.line, n^.col);
+            err('emit: feature not supported yet!', n^.loc);
          end;
    end;
 end;

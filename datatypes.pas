@@ -2,7 +2,7 @@ unit datatypes;
 
 interface
 
-uses symbols;
+uses utils, symbols;
 
 type
    type_tag = (primitive_type, record_type, array_type, function_type, pointer_type);
@@ -42,17 +42,15 @@ const
    file_type: spec = @_file_type;
 
 
-procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);
-procedure add_field(rec: spec; name: symbol; ty: spec; offset, line, col: longint);
-function get_field(rec: spec; name: symbol; line, col: longint): field;
+procedure add_param(rec: spec; name: symbol; ty: spec; loc: location);
+procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: location);
+function get_field(rec: spec; name: symbol; loc: location): field;
 function make_array_type(base: spec): spec;
 function make_record_type(): spec;
 function make_function_type(return: spec): spec;
 
 
 implementation
-
-uses utils;
 
 
 function make_record_type(): spec;
@@ -78,18 +76,18 @@ begin
 end;
 
 
-procedure append(list: field; f: field; line, col: longint);
+procedure append(list: field; f: field; loc: location);
 begin
    if list^.name = f^.name then
-      err('field ''' + f^.name^.id + ''' specified more than once', line, col)
+      err('field ''' + f^.name^.id + ''' specified more than once', loc)
    else if list^.next = nil then
       list^.next := f
    else
-      append(list^.next, f, line, col);
+      append(list^.next, f, loc);
 end;
 
 
-procedure add_param(rec: spec; name: symbol; ty: spec; line, col: longint);
+procedure add_param(rec: spec; name: symbol; ty: spec; loc: location);
 var f: field;
 begin
    new(f);
@@ -100,12 +98,12 @@ begin
    if rec^.fields = nil then
       rec^.fields := f
    else
-      append(rec^.fields, f, line, col);
+      append(rec^.fields, f, loc);
    rec^.length := rec^.length + 1;
 end;
 
 
-procedure add_field(rec: spec; name: symbol; ty: spec; offset, line, col: longint);
+procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: location);
 var f: field;
 begin
    new(f);
@@ -117,7 +115,7 @@ begin
    if rec^.fields = nil then
       rec^.fields := f
    else
-      append(rec^.fields, f, line, col);
+      append(rec^.fields, f, loc);
    rec^.length := rec^.length + 1;
 end;
 
@@ -133,12 +131,12 @@ begin
 end;
 
 
-function get_field(rec: spec; name: symbol; line, col: longint): field;
+function get_field(rec: spec; name: symbol; loc: location): field;
 var f: field;
 begin
    f := lookup(rec^.fields, name);
    if f = nil then
-      err('object has no field ''' + name^.id + '''', line, col);
+      err('object has no field ''' + name^.id + '''', loc);
    get_field := f;
 end;
 

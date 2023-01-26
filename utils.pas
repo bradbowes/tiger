@@ -2,9 +2,18 @@ unit utils;
 
 interface
 
+type
+   location = ^location_t;
+   location_t = record
+      line, col: longint;
+      file_name: string;
+   end;
+
 procedure err(msg: string);
-procedure err(msg: string; line, col: longint);
-function atoi(s: string; line, col: longint): int64;
+procedure err(msg, file_name: string; line, col: longint);
+procedure err(msg: string; loc: location);
+function atoi(s: string; file_name: string; line, col: longint): int64;
+
 
 implementation
 
@@ -17,13 +26,19 @@ begin
 end;
 
 
-procedure err(msg: string; line, col: longint);
+procedure err(msg, file_name: string; line, col: longint);
 begin
-   err('line ' + inttostr(line) + ', column ' + inttostr(col) + ': ' + msg);
+   err('in ' + file_name + ', line ' + inttostr(line) + ', column ' + inttostr(col) + ': ' + msg);
 end;
 
 
-function atoi(s: string; line, col: longint): int64;
+procedure err(msg: string; loc: location);
+begin
+   err(msg, loc^.file_name, loc^.line, loc^.col);
+end;
+
+
+function atoi(s: string; file_name: string; line, col: longint): int64;
 var
    i: int64; c: word;
 begin
@@ -33,7 +48,7 @@ begin
    else
       begin
          atoi := 0;
-         err('Bad integer format: ''' + s + '''', line, col);
+         err('Bad integer format: ''' + s + '''', file_name, line, col);
       end;
 end;
 
