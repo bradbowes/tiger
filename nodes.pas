@@ -2,7 +2,7 @@ unit nodes;
 
 interface
 
-uses utils, symbols, ops, values, bindings;
+uses errmsg, symbols, ops, values, bindings;
 
 type
    node_tag = (assign_node,
@@ -79,7 +79,7 @@ function make_field_var_node(obj: node; field: symbol; loc: location): node;
 function make_indexed_var_node(arr, index: node; loc: location): node;
 function make_integer_node(val: int64; loc: location): node;
 function make_string_node(val: symbol; loc: location): node;
-function make_char_node(val: longint; loc: location): node;
+function make_char_node(val: int64; loc: location): node;
 function make_boolean_node(val: boolean; loc: location): node;
 function make_nil_node(loc: location): node;
 function make_empty_node(loc: location): node;
@@ -216,7 +216,8 @@ end;
 
 
 function make_integer_node(val: int64; loc: location): node;
-var n: node;
+var
+   n: node;
 begin
    n := make_node(integer_node, loc);
    n^.value := make_integer_value(val);
@@ -233,7 +234,7 @@ begin
 end;
 
 
-function make_char_node(val: longint; loc: location): node;
+function make_char_node(val: int64; loc: location): node;
 var n: node;
 begin
    n := make_node(char_node, loc);

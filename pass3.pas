@@ -12,7 +12,7 @@ function trans3(n: node): node;
 
 implementation
 
-uses sysutils, utils, symbols;
+uses sysutils, errmsg, symbols;
 
 var
    next_tmp: longint = 0;

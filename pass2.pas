@@ -8,7 +8,7 @@ function trans2(n: node): node;
 
 implementation
 
-uses sysutils, utils, symbols, bindings;
+uses sysutils, errmsg, symbols, bindings;
 
 var
    tf: tf_function = @trans2;

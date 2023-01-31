@@ -2,7 +2,7 @@ unit datatypes;
 
 interface
 
-uses utils, symbols;
+uses errmsg, symbols;
 
 type
    type_tag = (primitive_type, record_type, array_type, function_type, pointer_type);

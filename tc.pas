@@ -2,8 +2,7 @@
 {$H+}
 program tc;
 
-
-uses utils, nodes, parser, sysutils, strutils, process, transforms, x86_emitter;
+uses errmsg, nodes, parser, sysutils, strutils, process, transforms, x86_emitter;
 
 var
    ast: node;

@@ -8,7 +8,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
 implementation
 
-uses utils, ops, symbols;
+uses errmsg, ops, symbols;
 
 function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 

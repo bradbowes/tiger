@@ -8,7 +8,7 @@ function trans1(n: node): node;
 
 implementation
 
-uses utils, ops, bindings, datatypes;
+uses errmsg, ops, bindings, datatypes;
 
 var
    tf: tf_function = @trans1;

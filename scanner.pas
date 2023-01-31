@@ -2,7 +2,7 @@ unit scanner;
 
 interface
 
-uses utils;
+uses errmsg;
 
 type
    token_tag = (and_token,

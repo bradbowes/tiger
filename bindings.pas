@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses utils, math, symbols, values, datatypes;
+uses errmsg, symbols, values, datatypes;
 
 type
    binding = ^binding_t;
@@ -44,6 +44,8 @@ function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: lon
 function lookup(env: scope; key: symbol; loc: location): binding;
 
 implementation
+
+uses math;
 
 
 var

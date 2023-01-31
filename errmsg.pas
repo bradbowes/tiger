@@ -1,4 +1,4 @@
-unit utils;
+unit errmsg;
 
 interface
 
@@ -13,7 +13,6 @@ type
 procedure err(msg: string);
 procedure err(msg, file_name: string; line, col: longint);
 procedure err(msg: string; loc: location);
-function atoi(s: string; loc: location): int64;
 
 
 implementation
@@ -36,20 +35,6 @@ end;
 procedure err(msg: string; loc: location);
 begin
    err(msg, loc^.file_name, loc^.line, loc^.col);
-end;
-
-
-function atoi(s: string; loc: location): int64;
-var
-   i: int64;
-begin
-   if trystrtoint64(s, i) then
-      atoi := i
-   else
-      begin
-         atoi := 0;
-         err('Bad integer format: ''' + s + '''', loc);
-      end;
 end;
 
 

@@ -8,7 +8,7 @@ function parse(file_name: string): node;
 
 implementation
 
-uses utils, scanner, symbols, ops;
+uses sysutils, errmsg, scanner, symbols, ops;
 
 function parse(file_name: string): node;
 var
@@ -129,6 +129,7 @@ var
       list: node_list;
       factor: node = nil;
       id: symbol;
+      i: int64;
    begin
       loc := token_location();
       value := token.value;
@@ -137,7 +138,10 @@ var
          number_token:
             begin
                next();
-               factor := make_integer_node(atoi(value, loc), loc);
+               if trystrtoint64(value, i) then
+                  factor := make_integer_node(i, loc)
+               else
+                  err('Bad integer format: ''' + value + '''', loc);
             end;
          string_token:
             begin
