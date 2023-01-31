@@ -9,10 +9,11 @@ type
       file_name: string;
    end;
 
+
 procedure err(msg: string);
 procedure err(msg, file_name: string; line, col: longint);
 procedure err(msg: string; loc: location);
-function atoi(s: string; file_name: string; line, col: longint): int64;
+function atoi(s: string; loc: location): int64;
 
 
 implementation
@@ -38,17 +39,16 @@ begin
 end;
 
 
-function atoi(s: string; file_name: string; line, col: longint): int64;
+function atoi(s: string; loc: location): int64;
 var
-   i: int64; c: word;
+   i: int64;
 begin
-   val(s, i, c);
-   if c = 0 then
+   if trystrtoint64(s, i) then
       atoi := i
    else
       begin
          atoi := 0;
-         err('Bad integer format: ''' + s + '''', file_name, line, col);
+         err('Bad integer format: ''' + s + '''', loc);
       end;
 end;
 

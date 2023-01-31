@@ -2,6 +2,8 @@ unit scanner;
 
 interface
 
+uses utils;
+
 type
    token_tag = (and_token,
                 array_token,
@@ -54,7 +56,6 @@ type
    token_t = record
                 tag: token_tag;
                 value: string;
-                line, col: longint;
              end;
 
    source = ^source_t;
@@ -68,15 +69,17 @@ type
 
 function load_source(file_name: string): source;
 procedure scan(s: source);
+function token_location(): location;
 
 var
    token: token_t;
+   line, col: longint;
    current_file: string;
 
 
 implementation
 
-uses sysutils, utils;
+uses sysutils;
 
 procedure scan(s: source);
 
@@ -100,7 +103,7 @@ procedure scan(s: source);
                   end
             end
          else
-            err('Read past end of file', current_file, token.line, token.col);
+            err('Read past end of file', current_file, line, col);
    end;
 
 
@@ -221,7 +224,7 @@ procedure scan(s: source);
       else
          err('illegal character literal', current_file, s^.line, s^.col);
       if length(token.value) <> 1 then
-         err('illegal character literal', current_file, token.line, token.col);
+         err('illegal character literal', current_file, line, col);
       token.tag := char_token;
    end;
 
@@ -267,8 +270,8 @@ procedure scan(s: source);
 begin
    skip_white;
    token.value := '';
-   token.line := s^.line;
-   token.col := s^.col;
+   line := s^.line;
+   col := s^.col;
    if not s^.open then
       begin
          token.tag := eof_token;
@@ -324,9 +327,21 @@ begin
             'a'..'z', 'A'..'Z': get_id;
          else if eof(s^.src) then next()
          else
-            err('Illegal token ''' + s^.ch + '''', current_file, token.line, token.col);
+            err('Illegal token ''' + s^.ch + '''', current_file, line, col);
          end;
       end;
+end;
+
+
+function token_location(): location;
+var
+   loc: location;
+begin
+   new(loc);
+   loc^.line := line;
+   loc^.col := col;
+   loc^.file_name := current_file;
+   token_location := loc;
 end;
 
 

@@ -72,25 +72,17 @@ let
             let
                cmp = string_compare(item, n1.left.item)
             in
-               if cmp < 0 then
-                  n1 := rotate_right(n1)
-               else
-                  begin
-                     n1.left := rotate_left(n1.left)
-                     n1 := rotate_right(n1)
-                  end
+               if cmp >= 0 then
+                  n1.left := rotate_left(n1.left)
+               n1 := rotate_right(n1)
             end
          else if bal < -1 then
             let
                cmp = string_compare(item, n1.right.item)
             in
-               if cmp > 0 then
-                  n1 := rotate_left(n1)
-               else
-                  begin
-                     n1.right := rotate_right(n1.right)
-                     n1 := rotate_left(n1)
-                  end
+               if cmp <= 0 then
+                  n1.right := rotate_right(n1.right)
+               n1 := rotate_left(n1)
             end
          n1
       end
@@ -144,5 +136,6 @@ in
          if ch <> EOF then
             ch := file_getchar(f) /* eat comma */
       end
-      writeln(str(tally(tree)))
+
+   writeln(str(tally(tree)))
 end
