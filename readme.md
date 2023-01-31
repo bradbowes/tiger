@@ -39,7 +39,7 @@
 - array literals
 - garbage collector
 - polymorphic types and functions
-- modules, separate compilation
+- modules
 - optimization
 - ffi
 - unicode
