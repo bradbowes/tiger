@@ -35,7 +35,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    begin
       check_binary_op := void_type;
       op := n^.op;
-      ty1 := type_check(n^.left, si + 1, nest, env, tenv);
+      ty1 := type_check(n^.left, si, nest, env, tenv);
       ty2 := type_check(n^.right, si, nest, env, tenv);
       if not compatible(ty1, ty2) then
          err('operator incompatible types', n^.loc);

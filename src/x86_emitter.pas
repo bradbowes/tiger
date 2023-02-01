@@ -431,10 +431,10 @@ var
    begin
       lbl := new_label();
       emit_expression(n^.left, si, nest);
-      emit('   movq %%rax, (%%r15)', []);
+      emit('   movq %%rax, %%rcx' + lineending +
+           '   movq %%rcx, (%%r15)', []);
       emit_expression(n^.right, si, nest);
-      emit('   movq (%%r15), %%rcx' + lineending +
-           '%s:' + lineending +
+      emit('%s:' + lineending +
            '   movq %%rax, (%%r15, %%rcx, 8)' + lineending +
            '   decq %%rcx' + lineending +
            '   jg %s' + lineending +
@@ -573,11 +573,12 @@ begin
                or_op:
                   emit_or();
                else
-                     tmp := inttostr(si) + '(%rbp)';
-                  // tmp := '%rcx';
+                  // tmp := inttostr(si) + '(%rbp)';
+                  tmp := '%rcx';
                   emit_expression(n^.right, si, nest);
                   emit('   movq %%rax, %s', [tmp]);
-                  emit_expression(n^.left, si - 8, nest);
+                  // emit_expression(n^.left, si - 8, nest);
+                  emit_expression(n^.left, si, nest);
                   case n^.op of
                      plus_op:
                         emit('   addq %s, %%rax', [tmp]);
