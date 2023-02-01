@@ -505,7 +505,7 @@ var
       emit('   movq %d(%%rbp), %%rsi', [si]);
    end;
 
-(*
+
    procedure emit_for();
    var
       offset, stack_index: longint;
@@ -539,7 +539,7 @@ var
       emit('   movq %d(%%rbp), %%rbx', [offset - 16]);
       emit('   movq %d(%%rbp), %%rcx', [offset - 8]);
    end;
-*)
+
 
    procedure emit_while();
    var

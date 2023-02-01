@@ -22,6 +22,7 @@ var
    op: op_tag;
    list: node_list;
    it: node_list_item;
+   int_symbol, fin: symbol;
 
 begin
    loc := n^.loc;
@@ -177,8 +178,14 @@ begin
             append_node(list, e1);
             e2 := make_sequence_node(list, right^.loc);
             list := make_node_list();
-            append_node(list, make_var_decl_node(n^.name, intern('int'), trans1(left), loc));
-            e1 := make_binary_op_node(leq_op, make_simple_var_node(n^.name, loc), trans1(cond), loc);
+            int_symbol := intern('int');
+            append_node(list, make_var_decl_node(n^.name, int_symbol, trans1(left), left^.loc));
+            fin := gensym();
+            append_node(list, make_var_decl_node(fin, int_symbol, trans1(cond), cond^.loc));
+            e1 := make_binary_op_node(leq_op,
+                                      make_simple_var_node(n^.name, loc),
+                                      make_simple_var_node(fin, cond^.loc),
+                                      cond^.loc);
             e2 := make_while_node(e1, e2, right^.loc);
             e1 := make_let_node(list, e2, loc);
             trans1 := e1
