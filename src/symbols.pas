@@ -10,15 +10,26 @@ type
    end;
 
 function intern (s: string): symbol;
+function gensym(): symbol;
 
 
 implementation
+
+uses sysutils;
 
 const
    hash_size = 1021;
 
 var
    tbl : array [0 .. hash_size - 1] of symbol;
+   next_tmp: longint = 0;
+
+
+function gensym(): symbol;
+begin
+   next_tmp := next_tmp + 1;
+   gensym := intern('tmp$_' + inttostr(next_tmp));
+end;
 
 
 function hash(s: string): integer;

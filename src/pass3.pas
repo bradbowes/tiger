@@ -1,6 +1,6 @@
 (*
   TODO:
-    need label, goto nodes to transform while, for loops
+    need label, goto nodes to transform while loops
 *)
 
 unit pass3;
@@ -12,18 +12,10 @@ function trans3(n: node): node;
 
 implementation
 
-uses sysutils, errmsg, symbols;
+uses errmsg, symbols;
 
 var
-   next_tmp: longint = 0;
    tf: tf_function = @trans3;
-
-function tmp(): symbol;
-begin
-   next_tmp := next_tmp + 1;
-   tmp := intern('tmp$_' + inttostr(next_tmp));
-end;
-
 
 function trans3(n: node): node;
 var
@@ -50,7 +42,7 @@ var
    begin
       if compound(n) then
          begin
-            v := tmp();
+            v := gensym();
             loc := n^.loc;
             append_node(decls, make_var_decl_node(v, nil, trans3(n), loc));
             reduce := make_simple_var_node(v, loc);

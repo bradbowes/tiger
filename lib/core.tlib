@@ -30,8 +30,19 @@ putchar(c: char) =
    file_putchar(c, STD_OUTPUT)
 
 write(s: string) =
+   let
+      i: int = 0
+   in
+      while (i <= (length(s) - 1)) do
+         begin
+            putchar(s[i]);
+            i := (i + 1)
+         end
+   end
+/*
    for i := 0 to length(s) - 1 do
       putchar(s[i])
+*/
 
 writeln(s: string) =
    begin
@@ -40,6 +51,17 @@ writeln(s: string) =
    end
 
 file_write(s: string, f: file) =
+/*
+   let
+      i: int = 0
+   in
+      while (i <= (length(s) - 1)) do
+         begin
+            file_putchar(s[i], f);
+            i := (i + 1)
+         end
+   end
+*/
    for i := 0 to length(s) - 1 do
       file_putchar(s[i], f)
 

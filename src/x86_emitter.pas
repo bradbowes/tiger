@@ -431,10 +431,10 @@ var
    begin
       lbl := new_label();
       emit_expression(n^.left, si, nest);
-      emit('   movq %%rax, %%rcx' + lineending +
-           '   movq %%rcx, (%%r15)', []);
+      emit('   movq %%rax, (%%r15)', []);
       emit_expression(n^.right, si, nest);
-      emit('%s:' + lineending +
+      emit('   movq (%%r15), %%rcx' + lineending +
+           '%s:' + lineending +
            '   movq %%rax, (%%r15, %%rcx, 8)' + lineending +
            '   decq %%rcx' + lineending +
            '   jg %s' + lineending +
@@ -505,7 +505,7 @@ var
       emit('   movq %d(%%rbp), %%rsi', [si]);
    end;
 
-
+(*
    procedure emit_for();
    var
       offset, stack_index: longint;
@@ -539,7 +539,7 @@ var
       emit('   movq %d(%%rbp), %%rbx', [offset - 16]);
       emit('   movq %d(%%rbp), %%rcx', [offset - 8]);
    end;
-
+*)
 
    procedure emit_while();
    var
@@ -573,7 +573,8 @@ begin
                or_op:
                   emit_or();
                else
-                  tmp := inttostr(si) + '(%rbp)';
+                     tmp := inttostr(si) + '(%rbp)';
+                  // tmp := '%rcx';
                   emit_expression(n^.right, si, nest);
                   emit('   movq %%rax, %s', [tmp]);
                   emit_expression(n^.left, si - 8, nest);
@@ -671,8 +672,10 @@ begin
          emit_sequence();
       assign_node:
          emit_assign();
+      (*
       for_node:
          emit_for();
+      *)
       while_node:
          emit_while();
       else

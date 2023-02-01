@@ -8,7 +8,7 @@ function trans1(n: node): node;
 
 implementation
 
-uses errmsg, ops, bindings, datatypes;
+uses errmsg, ops, symbols, bindings, datatypes;
 
 var
    tf: tf_function = @trans1;
@@ -30,6 +30,7 @@ begin
    left := n^.left;
    right := n^.right;
    op := n^.op;
+
 
    case n^.tag of
       simple_var_node:
@@ -164,6 +165,24 @@ begin
             else
                trans1 := copy_node(n, tf);
          end;
+      for_node:
+         begin
+            list := make_node_list();
+            append_node(list, trans1(right));
+            e1 := make_simple_var_node(n^.name, loc);
+            e2 := make_integer_node(1, loc);
+            e1 := make_binary_op_node(plus_op, e1, e2, loc);
+            e2 := make_simple_var_node(n^.name, loc);
+            e1 := make_assign_node(e2, e1, loc);
+            append_node(list, e1);
+            e2 := make_sequence_node(list, right^.loc);
+            list := make_node_list();
+            append_node(list, make_var_decl_node(n^.name, intern('int'), trans1(left), loc));
+            e1 := make_binary_op_node(leq_op, make_simple_var_node(n^.name, loc), trans1(cond), loc);
+            e2 := make_while_node(e1, e2, right^.loc);
+            e1 := make_let_node(list, e2, loc);
+            trans1 := e1
+         end;
       while_node:
          begin
             e1 := trans1(cond);
@@ -174,7 +193,6 @@ begin
          end;
       let_node:
          begin
-            e2 := trans1(n^.right);
             list := make_node_list();
             it := n^.list^.first;
             while it <> nil do
@@ -184,6 +202,7 @@ begin
                   append_node(list, trans1(e1));
                   it := it^.next;
                end;
+            e2 := trans1(n^.right);
             if list^.length > 0 then
                trans1 := make_let_node(list, e2, loc)
             else
