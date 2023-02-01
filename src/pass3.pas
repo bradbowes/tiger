@@ -28,7 +28,7 @@ end;
 function trans3(n: node): node;
 var
    decls: node_list;
-   loc: location;
+   loc: source_location;
 
    function compound(n: node): boolean;
    begin
@@ -46,7 +46,7 @@ var
    function reduce(n: node): node;
    var
       v: symbol;
-      loc: location;
+      loc: source_location;
    begin
       if compound(n) then
          begin

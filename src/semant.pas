@@ -61,7 +61,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       ty1, ty2: spec;
       b: binding;
       right: node;
-      loc: location;
+      loc: source_location;
    begin
       right := n^.right;
       loc := n^.loc;
@@ -97,7 +97,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       param: node;
       key: symbol;
       stack_index: longint;
-      loc: location;
+      loc: source_location;
    begin
       if n^.type_name = nil then
          return_type := void_type
@@ -184,7 +184,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
       it: node_list_item;
       fld: node;
       offset: longint;
-      loc: location;
+      loc: source_location;
       ty, fld_ty: spec;
    begin
       offset := 0;

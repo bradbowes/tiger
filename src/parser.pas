@@ -77,7 +77,7 @@ var
 
    function get_sequence() : node;
    var
-      loc: location;
+      loc: source_location;
       list: node_list;
    begin
       loc := token_location();
@@ -95,9 +95,9 @@ var
    function get_field(): node;
    var
       name: symbol;
-      loc: location;
+      loc: source_location;
    begin
-      loc := token_location;
+      loc := token_location();
       name := get_identifier();
       advance(eq_token, '=');
       get_field := make_field_node(name, get_expression(), loc);
@@ -124,7 +124,7 @@ var
 
    function get_factor(): node;
    var
-      loc: location;
+      loc: source_location;
       value: string;
       list: node_list;
       factor: node = nil;
@@ -247,7 +247,7 @@ var
 
    function get_product(): node;
    var
-      loc: location;
+      loc: source_location;
       left: node;
       op: op_tag = nul_op;
    begin
@@ -271,7 +271,7 @@ var
 
    function get_sum(): node;
    var
-      loc: location;
+      loc: source_location;
       left: node;
       op: op_tag = nul_op;
    begin
@@ -294,7 +294,7 @@ var
 
    function get_boolean(): node;
    var
-      loc: location;
+      loc: source_location;
       left: node;
       op: op_tag = nul_op;
    begin
@@ -321,7 +321,7 @@ var
 
    function get_conjunction(): node;
    var
-      loc: location;
+      loc: source_location;
       left: node;
    begin
       loc := token_location();
@@ -339,7 +339,7 @@ var
 
    function get_disjunction(): node;
    var
-      loc: location;
+      loc: source_location;
       left: node;
    begin
       loc := token_location();
@@ -357,7 +357,7 @@ var
 
    function get_assignment(): node;
    var
-      loc: location;
+      loc: source_location;
       left_side: node;
    begin
       loc := token_location();
@@ -380,10 +380,10 @@ var
    var
       condition: node;
       consequent: node;
-      loc: location;
+      loc: source_location;
    begin
       get_if_expression := nil;
-      loc := token_location;
+      loc := token_location();
       next();
       condition := get_expression();
       advance(then_token, 'then');
@@ -402,7 +402,7 @@ var
    function get_while_expression(): node;
    var
       condition: node;
-      loc: location;
+      loc: source_location;
    begin
       get_while_expression := nil;
       loc := token_location();
@@ -417,7 +417,7 @@ var
    var
       iter: symbol;
       start, finish, body: node;
-      loc: location;
+      loc: source_location;
    begin
       loc := token_location();
       next();
@@ -435,7 +435,7 @@ var
    function get_field_desc(): node;
    var
       name: symbol;
-      loc: location;
+      loc: source_location;
    begin
       loc := token_location();
       name := get_identifier();
@@ -464,7 +464,7 @@ var
 
    function get_type_spec(): node;
    var
-      loc: location;
+      loc: source_location;
       desc: node = nil;
    begin
       loc := token_location();
@@ -490,7 +490,7 @@ var
 
    function get_function_declaration(name: symbol): node;
    var
-      loc: location;
+      loc: source_location;
       ty: symbol = nil;
       params: node_list;
       body: node = nil;
@@ -516,7 +516,7 @@ var
 
    function get_var_declaration(): node;
    var
-      loc: location;
+      loc: source_location;
       name	: symbol;
       ty	: symbol = nil;
       exp	: node = nil;
@@ -549,7 +549,7 @@ var
 
    function get_type_declaration(): node;
    var
-      loc: location;
+      loc: source_location;
       name: symbol;
    begin
       loc := token_location();
@@ -586,7 +586,7 @@ var
 
    function get_let_expression(): node;
    var
-      loc: location;
+      loc: source_location;
       decls: node_list;
       body: node;
    begin

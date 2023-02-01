@@ -69,7 +69,7 @@ type
 
 function load_source(file_name: string): source;
 procedure scan(s: source);
-function token_location(): location;
+function token_location(): source_location;
 
 var
    token: token_t;
@@ -333,9 +333,9 @@ begin
 end;
 
 
-function token_location(): location;
+function token_location(): source_location;
 var
-   loc: location;
+   loc: source_location;
 begin
    new(loc);
    loc^.line := line;

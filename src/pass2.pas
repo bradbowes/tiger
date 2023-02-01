@@ -32,7 +32,7 @@ end;
 function trans2(n: node): node;
 var
    b: binding;
-   loc: location;
+   loc: source_location;
    list: node_list;
    it: node_list_item;
    arg: node;

@@ -56,7 +56,7 @@ type
 
    node_t = record
       tag: node_tag;
-      loc: location;
+      loc: source_location;
       value: value;
       binding: binding;
       name, type_name: symbol;
@@ -72,34 +72,34 @@ type
 
 function make_node_list(): node_list;
 procedure append_node(list: node_list; n: node);
-function make_assign_node(variable, expr: node; loc: location): node;
-function make_call_node(name: symbol; args: node_list; loc: location): node;
-function make_simple_var_node(name: symbol; loc: location): node;
-function make_field_var_node(obj: node; field: symbol; loc: location): node;
-function make_indexed_var_node(arr, index: node; loc: location): node;
-function make_integer_node(val: int64; loc: location): node;
-function make_string_node(val: symbol; loc: location): node;
-function make_char_node(val: int64; loc: location): node;
-function make_boolean_node(val: boolean; loc: location): node;
-function make_nil_node(loc: location): node;
-function make_empty_node(loc: location): node;
-function make_type_decl_node(name: symbol; spec: node; loc: location): node;
-function make_var_decl_node(name, ty: symbol; expr: node; loc: location): node;
-function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: location): node;
-function make_record_desc_node(fields: node_list; loc: location): node;
-function make_array_desc_node(base: symbol; loc: location): node;
-function make_unary_op_node(op: op_tag; exp: node; loc: location): node;
-function make_binary_op_node(op: op_tag; left, right: node; loc: location): node;
-function make_field_node(name: symbol; expr: node; loc: location): node;
-function make_field_desc_node(name, ty: symbol; loc: location): node;
-function make_if_else_node(condition, consequent, alternative: node; loc: location): node;
-function make_if_node(condition, consequent: node; loc: location): node;
-function make_while_node(condition, body: node; loc: location): node;
-function make_for_node(iter: symbol; start, finish, body: node; loc: location): node;
-function make_let_node(decls: node_list; body: node; loc: location): node;
-function make_sequence_node(sequence: node_list; loc: location): node;
-function make_record_node(ty: symbol; fields: node_list; loc: location): node;
-function make_array_node(ty: symbol; size, value: node; loc: location): node;
+function make_assign_node(variable, expr: node; loc: source_location): node;
+function make_call_node(name: symbol; args: node_list; loc: source_location): node;
+function make_simple_var_node(name: symbol; loc: source_location): node;
+function make_field_var_node(obj: node; field: symbol; loc: source_location): node;
+function make_indexed_var_node(arr, index: node; loc: source_location): node;
+function make_integer_node(val: int64; loc: source_location): node;
+function make_string_node(val: symbol; loc: source_location): node;
+function make_char_node(val: int64; loc: source_location): node;
+function make_boolean_node(val: boolean; loc: source_location): node;
+function make_nil_node(loc: source_location): node;
+function make_empty_node(loc: source_location): node;
+function make_type_decl_node(name: symbol; spec: node; loc: source_location): node;
+function make_var_decl_node(name, ty: symbol; expr: node; loc: source_location): node;
+function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
+function make_record_desc_node(fields: node_list; loc: source_location): node;
+function make_array_desc_node(base: symbol; loc: source_location): node;
+function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
+function make_binary_op_node(op: op_tag; left, right: node; loc: source_location): node;
+function make_field_node(name: symbol; expr: node; loc: source_location): node;
+function make_field_desc_node(name, ty: symbol; loc: source_location): node;
+function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
+function make_if_node(condition, consequent: node; loc: source_location): node;
+function make_while_node(condition, body: node; loc: source_location): node;
+function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
+function make_let_node(decls: node_list; body: node; loc: source_location): node;
+function make_sequence_node(sequence: node_list; loc: source_location): node;
+function make_record_node(ty: symbol; fields: node_list; loc: source_location): node;
+function make_array_node(ty: symbol; size, value: node; loc: source_location): node;
 procedure delete_node(var n: node);
 function copy_node(n: node; tf: tf_function): node;
 
@@ -144,7 +144,7 @@ begin
 end;
 
 
-function make_node(tag: node_tag; loc: location): node;
+function make_node(tag: node_tag; loc: source_location): node;
 var
    n: node;
 begin
@@ -166,7 +166,7 @@ begin
 end;
 
 
-function make_assign_node(variable, expr: node; loc: location): node;
+function make_assign_node(variable, expr: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(assign_node, loc);
@@ -176,7 +176,7 @@ begin
 end;
 
 
-function make_call_node(name: symbol; args: node_list; loc: location): node;
+function make_call_node(name: symbol; args: node_list; loc: source_location): node;
 var n: node;
 begin
    n := make_node(call_node, loc);
@@ -186,7 +186,7 @@ begin
 end;
 
 
-function make_simple_var_node(name: symbol; loc: location): node;
+function make_simple_var_node(name: symbol; loc: source_location): node;
 var n: node;
 begin
    n := make_node(simple_var_node, loc);
@@ -195,7 +195,7 @@ begin
 end;
 
 
-function make_field_var_node(obj: node; field: symbol; loc: location): node;
+function make_field_var_node(obj: node; field: symbol; loc: source_location): node;
 var n: node;
 begin
    n := make_node(field_var_node, loc);
@@ -205,7 +205,7 @@ begin
 end;
 
 
-function make_indexed_var_node(arr, index: node; loc: location): node;
+function make_indexed_var_node(arr, index: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(indexed_var_node, loc);
@@ -215,7 +215,7 @@ begin
 end;
 
 
-function make_integer_node(val: int64; loc: location): node;
+function make_integer_node(val: int64; loc: source_location): node;
 var
    n: node;
 begin
@@ -225,7 +225,7 @@ begin
 end;
 
 
-function make_string_node(val: symbol; loc: location): node;
+function make_string_node(val: symbol; loc: source_location): node;
 var n: node;
 begin
    n := make_node(string_node, loc);
@@ -234,7 +234,7 @@ begin
 end;
 
 
-function make_char_node(val: int64; loc: location): node;
+function make_char_node(val: int64; loc: source_location): node;
 var n: node;
 begin
    n := make_node(char_node, loc);
@@ -243,7 +243,7 @@ begin
 end;
 
 
-function make_boolean_node(val: boolean; loc: location): node;
+function make_boolean_node(val: boolean; loc: source_location): node;
 var n: node;
 begin
    n := make_node(boolean_node, loc);
@@ -252,19 +252,19 @@ begin
 end;
 
 
-function make_nil_node(loc: location): node;
+function make_nil_node(loc: source_location): node;
 begin
    make_nil_node := make_node(nil_node, loc);
 end;
 
 
-function make_empty_node(loc: location): node;
+function make_empty_node(loc: source_location): node;
 begin
    make_empty_node := make_node(empty_node, loc);
 end;
 
 
-function make_type_decl_node(name: symbol; spec: node; loc: location): node;
+function make_type_decl_node(name: symbol; spec: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(type_decl_node, loc);
@@ -274,7 +274,7 @@ begin
 end;
 
 
-function make_var_decl_node(name, ty: symbol; expr: node; loc: location): node;
+function make_var_decl_node(name, ty: symbol; expr: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(var_decl_node, loc);
@@ -285,7 +285,7 @@ begin
 end;
 
 
-function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: location): node;
+function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(fun_decl_node, loc);
@@ -297,7 +297,7 @@ begin
 end;
 
 
-function make_record_desc_node(fields: node_list; loc: location): node;
+function make_record_desc_node(fields: node_list; loc: source_location): node;
 var n: node;
 begin
    n := make_node(record_desc_node, loc);
@@ -306,7 +306,7 @@ begin
 end;
 
 
-function make_array_desc_node(base: symbol; loc: location): node;
+function make_array_desc_node(base: symbol; loc: source_location): node;
 var n: node;
 begin
    n := make_node(array_desc_node, loc);
@@ -315,7 +315,7 @@ begin
 end;
 
 
-function make_unary_op_node(op: op_tag; exp: node; loc: location): node;
+function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(unary_op_node, loc);
@@ -325,7 +325,7 @@ begin
 end;
 
 
-function make_binary_op_node(op: op_tag; left, right: node; loc: location): node;
+function make_binary_op_node(op: op_tag; left, right: node; loc: source_location): node;
 var n: node;
 begin
   n := make_node(binary_op_node, loc);
@@ -336,7 +336,7 @@ begin
 end;
 
 
-function make_field_node(name: symbol; expr: node; loc: location): node;
+function make_field_node(name: symbol; expr: node; loc: source_location): node;
 var n: node;
 begin
    n :=  make_node(field_node, loc);
@@ -346,7 +346,7 @@ begin
 end;
 
 
-function make_field_desc_node(name, ty: symbol; loc: location): node;
+function make_field_desc_node(name, ty: symbol; loc: source_location): node;
 var n: node;
 begin
    n := make_node(field_desc_node, loc);
@@ -356,7 +356,7 @@ begin
 end;
 
 
-function make_if_else_node(condition, consequent, alternative: node; loc: location): node;
+function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(if_else_node, loc);
@@ -367,7 +367,7 @@ begin
 end;
 
 
-function make_if_node(condition, consequent: node; loc: location): node;
+function make_if_node(condition, consequent: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(if_node, loc);
@@ -377,7 +377,7 @@ begin
 end;
 
 
-function make_while_node(condition, body: node; loc: location): node;
+function make_while_node(condition, body: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(while_node, loc);
@@ -387,7 +387,7 @@ begin
 end;
 
 
-function make_for_node(iter: symbol; start, finish, body: node; loc: location): node;
+function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(for_node, loc);
@@ -399,7 +399,7 @@ begin
 end;
 
 
-function make_let_node(decls: node_list; body: node; loc: location): node;
+function make_let_node(decls: node_list; body: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(let_node, loc);
@@ -409,7 +409,7 @@ begin
 end;
 
 
-function make_sequence_node(sequence: node_list; loc: location): node;
+function make_sequence_node(sequence: node_list; loc: source_location): node;
 var n: node;
 begin
    n := make_node(sequence_node, loc);
@@ -418,7 +418,7 @@ begin
 end;
 
 
-function make_record_node(ty: symbol; fields: node_list; loc: location): node;
+function make_record_node(ty: symbol; fields: node_list; loc: source_location): node;
 var n: node;
 begin
    n := make_node(record_node, loc);
@@ -428,7 +428,7 @@ begin
 end;
 
 
-function make_array_node(ty: symbol; size, value: node; loc: location): node;
+function make_array_node(ty: symbol; size, value: node; loc: source_location): node;
 var n: node;
 begin
    n := make_node(array_node, loc);

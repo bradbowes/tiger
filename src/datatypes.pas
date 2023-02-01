@@ -42,9 +42,9 @@ const
    file_type: spec = @_file_type;
 
 
-procedure add_param(rec: spec; name: symbol; ty: spec; loc: location);
-procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: location);
-function get_field(rec: spec; name: symbol; loc: location): field;
+procedure add_param(rec: spec; name: symbol; ty: spec; loc: source_location);
+procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: source_location);
+function get_field(rec: spec; name: symbol; loc: source_location): field;
 function make_array_type(base: spec): spec;
 function make_record_type(): spec;
 function make_function_type(return: spec): spec;
@@ -76,7 +76,7 @@ begin
 end;
 
 
-procedure append(list: field; f: field; loc: location);
+procedure append(list: field; f: field; loc: source_location);
 begin
    if list^.name = f^.name then
       err('field ''' + f^.name^.id + ''' specified more than once', loc)
@@ -87,7 +87,7 @@ begin
 end;
 
 
-procedure add_param(rec: spec; name: symbol; ty: spec; loc: location);
+procedure add_param(rec: spec; name: symbol; ty: spec; loc: source_location);
 var f: field;
 begin
    new(f);
@@ -103,7 +103,7 @@ begin
 end;
 
 
-procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: location);
+procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: source_location);
 var f: field;
 begin
    new(f);
@@ -131,7 +131,7 @@ begin
 end;
 
 
-function get_field(rec: spec; name: symbol; loc: location): field;
+function get_field(rec: spec; name: symbol; loc: source_location): field;
 var f: field;
 begin
    f := lookup(rec^.fields, name);

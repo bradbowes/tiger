@@ -40,8 +40,8 @@ const
 
 function add_scope(env: scope): scope;
 procedure delete_scope(var env: scope);
-function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: location): binding;
-function lookup(env: scope; key: symbol; loc: location): binding;
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
+function lookup(env: scope; key: symbol; loc: source_location): binding;
 
 implementation
 
@@ -163,7 +163,7 @@ begin
 end;
 
 
-function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: location): binding;
+function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
 var
    t: tree;
    b: binding;
@@ -187,7 +187,7 @@ begin
 end;
 
 
-function lookup(env: scope; key: symbol; loc: location): binding;
+function lookup(env: scope; key: symbol; loc: source_location): binding;
 var
    b: binding;
 begin

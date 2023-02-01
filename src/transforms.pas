@@ -34,9 +34,9 @@ var
 begin
    ast := n;
    check(ast);
-   ast := opt(ast, @trans1);
-   ast := opt(ast, @trans1);
    ast := opt(ast, @trans2);
+   ast := opt(ast, @trans1);
+   ast := opt(ast, @trans1);
    ast := opt(ast, @trans3);
    transform := ast;
 end;

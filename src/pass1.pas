@@ -16,7 +16,7 @@ var
 
 function trans1(n: node): node;
 var
-   loc: location;
+   loc: source_location;
    b: binding;
    e1, e2, cond, left, right: node;
    op: op_tag;

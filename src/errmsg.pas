@@ -3,8 +3,8 @@ unit errmsg;
 interface
 
 type
-   location = ^location_t;
-   location_t = record
+   source_location = ^source_location_t;
+   source_location_t = record
       line, col: longint;
       file_name: string;
    end;
@@ -12,7 +12,7 @@ type
 
 procedure err(msg: string);
 procedure err(msg, file_name: string; line, col: longint);
-procedure err(msg: string; loc: location);
+procedure err(msg: string; loc: source_location);
 
 
 implementation
@@ -32,7 +32,7 @@ begin
 end;
 
 
-procedure err(msg: string; loc: location);
+procedure err(msg: string; loc: source_location);
 begin
    err(msg, loc^.file_name, loc^.line, loc^.col);
 end;
