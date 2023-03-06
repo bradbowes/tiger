@@ -50,24 +50,23 @@ let
                   end
                n
             end
-
-         t: token = nil
       in
          skip()
          if ch = plus or ch = minus or
             ch = mul or ch = div or
             ch = lpar or ch = rpar then
-               begin
-                  t := token { op = ch, value = 0 }
+               let
+                  t = token { op = ch, value = 0 }
+               in
                   ch := getchar()
+                  t
                end
          else if ch = newline or ch = quit then
-            t := token { op = ch, value = 0 }
+            token { op = ch, value = 0 }
          else if digit() then
-            t := token { op = num, value = number() }
-         else t := error("syntax error")
-
-         t
+            token { op = num, value = number() }
+         else
+            error("syntax error")
       end
 
    t = scan()
