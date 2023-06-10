@@ -43,10 +43,11 @@ begin
    assem := base + '.s';
    emit_x86(ast, assem);
    obj := base + '.o';
-   runcommand('as', ['-o', obj, assem], output);
+   runcommand('as', ['-arch x86_64', '-o', obj, assem], output);
    if base <> source then
       exe := base
    else
       exe := base + '.out';
-   runcommand('ld', ['-o', exe, '-lSystem', obj, '/usr/local/share/tiger/lib/lib.o'], output);
+   runcommand('cc', ['-arch x86_64', '-o', exe, obj, 
+'/usr/local/share/tiger/lib/lib.o'], output);
 end.

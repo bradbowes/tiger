@@ -5,7 +5,7 @@ SEEK_END = 2
 
 
 .text
-.align 3
+.p2align 3
 .globl _main
 _main:
    subq $40, %rsp                      // space for global variables
@@ -39,7 +39,7 @@ main_done:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_open_input
 f$_open_input:
    movq 16(%rsp), %rdi
@@ -49,7 +49,7 @@ f$_open_input:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_open_output
 f$_open_output:
    movq 16(%rsp), %rdi
@@ -59,7 +59,7 @@ f$_open_output:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_close_file
 f$_close_file:
    movq 16(%rsp), %rdi
@@ -67,7 +67,7 @@ f$_close_file:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_get_stdin_ptr
 f$_get_stdin_ptr:
 	movq ___stdinp@GOTPCREL(%rip), %rax
@@ -75,7 +75,7 @@ f$_get_stdin_ptr:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_get_stdout_ptr
 f$_get_stdout_ptr:
 	movq ___stdoutp@GOTPCREL(%rip), %rax
@@ -83,7 +83,7 @@ f$_get_stdout_ptr:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_get_stderr_ptr
 f$_get_stderr_ptr:
 	movq ___stderrp@GOTPCREL(%rip), %rax
@@ -91,7 +91,7 @@ f$_get_stderr_ptr:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_file_getchar
 f$_file_getchar:
    movq 16(%rsp), %rdi                 // FILE *
@@ -100,7 +100,7 @@ f$_file_getchar:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_file_putchar
 f$_file_putchar:
    movq 16(%rsp), %rdi
@@ -109,7 +109,7 @@ f$_file_putchar:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_str
 f$_str:
    pushq %rbx
@@ -124,13 +124,13 @@ f$_str:
    movq %r15, %rax
    addq $15, %rbx
    addq %rbx, %r15
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    popq %rcx
    popq %rbx
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_string_buffer
 f$_string_buffer:
    movq 16(%rsp), %rbx
@@ -148,11 +148,11 @@ buffer_done:
    movq %r15, %rax
    addq (%r15), %r15
    addq $15, %r15
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_length
 f$_length:
    movq 16(%rsp), %rax
@@ -160,19 +160,19 @@ f$_length:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_ord
 f$_ord:
    ret                                 // cast char to int, does nothing
 
 
-.align 3
+.p2align 3
 .globl f$_chr
 f$_chr:                                // cast int to char, does nothing
    ret
 
 
-.align 3
+.p2align 3
 copy:
    xorq %rbx, %rbx
 copy_loop:
@@ -187,7 +187,7 @@ copy_done:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_string_concat
 f$_string_concat:
    movq 16(%rsp), %rsi                 // string 1
@@ -206,11 +206,11 @@ f$_string_concat:
    movq %r15, %rax
    addq $15, %rdx
    addq %rdx, %r15
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_substring
 f$_substring:
    movq 16(%rsp), %rsi                 // source string
@@ -224,11 +224,11 @@ f$_substring:
    movq %r15, %rax
    addq $15, %rcx
    addq %rcx, %r15
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_string_compare
 f$_string_compare:
    movq 16(%rsp), %rsi                 // string1
@@ -260,21 +260,21 @@ compare_done:
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_toh
 f$_toh:
    movq %r15, %rax
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_command_argcount
 f$_command_argcount:
    movq 32(%r14), %rax
    ret
 
 
-.align 3
+.p2align 3
 .globl f$_command_arg
 f$_command_arg:
    movq 16(%rsp), %rbx                 // argv number
@@ -292,36 +292,36 @@ getarg_loop:
 getarg_done:
    movq %rbx, (%r15)                   // string length
    movq %r15, %rax
-   addq $15, %rbx                      // add space for length plus alignment
+   addq $15, %rbx                      // add space for length plus p2alignment
    addq %rbx, %r15                     // update heap pointer
-   andq $0xfffffffffffffff8, %r15      // align 8 bytes
+   andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
 
 .data
 
-.align 3
+.p2align 3
 newline:
    .quad 1
    .asciz "\n"
 
-.align 3
+.p2align 3
 read_mode:
    .asciz "r"
 
-.align 3
+.p2align 3
 write_mode:
    .asciz "w"
 
-.align 3
+.p2align 3
 append_mode:
    .asciz "a"
 
-.align 3
+.p2align 3
 heap_err_msg:
    .asciz "Could not allocate heap.\n"
 
-.align 3
+.p2align 3
 str_fmt:
    .asciz "%ld"
 

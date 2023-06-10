@@ -20,7 +20,7 @@ test:	tc tprint lib.o
 	cd ../tests; ./run_tests.sh; cd ../src
 
 lib.o:	../lib/lib.s
-	as -o lib.o ../lib/lib.s
+	as -arch x86_64 -o lib.o ../lib/lib.s
 
 install:	tc tprint ../lib/core.tlib lib.o
 	install -d $(BINDIR)

@@ -19,7 +19,7 @@ procedure emit_expression(n: node; si, nest: longint); forward;
 
 const prologue =
    '.text' + lineending +
-   '.align 3' + lineending +
+   '.p2align 3' + lineending +
    '.globl f$_tiger_entry' + lineending +
    'f$_tiger_entry:' + lineending +
    '   movq %%rsp, %%rbp';
@@ -121,7 +121,7 @@ begin
          l := length(s);
          s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
          emit(lineending +
-              '   .align 3' + lineending +
+              '   .p2align 3' + lineending +
               'tiger$_string_%d:' + lineending +
               '   .quad %d' + lineending +
               '   .asciz "%s"', [sl^.id, l, s]);
@@ -140,7 +140,7 @@ begin
       begin
          f := fl^.fun;
          emit(lineending +
-              '   .align 3' + lineending +
+              '   .p2align 3' + lineending +
               '%s:' + lineending +
               '   pushq %%rbp' + lineending +
               '   movq %%rsp, %%rbp', [f^.name^.id]);
