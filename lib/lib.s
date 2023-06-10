@@ -9,6 +9,8 @@ SEEK_END = 2
 .globl _main
 _main:
    pushq %rbp
+   movq %rsp, %rbp
+   andq $0xfffffffffffffff0, %rsp
    subq $40, %rsp                      // space for global variables
    movq %rsp, %r14                     // save global var pointer
    movq %rdi, 32(%r14)                 // argc
@@ -35,7 +37,8 @@ main_fail:
    call _fputs
 
 main_done:
-   addq $40, %rsp
+   // addq $40, %rsp
+   movq %rbp, %rsp
    xorq %rax, %rax
    popq %rbp
    ret

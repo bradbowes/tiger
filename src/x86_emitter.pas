@@ -22,10 +22,12 @@ const prologue =
    '.p2align 3' + lineending +
    '.globl f$_tiger_entry' + lineending +
    'f$_tiger_entry:' + lineending +
+   '   pushq %%rbp' + lineending +
    '   movq %%rsp, %%rbp';
 
 
 const epilogue =
+   '   popq %%rbp' + lineending +
    '   ret';
 
 
