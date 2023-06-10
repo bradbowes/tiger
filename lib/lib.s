@@ -8,6 +8,7 @@ SEEK_END = 2
 .p2align 3
 .globl _main
 _main:
+   pushq %rbp
    subq $40, %rsp                      // space for global variables
    movq %rsp, %r14                     // save global var pointer
    movq %rdi, 32(%r14)                 // argc
@@ -36,6 +37,7 @@ main_fail:
 main_done:
    addq $40, %rsp
    xorq %rax, %rax
+   popq %rbp
    ret
 
 
