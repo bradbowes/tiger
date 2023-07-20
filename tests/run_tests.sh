@@ -145,8 +145,8 @@ in
 end" "30"
 
 
-# test_code "(writeln(str(72)); writeln(str(42)))" "72
-# 42"
+test_code "begin writeln(str(72)) writeln(str(42)) end" "72
+42"
 
 test_code "let
    a = 0
