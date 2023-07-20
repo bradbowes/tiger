@@ -120,21 +120,21 @@ begin
 end;
 
 
-function lookup(list: field; name: symbol): field;
+function find(list: field; name: symbol): field;
 begin
    if list = nil then
-      lookup := nil
+      find := nil
    else if list^.name = name then
-      lookup := list
+      find := list
    else
-      lookup := lookup(list^.next, name);
+      find := find(list^.next, name);
 end;
 
 
 function get_field(rec: spec; name: symbol; loc: source_location): field;
 var f: field;
 begin
-   f := lookup(rec^.fields, name);
+   f := find(rec^.fields, name);
    if f = nil then
       err('object has no field ''' + name^.id + '''', loc);
    get_field := f;
