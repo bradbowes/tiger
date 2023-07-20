@@ -206,7 +206,7 @@ begin
                begin
                   e1 := it^.node;
                   if (e1^.binding <> nil) and ((e1^.binding^.mutates) or (e1^.binding^.value = nil)) then
-                  append_node(list, trans1(e1));
+                     append_node(list, trans1(e1));
                   it := it^.next;
                end;
             e2 := trans1(n^.right);

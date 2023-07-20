@@ -120,15 +120,6 @@ var
       expand_assign := expand(make_assign_node(left, right, loc));
    end;
 
-   function expand_for(): node;
-   var
-      left, cond: node;
-   begin
-      left := reduce(n^.left);
-      cond := reduce(n^.cond);
-      expand_for := expand(make_for_node(n^.name, left, cond, trans3(n^.right), loc));
-   end;
-
    function expand_indexed_var(): node;
    var
       left, right: node;
@@ -175,7 +166,6 @@ begin
       assign_node: trans3 := expand_assign();
       unary_op_node: trans3 := expand_unary_op();
       binary_op_node: trans3 := expand_binary_op();
-      for_node: trans3 := expand_for();
       indexed_var_node: trans3 := expand_indexed_var();
       field_var_node: trans3 := expand_field_var();
       record_node: trans3 := expand_record();

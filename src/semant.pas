@@ -323,9 +323,9 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
 
 
    function check_simple_var(): spec;
-   var b: binding;
+   var
+      b: binding;
    begin
-
       b := lookup(env, n^.name, n^.loc);
       n^.binding := b;
       if b^.nesting_level <> nest then

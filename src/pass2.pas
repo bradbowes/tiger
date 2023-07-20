@@ -6,6 +6,7 @@ uses nodes;
 
 function trans2(n: node): node;
 
+
 implementation
 
 uses sysutils, errmsg, symbols, bindings;
@@ -13,12 +14,10 @@ uses sysutils, errmsg, symbols, bindings;
 var
    tf: tf_function = @trans2;
 
-
 function var_name(b: binding): symbol;
 begin
    var_name := intern('v$_' + b^.key^.id + '_' + inttostr(b^.id));
 end;
-
 
 function fun_name(b: binding): symbol;
 begin
@@ -27,7 +26,6 @@ begin
    else
       fun_name := intern('f$_' + b^.key^.id + '_' + inttostr(b^.id));
 end;
-
 
 function trans2(n: node): node;
 var
@@ -71,8 +69,6 @@ begin
                   end;
                trans2 := make_fun_decl_node(fun_name(b), list, n^.type_name, trans2(n^.right), loc);
             end;
-      for_node:
-         trans2 := make_for_node(var_name(b), trans2(n^.left), trans2(n^.cond), trans2(n^.right), loc);
       else
          trans2 := copy_node(n, tf);
    end;

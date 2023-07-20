@@ -23,14 +23,13 @@ const
 var
    tbl : array [0 .. hash_size - 1] of symbol;
    next_tmp: longint = 0;
-
+   i: integer;
 
 function gensym(): symbol;
 begin
    next_tmp := next_tmp + 1;
    gensym := intern('tmp$_' + inttostr(next_tmp));
 end;
-
 
 function hash(s: string): integer;
 var
@@ -43,16 +42,15 @@ begin
    hash := h mod hash_size;
 end;
 
-
 function make_symbol(s: string): symbol;
 var
    sym: symbol;
 begin
    new(sym);
    sym^.id := s;
+   sym^.next := nil;
    make_symbol := sym;
 end;
-
 
 function intern(s: string): symbol;
 var
@@ -78,4 +76,7 @@ begin
    intern := sym;
 end;
 
+begin
+   for i := 0 to hash_size - 1 do
+      tbl[i] := nil;
 end.
