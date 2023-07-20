@@ -4,13 +4,13 @@ interface
 
 uses bindings, datatypes, nodes;
 
-function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
+function type_check(n: node; si, nest: integer; env, tenv: scope): spec;
 
 implementation
 
 uses errmsg, ops, symbols;
 
-function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
+function type_check(n: node; si, nest: integer; env, tenv: scope): spec;
 
 
    function compatible(a, b: spec): boolean;
@@ -56,7 +56,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
-   procedure check_var_decl(n: node; si, offset: longint; env, tenv: scope);
+   procedure check_var_decl(n: node; si, offset: integer; env, tenv: scope);
    var
       ty1, ty2: spec;
       b: binding;
@@ -89,14 +89,14 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
-   procedure check_fun_decl(n: node; si: longint; env, tenv: scope);
+   procedure check_fun_decl(n: node; si: integer; env, tenv: scope);
    var
       ty, param_type, return_type: spec;
       fenv: scope;
       it: node_list_item;
       param: node;
       key: symbol;
-      stack_index: longint;
+      stack_index: integer;
       loc: source_location;
    begin
       if n^.type_name = nil then
@@ -145,7 +145,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    end;
 
 
-   procedure check_fun_body(n: node; si: longint; env, tenv: scope);
+   procedure check_fun_body(n: node; si: integer; env, tenv: scope);
    var
       ty, body_type: spec;
    begin
@@ -183,7 +183,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    var
       it: node_list_item;
       fld: node;
-      offset: longint;
+      offset: integer;
       loc: source_location;
       ty, fld_ty: spec;
    begin
@@ -211,7 +211,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
          group: node_list = nil;
          it: node_list_item;
          new_env, new_tenv: scope;
-         stack_index, offset: longint;
+         stack_index, offset: integer;
 
       procedure dispose_group();
       var
@@ -392,7 +392,7 @@ function type_check(n: node; si, nest: longint; env, tenv: scope): spec;
    function check_assign(): spec;
    var
       ty: spec;
-      new_si: longint;
+      new_si: integer;
       left: node;
    begin
       left := n^.left;

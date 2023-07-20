@@ -4,17 +4,39 @@ interface
 uses errmsg, symbols, values, datatypes;
 
 type
+   reachability = (reachable_unknown, reachable_yes, reachable_no);
+
    binding = ^binding_t;
+   binding_list_item = ^binding_list_item_t;
+   binding_list = ^binding_list_t;
+
+   binding_list_item_t = record
+      binding: binding;
+      next: binding_list_item
+   end;
+
+   binding_list_t = record
+      first: binding_list_item;
+      last:  binding_list_item;
+      length: longint;
+   end;
+
    binding_t = record
       key: symbol;
       ty: spec;
       id: longint;
       external: boolean;
-      stack_index: longint;
-      nesting_level: longint;
+      stack_index: integer;
+      nesting_level: integer;
       mutates: boolean;
       escapes: boolean;
+      recursive: boolean;
+      reachable: reachability;
       value: value;
+      call_count: integer;
+      free_vars: binding_list;
+      callers: binding_list;
+      callees: binding_list;
    end;
 
    tree = ^tree_t;
@@ -37,20 +59,102 @@ const
    _global_tenv: scope_t = (bindings: nil; stack_index: 0; next: nil);
    global_tenv: scope = @_global_tenv;
 
-
 function add_scope(env: scope): scope;
 procedure delete_scope(var env: scope);
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
 function lookup(env: scope; key: symbol; loc: source_location): binding;
+procedure add_free_var(fn, free_var: binding);
+procedure add_caller(fn, caller: binding);
+procedure add_callee(fn, callee: binding);
 
 implementation
 
 uses math;
 
-
 var
    next_id: longint = 1;
 
+function make_binding_list(): binding_list;
+var
+   list: binding_list;
+begin
+   new(list);
+   list^.first := nil;
+   list^.last := nil;
+   list^.length := 0;
+   make_binding_list := list;
+end;
+
+function make_list_item(b: binding): binding_list_item;
+var
+   item: binding_list_item;
+begin
+   new(item);
+   item^.binding := b;
+   item^.next := nil;
+   make_list_item := item;
+end;
+
+procedure append_binding(list: binding_list; b: binding);
+var
+   item: binding_list_item;
+begin
+   item := make_list_item(b);
+   if list^.first = nil then
+      list^.first := item
+   else
+      list^.last^.next := item;
+  list^.last := item;
+  list^.length := list^.length + 1;
+end;
+
+procedure add_free_var(fn, free_var: binding);
+var
+   it: binding_list_item;
+   free_vars: binding_list;
+begin
+   free_vars := fn^.free_vars;
+   it := free_vars^.first;
+   while it <> nil do
+      begin
+         if it^.binding = free_var then
+            exit();
+         it := it^.next;
+      end;
+   append_binding(free_vars, free_var);
+end;
+
+procedure add_caller(fn, caller: binding);
+var
+   it: binding_list_item;
+   callers: binding_list;
+begin
+   callers := fn^.callers;
+   it := callers^.first;
+   while it <> nil do
+      begin
+         if it^.binding = caller then
+            exit();
+         it := it^.next;
+      end;
+   append_binding(callers, caller);
+end;
+
+procedure add_callee(fn, callee: binding);
+var
+   it: binding_list_item;
+   callees: binding_list;
+begin
+   callees := fn^.callees;
+   it := callees^.first;
+   while it <> nil do
+      begin
+         if it^.binding = callee then
+            exit();
+         it := it^.next;
+      end;
+   append_binding(callees, callee);
+end;
 
 function add_scope(env: scope): scope;
 var
@@ -61,7 +165,6 @@ begin
    s^.next := env;
    add_scope := s;
 end;
-
 
 function make_tree(binding: binding): tree;
 var
@@ -75,20 +178,17 @@ begin
    make_tree := t;
 end;
 
-
 function height(t: tree): Integer;
 begin
    if t = nil then height := 0
    else height := t^.height;
 end;
 
-
 function balance(t: tree): Integer;
 begin
    if t = nil then balance := 0
    else balance := height(t^.left) - height(t^.right);
 end;
-
 
 function rotate_left(t: tree): tree;
 var
@@ -103,7 +203,6 @@ begin
    rotate_left := t1;
 end;
 
-
 function rotate_right(t: tree): tree;
 var
    t1, tmp: tree;
@@ -117,7 +216,6 @@ begin
    rotate_right := t1;
 end;
 
-
 function find(t: tree; key: symbol): binding;
 begin
    if t = nil then
@@ -129,7 +227,6 @@ begin
    else
       find := t^.binding;
 end;
-
 
 function insert(t: tree; b: binding) : tree;
 var
@@ -162,7 +259,6 @@ begin
    insert := t;
 end;
 
-
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
 var
    t: tree;
@@ -181,11 +277,15 @@ begin
    b^.external := false;
    b^.mutates := false;
    b^.escapes := false;
+   b^.recursive := false;
+   b^.reachable := reachable_unknown;
+   b^.free_vars := make_binding_list();
+   b^.callers := make_binding_list();
+   b^.callees := make_binding_list();
    b^.value := nil;
    env^.bindings := insert(t, b);
    bind := b;
 end;
-
 
 function lookup(env: scope; key: symbol; loc: source_location): binding;
 var
@@ -200,7 +300,6 @@ begin
       lookup := b;
 end;
 
-
 procedure delete_tree(t: tree);
 begin
    if t^.left <> nil then delete_tree(t^.left);
@@ -208,7 +307,6 @@ begin
    dispose(t^.binding);
    dispose(t);
 end;
-
 
 procedure delete_scope(var env: scope);
 begin
@@ -220,7 +318,6 @@ begin
          env := nil;
       end;
 end;
-
 
 begin
    bind(global_tenv, intern('int'), int_type, 0, 0, nil);
