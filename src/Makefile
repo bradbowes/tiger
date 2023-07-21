@@ -38,6 +38,7 @@ uninstall:
 clean:
 	rm -f tc
 	rm -f tprint
+	rm -f report
 	rm -f *.o
 	rm -f *.s
 	rm -f a.out
