@@ -10,11 +10,6 @@ implementation
 
 uses pass1, pass2, pass3, bindings, semant;
 
-procedure check(n: node);
-begin
-   type_check(n, 1, 1, add_scope(global_env), add_scope(global_tenv));
-end;
-
 
 function opt(n: node; tf: tf_function): node;
 var
@@ -23,7 +18,7 @@ begin
    ast := tf(n);
    delete_node(n);
    opt := ast;
-   check(opt);
+   type_check(opt);
 end;
 
 
@@ -33,7 +28,7 @@ var
    ast: node;
 begin
    ast := n;
-   check(ast);
+   type_check(ast);
    ast := opt(ast, @trans1);
    ast := opt(ast, @trans1);
    ast := opt(ast, @trans2);

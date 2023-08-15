@@ -245,7 +245,7 @@ var
 begin
    annotate(n, 0, nil);
    shaken := shake(n);
-   type_check(shaken, 1, 1, add_scope(global_env), add_scope(global_tenv));
+   type_check(shaken);
    annotate(shaken, 0, nil);
    report(shaken);
    // report(n);

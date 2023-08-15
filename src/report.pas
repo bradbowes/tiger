@@ -5,10 +5,10 @@ var
    ast: node;
 begin
    ast := parse(paramstr(1));
-   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
+   type_check(ast);
    ast := trans1(ast);
-   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
+   type_check(ast);
    ast := trans1(ast);
-   type_check(ast, 1, 1, add_scope(global_env), add_scope(global_tenv));
+   type_check(ast);
    analyze(ast);
 end.

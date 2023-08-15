@@ -30,7 +30,7 @@ let
          token { op = err, value = 0 }
       end
 
-   scan() : token =
+   scan(): token =
       let
          digit(): bool =
             ch >= #"0" and ch <= #"9"
