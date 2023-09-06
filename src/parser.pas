@@ -8,31 +8,31 @@ function parse(file_name: string): node;
 
 implementation
 
-uses sysutils, errmsg, scanner, symbols, ops;
+uses sysutils, sources, scanner, symbols, ops;
 
 function parse(file_name: string): node;
 var
-   src: source;
    lib: node_list;
    expr: node;
 
 
    procedure next();
    begin
-      scan(src);
+      scan();
       while token.tag = comment_token do
-         scan(src);
+         scan();
    end;
 
 
    procedure set_source(file_name: string);
    begin
-      src := load_source(file_name);
+      load_source(file_name);
       next();
    end;
 
 
    function get_expression(): node; forward;
+
 
    function get_identifier(): symbol;
    var

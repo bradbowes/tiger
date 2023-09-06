@@ -11,7 +11,7 @@ procedure emit_x86(ast: node; file_name: string);
 implementation
 
 uses sysutils, symbols, parser,
-     errmsg, ops, bindings, datatypes;
+     sources, ops, bindings, datatypes;
 
 
 procedure emit_expression(n: node; si, nest: longint); forward;

@@ -2,7 +2,7 @@ unit scanner;
 
 interface
 
-uses errmsg;
+uses sources;
 
 type
    token_tag = (and_token,
@@ -51,6 +51,7 @@ type
                 to_token,
                 true_token,
                 type_token,
+                use_token,
                 while_token);
 
    token_t = record
@@ -58,59 +59,25 @@ type
                 value: string;
              end;
 
-   source = ^source_t;
-   source_t = record
-                  open: boolean;
-                  src: text;
-                  ch: char;
-                  line, col: longint;
-               end;
-
-
-function load_source(file_name: string): source;
-procedure scan(s: source);
+procedure scan();
 function token_location(): source_location;
 
 var
    token: token_t;
    line, col: longint;
-   current_file: string;
-
 
 implementation
 
 uses sysutils;
 
-procedure scan(s: source);
+procedure scan();
 
-   procedure next();
-   begin
-      if s^.open then
-         if eof(s^.src) then
-            begin
-               s^.ch := chr(4);
-               close(s^.src);
-               s^.open := false;
-            end
-         else
-            begin
-               read(s^.src, s^.ch);
-               s^.col := s^.col + 1;
-               if s^.ch = chr(10) then
-                  begin
-                     s^.line := s^.line + 1;
-                     s^.col := 0;
-                  end
-            end
-         else
-            err('Read past end of file', current_file, line, col);
-   end;
 
 
    procedure push_char();
    begin
-      token.value := token.value + s^.ch;
-      next();
+      token.value := token.value + src^.ch;
+      getch();
    end;
 
 
@@ -123,8 +90,8 @@ procedure scan(s: source);
 
    procedure skip_white;
    begin
-      while s^.ch in [' ', #9 .. #13] do
-         next();
+      while src^.ch in [' ', #9 .. #13] do
+         getch();
    end;
 
 
@@ -133,14 +100,14 @@ procedure scan(s: source);
       token.value := '/*';
       repeat
          repeat
-            next();
-            token.value := token.value + s^.ch;
-         until s^.ch = '*';
-         next();
-         while s^.ch = '*' do
-            next();
-      until s^.ch = '/';
-      next();
+            getch();
+            token.value := token.value + src^.ch;
+         until src^.ch = '*';
+         getch();
+         while src^.ch = '*' do
+            getch();
+      until src^.ch = '/';
+      getch();
       token.value := token.value + '/';
       token.tag := comment_token;
    end;
@@ -151,12 +118,12 @@ procedure scan(s: source);
       escape: string = '';
       code: string;
    begin
-      next();
-      while s^.ch <> '"' do
-         if s^.ch = '\' then
+      getch();
+      while src^.ch <> '"' do
+         if src^.ch = '\' then
             begin
-               next();
-               case s^.ch of
+               getch();
+               case src^.ch of
                   't': escape := #9;  (* tab *)
                   'n': escape := #10; (* newline *)
                   'v': escape := #11; (* vertical tab *)
@@ -167,71 +134,71 @@ procedure scan(s: source);
                   '''': escape := '''';
                   '^':
                      begin
-                        next();
-                        if s^.ch in ['A'..'Z'] then
-                           escape := chr(ord(s^.ch) - 64)
-                        else if s^.ch in ['a'.. 'z'] then
-                           escape := chr(ord(s^.ch) - 96)
+                        getch();
+                        if src^.ch in ['A'..'Z'] then
+                           escape := chr(ord(src^.ch) - 64)
+                        else if src^.ch in ['a'.. 'z'] then
+                           escape := chr(ord(src^.ch) - 96)
                         else
-                           err('illegal escape sequence', current_file, s^.line, s^.col);
+                           err('illegal escape sequence', src_location());
                      end;
                   '0'..'9':
                      begin
-                        code := s^.ch;
-                        next();
-                        if s^.ch in ['0'..'9'] then
-                           code := code + s^.ch
+                        code := src^.ch;
+                        getch();
+                        if src^.ch in ['0'..'9'] then
+                           code := code + src^.ch
                         else
-                           err('illegal escape sequence', current_file, s^.line, s^.col);
-                        next();
-                        if s^.ch in ['0'..'9'] then
-                           code := code + s^.ch
+                           err('illegal escape sequence', src_location());
+                        getch();
+                        if src^.ch in ['0'..'9'] then
+                           code := code + src^.ch
                         else
-                           err('illegal escape sequence', current_file, s^.line, s^.col);
+                           err('illegal escape sequence', src_location());
                         if code > '255' then
-                           err('illegal escape sequence', current_file, s^.line, s^.col);
+                           err('illegal escape sequence', src_location());
                         escape := chr(strtoint(code));
                      end;
                   ' ', chr(9) .. chr(13):
                      begin
                         skip_white;
-                        if s^.ch = '\' then
+                        if src^.ch = '\' then
                            begin
-                              next();
+                              getch();
                               continue;
                            end
                         else
-                           err('illegal escape sequence', current_file, s^.line, s^.col);
+                           err('illegal escape sequence', src_location());
                      end;
                   else
-                     err('illegal escape sequence', current_file, s^.line, s^.col);
+                     err('illegal escape sequence', src_location());
                end;
                token.value := token.value + escape;
-               next();
+               getch();
             end
          else
             push_char;
-      next();
+      getch();
       token.tag := string_token;
    end;
 
 
    procedure get_char();
    begin
-      next();
-      if s^.ch = '"' then
+      getch();
+      if src^.ch = '"' then
          get_string()
       else
-         err('illegal character literal', current_file, s^.line, s^.col);
+         err('illegal character literal', src_location());
       if length(token.value) <> 1 then
-         err('illegal character literal', current_file, line, col);
+         err('illegal character literal', token_location());
       token.tag := char_token;
    end;
 
 
    procedure get_number;
    begin
-      while s^.ch in ['0'..'9'] do
+      while src^.ch in ['0'..'9'] do
          push_char();
       token.tag := number_token;
    end;
@@ -239,7 +206,7 @@ procedure scan(s: source);
 
    procedure get_id;
    begin
-      while s^.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
+      while src^.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
          push_char;
       case token.value of
          'and': token.tag := and_token;
@@ -261,6 +228,7 @@ procedure scan(s: source);
          'to': token.tag := to_token;
          'true': token.tag := true_token;
          'type': token.tag := type_token;
+         'use': token.tag := use_token;
          'while': token.tag := while_token;
       else
          token.tag := id_token;
@@ -270,16 +238,16 @@ procedure scan(s: source);
 begin
    skip_white;
    token.value := '';
-   line := s^.line;
-   col := s^.col;
-   if not s^.open then
+   line := src^.line;
+   col := src^.col;
+   if not src^.open then
       begin
          token.tag := eof_token;
          token.value := '<EOF>';
       end
    else
       begin
-         case s^.ch of
+         case src^.ch of
             ',': recognize(comma_token);
             ';': recognize(semicolon_token);
             '.': recognize(dot_token);
@@ -295,14 +263,14 @@ begin
             '/':
                begin
                   push_char;
-                  if s^.ch = '*' then skip_comment
+                  if src^.ch = '*' then skip_comment
                   else token.tag := div_token;
                end;
             '=': recognize(eq_token);
             '<':
                begin
                   push_char;
-                  case s^.ch of
+                  case src^.ch of
                      '>': recognize(neq_token);
                      '=': recognize(leq_token);
                   else
@@ -312,22 +280,22 @@ begin
             '>':
                begin
                   push_char;
-                  if s^.ch = '=' then recognize(geq_token)
+                  if src^.ch = '=' then recognize(geq_token)
                   else token.tag := gt_token;
                end;
             ':':
                begin
                   push_char;
-                  if s^.ch = '=' then recognize(assign_token)
+                  if src^.ch = '=' then recognize(assign_token)
                   else token.tag := colon_token;
                end;
             '0'..'9': get_number;
             '"': get_string;
             '#': get_char;
             'a'..'z', 'A'..'Z': get_id;
-         else if eof(s^.src) then next()
+         else if eof(src^.src) then getch()
          else
-            err('Illegal token ''' + s^.ch + '''', current_file, line, col);
+            err('Illegal token ''' + src^.ch + '''', token_location());
          end;
       end;
 end;
@@ -340,23 +308,8 @@ begin
    new(loc);
    loc^.line := line;
    loc^.col := col;
-   loc^.file_name := current_file;
+   loc^.file_name := src^.file_name;
    token_location := loc;
-end;
-
-
-function load_source(file_name: string): source;
-var s: source;
-begin
-   current_file := file_name;
-   new(s);
-   assign(s^.src, file_name);
-   reset(s^.src);
-   s^.open := true;
-   read(s^.src, s^.ch);
-   s^.col := 1;
-   s^.line := 1;
-   load_source := s;
 end;
 
 

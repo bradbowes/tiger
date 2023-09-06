@@ -2,7 +2,7 @@ unit nodes;
 
 interface
 
-uses errmsg, symbols, ops, values, bindings;
+uses sources, symbols, ops, values, bindings;
 
 type
    node_tag = (assign_node,

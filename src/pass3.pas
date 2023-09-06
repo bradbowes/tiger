@@ -12,7 +12,7 @@ function trans3(n: node): node;
 
 implementation
 
-uses errmsg, symbols;
+uses sources, symbols;
 
 var
    tf: tf_function = @trans3;

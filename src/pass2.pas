@@ -9,7 +9,7 @@ function trans2(n: node): node;
 
 implementation
 
-uses sysutils, errmsg, symbols, bindings;
+uses sysutils, sources, symbols, bindings;
 
 var
    tf: tf_function = @trans2;

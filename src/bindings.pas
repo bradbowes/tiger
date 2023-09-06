@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses errmsg, symbols, values, datatypes;
+uses sources, symbols, values, datatypes;
 
 type
    reachability = (reachable_unknown, reachable_yes, reachable_no);

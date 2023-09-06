@@ -2,13 +2,13 @@ unit semant;
 
 interface
 
-uses bindings, datatypes, nodes;
+uses datatypes, nodes;
 
 function type_check(n: node): spec;
 
 implementation
 
-uses errmsg, ops, symbols;
+uses sources, bindings, ops, symbols;
 
 function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
