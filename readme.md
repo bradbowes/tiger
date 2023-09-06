@@ -28,6 +28,8 @@
 - `break` is not implemented.
 - string comparison operators (`<`, `<=`, `>`, `>=`) not implemented --
   use `string_compare` function instead.
+- `use "<file_name>"` to include external definition file in `let`
+  declaration block
 
 # To do
 
@@ -85,3 +87,8 @@
 - string_concat(s1: string, s2: string): string
 - string_compare(s1: string, s2: string): int
 - string_buffer(size: int): string
+
+## Integers
+
+- min(m: int, n: int): int
+- max(m: int, n: int): int
