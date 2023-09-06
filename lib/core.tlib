@@ -48,3 +48,9 @@ file_writeln(s: string, f: file) =
       file_write(s, f)
       file_putchar(#"\n", f)
    end
+
+max(m: int, n: int): int =
+   if m < n then n else m
+
+min(m: int, n: int): int =
+   if m > n then n else m

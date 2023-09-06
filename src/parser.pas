@@ -576,10 +576,26 @@ var
    function get_declaration_list(): node_list;
    var
       decls: node_list;
+      use_file: string;
    begin
       decls := make_node_list();
-      while token.tag in [id_token, type_token] do
-         append_node(decls, get_declaration());
+      while token.tag in [id_token, type_token, use_token] do
+         begin
+            if token.tag = use_token then
+               begin
+                  next();
+                  if token.tag = string_token then
+                     begin
+                        use_file := token.value;
+                        load_source(use_file);
+                        next();
+                     end
+                  else
+                     err('Expected file name', token_location());
+               end
+            else
+               append_node(decls, get_declaration());
+         end;
       get_declaration_list := decls
    end;
 

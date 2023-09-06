@@ -26,7 +26,6 @@ var
 procedure load_source(file_name: string);
 procedure getch();
 procedure err(msg: string);
-procedure err(msg, file_name: string; line, col: longint);
 procedure err(msg: string; loc: source_location);
 function src_location(): source_location;
 
@@ -46,7 +45,10 @@ begin
    read(s^.src, s^.ch);
    s^.col := 1;
    s^.line := 1;
-   s^.resume := src;
+   if (src <> nil) and src^.open then
+      s^.resume := src
+   else
+      s^.resume := nil;
    src := s;
 end;
 
@@ -59,6 +61,11 @@ begin
             src^.ch := chr(4);
             close(src^.src);
             src^.open := false;
+            if src^.resume <> nil then
+               begin
+                  src := src^.resume;
+                  getch();
+               end
          end
       else
          begin
@@ -71,7 +78,7 @@ begin
                end
          end
       else
-         err('Read past end of file', src^.file_name, src^.line, src^.col);
+         err('Read past end of file', src_location());
 end;
 
 
@@ -94,15 +101,9 @@ begin
 end;
 
 
-procedure err(msg, file_name: string; line, col: longint);
-begin
-   err('in ' + file_name + ', line ' + inttostr(line) + ', column ' + inttostr(col) + ': ' + msg);
-end;
-
-
 procedure err(msg: string; loc: source_location);
 begin
-   err(msg, loc^.file_name, loc^.line, loc^.col);
+   err('in ' + loc^.file_name + ', line ' +  inttostr(loc^.line) + ', column ' +  inttostr(loc^.col) + ': ' + msg);
 end;
 
 

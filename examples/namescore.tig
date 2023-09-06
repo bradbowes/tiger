@@ -1,0 +1,71 @@
+/*
+   Using p022names.txt a 46K text file containing over five-thousand
+   first names, begin by sorting it into alphabetical order. Then
+   working out the alphabetical value for each name, multiply this
+   value by its alphabetical position in the list to obtain a name
+   score.
+
+   For example, when the list is sorted into alphabetical order,
+   COLIN, which is worth 3 + 15 + 12 + 9 + 14 = 53, is the 938th
+   name in the list. So, COLIN would obtain a score of
+   938 × 53 = 49714.
+
+   What is the total of all the name scores in the file?
+*/
+let
+   use "avl.tlib"
+
+   tree: node = nil
+
+   tally(n: node): int =
+      let
+         pos = 1
+         total = 0
+         walk(n: node) =
+            if n <> nil then
+               begin
+                  if n.left <> nil then
+                     walk(n.left)
+
+                  let
+                     score = 0
+                     name = n.item
+                  in
+                     for i := 0 to length(name) - 1 do
+                        score := score + ord(name[i]) - ord(#"A") + 1
+                     total := total + pos * score
+                  end
+
+                  pos := pos + 1
+
+                  if n.right <> nil then
+                     walk(n.right)
+               end
+      in
+         walk(tree)
+         total
+      end
+
+   buf = string_buffer(64)
+   f = open_input("p022_names.txt")
+   ch = file_getchar(f)
+   n = 0
+in
+   while ch <> EOF do
+      begin
+         ch := file_getchar(f) /* eat quotation mark */
+         n := 0
+         while ch <> #"\"" do
+            begin
+               buf[n] := ch
+               n := n + 1
+               ch := file_getchar(f)
+            end
+         tree := insert(substring(buf, 0, n), tree)
+         ch := file_getchar(f) /* eat quotation mark */
+         if ch <> EOF then
+            ch := file_getchar(f) /* eat comma */
+      end
+
+   writeln(str(tally(tree)))
+end

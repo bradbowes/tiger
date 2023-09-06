@@ -65,7 +65,7 @@ clean:
 	rm -f ../examples/euler14
 	rm -f ../examples/euler15
 	rm -f ../examples/euler17
-	rm -f ../examples/euler22
+	rm -f ../examples/namescore
 	rm -f ../examples/merge
 	rm -f ../examples/queens
 	rm -f ../examples/wordcount

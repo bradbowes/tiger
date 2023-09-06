@@ -1,0 +1,69 @@
+type node = {item: string, left: node, right: node, height: int}
+
+height(n: node): int =
+   if n = nil then 0 else n.height
+
+balance(n: node): int =
+   if n= nil then 0
+   else height(n.left) - height(n.right)
+
+rotate_left(n: node): node =
+   let
+      n1 = n.right
+      tmp = n1.left
+   in
+      n1.left := n
+      n.right := tmp
+      n.height := max(height(n.left), height(n.right)) + 1
+      n1.height := max(height(n1.left), height(n1.right)) + 1
+      n1
+   end
+
+rotate_right(n: node): node =
+   let
+      n1 = n.left
+      tmp = n1.right
+   in
+      n1.right := n
+      n.left := tmp
+      n.height := max(height(n.left), height(n.right)) + 1
+      n1.height := max(height(n1.left), height(n1.right)) + 1
+      n1
+   end
+
+insert(item: string, n: node): node =
+   let
+      n1 =
+         if n = nil then
+            node { item = item, left = nil, right = nil, height = 1 }
+         else
+            let
+               cmp = string_compare(item, n.item)
+            in
+               if cmp < 0 then
+                  n.left := insert(item, n.left)
+               else if cmp > 0 then
+                  n.right := insert(item, n.right)
+               n
+            end
+      bal = balance(n1)
+   in
+      if bal > 1 then
+         let
+            cmp = string_compare(item, n1.left.item)
+         in
+            if cmp >= 0 then
+               n1.left := rotate_left(n1.left)
+            n1 := rotate_right(n1)
+         end
+      else if bal < -1 then
+         let
+            cmp = string_compare(item, n1.right.item)
+         in
+            if cmp <= 0 then
+               n1.right := rotate_right(n1.right)
+            n1 := rotate_left(n1)
+         end
+      n1
+   end
+
