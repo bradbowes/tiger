@@ -72,6 +72,7 @@
 - file_writeln(s: string, f: file)
 - command_argcount(): int
 - command_arg(n: int): string
+- halt(n: int)
 
 ## Conversion
 

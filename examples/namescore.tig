@@ -1,4 +1,6 @@
 /*
+   https://projecteuler.net/problem=22
+
    Using p022names.txt a 46K text file containing over five-thousand
    first names, begin by sorting it into alphabetical order. Then
    working out the alphabetical value for each name, multiply this
@@ -15,8 +17,6 @@
 let
    use "avl.tlib"
 
-   tree: node = nil
-
    tally(n: node): int =
       let
          pos = 1
@@ -24,9 +24,7 @@ let
          walk(n: node) =
             if n <> nil then
                begin
-                  if n.left <> nil then
-                     walk(n.left)
-
+                  walk(n.left)
                   let
                      score = 0
                      name = n.item
@@ -35,14 +33,11 @@ let
                         score := score + ord(name[i]) - ord(#"A") + 1
                      total := total + pos * score
                   end
-
                   pos := pos + 1
-
-                  if n.right <> nil then
-                     walk(n.right)
+                  walk(n.right)
                end
       in
-         walk(tree)
+         walk(n)
          total
       end
 
@@ -50,6 +45,8 @@ let
    f = open_input("p022_names.txt")
    ch = file_getchar(f)
    n = 0
+   tree: node = nil
+
 in
    while ch <> EOF do
       begin

@@ -1,3 +1,4 @@
+halt(n: int)
 str(n: int): string
 length(s: string): int
 ord(c: char): int

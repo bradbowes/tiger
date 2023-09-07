@@ -45,6 +45,13 @@ main_done:
 
 
 .p2align 3
+.globl f$_halt
+f$_halt:
+   movq 16(%rsp), %rdi
+   call _exit
+
+
+.p2align 3
 .globl f$_open_input
 f$_open_input:
    movq 16(%rsp), %rdi
