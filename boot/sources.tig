@@ -1,0 +1,88 @@
+type location = {
+   file_name: string,
+   line: int,
+   col: int
+}
+
+type source = {
+   file_name: string,
+   open: boolean,
+   src: file,
+   ch: char,
+   line: int,
+   col: int,
+   resume: source
+}
+
+src: source = nil
+
+src_location(): location =
+   if src = nil then
+      nil
+   else
+      location {
+         file_name = src.file_name,
+         line = src.line,
+         col = src.col
+      }
+
+err(msg: string; loc: location) =
+   begin
+      write("Error: ")
+      if loc <> nil then
+         begin
+            write("in ")
+            write(loc.file_name)
+            write(", line ")
+            write(str(loc.line))
+            write(", column ")
+            write(str(loc.col))
+            write(": ")
+         end
+      write(msg)
+      halt(1)
+   end
+
+load_source(file_name: string) =
+   let
+      f = open_input(file_name)
+      ch = get_char(f)
+      s = source {
+         file_name = file_name,
+         open = true,
+         src = f,
+         ch = ch,
+         line = 1,
+         col = 1,
+         resume = if src <> nil and src.open then src else nil
+      }
+   in
+      src := s
+   end
+
+nextch() =
+   if src <> nil and src^.open then
+      begin
+         src.ch := get_char(src.src)
+         if src.ch = EOF then
+            begin
+               close_input(src^.src);
+               src.open := false;
+               if src^.resume <> nil then
+                  begin
+                     src := src.resume;
+                     nextch();
+                  end
+            end
+         else
+            if src.ch = #"\n" then
+               begin
+                  src^.line := src^.line + 1;
+                  src^.col := 0;
+               end
+            else
+               src.col := src.col + 1;
+      end
+   else
+      err('Read past end of file', src_location());
+end;
