@@ -500,8 +500,8 @@ var
    begin
       ty := n^.left^.binding^.ty;
       offset := get_field(ty, n^.name, n^.loc)^.offset;
-      emit_expression(n^.left, si, nest);
       emit('   movq %%rsi, %d(%%rbp)', [si]);
+      emit_expression(n^.left, si, nest);
       emit('   movq %%rax, %%rsi', []);
       emit('   movq %d(%%rsi), %%rax', [8 * offset]);
       emit('   movq %d(%%rbp), %%rsi', [si]);

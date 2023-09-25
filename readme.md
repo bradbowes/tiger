@@ -89,6 +89,14 @@
 - string_compare(s1: string, s2: string): int
 - string_buffer(size: int): string
 
+## Chars
+
+- is_digit(c: char): bool
+- is_space(c: char): bool
+- is_upper(c: char): bool
+- is_lower(c: char): bool
+- is_alpha(c: char): bool
+
 ## Integers
 
 - min(m: int, n: int): int

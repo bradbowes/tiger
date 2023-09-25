@@ -6,15 +6,15 @@ type location = {
 
 type source = {
    file_name: string,
-   open: boolean,
+   open: bool,
    src: file,
-   ch: char,
    line: int,
    col: int,
    resume: source
 }
 
 src: source = nil
+ch = chr(0)
 
 src_location(): location =
    if src = nil then
@@ -26,63 +26,61 @@ src_location(): location =
          col = src.col
       }
 
-err(msg: string; loc: location) =
+err(msg: string, loc: location) =
    begin
-      write("Error: ")
+      file_write("Error: ", STD_ERROR)
       if loc <> nil then
          begin
-            write("in ")
-            write(loc.file_name)
-            write(", line ")
-            write(str(loc.line))
-            write(", column ")
-            write(str(loc.col))
-            write(": ")
+            file_write("in ", STD_ERROR)
+            file_write(loc.file_name, STD_ERROR)
+            file_write(", line ", STD_ERROR)
+            file_write(str(loc.line), STD_ERROR)
+            file_write(", column ", STD_ERROR)
+            file_write(str(loc.col), STD_ERROR)
+            file_write(": ", STD_ERROR)
          end
-      write(msg)
+      file_writeln(msg, STD_ERROR)
       halt(1)
    end
 
-load_source(file_name: string) =
-   let
-      f = open_input(file_name)
-      ch = get_char(f)
-      s = source {
-         file_name = file_name,
-         open = true,
-         src = f,
-         ch = ch,
-         line = 1,
-         col = 1,
-         resume = if src <> nil and src.open then src else nil
-      }
-   in
-      src := s
-   end
-
 nextch() =
-   if src <> nil and src^.open then
+   if src <> nil and src.open then
       begin
-         src.ch := get_char(src.src)
-         if src.ch = EOF then
+         ch := file_getchar(src.src)
+         if ch = EOF then
             begin
-               close_input(src^.src);
+               close_file(src.src);
                src.open := false;
-               if src^.resume <> nil then
+               if src.resume <> nil then
                   begin
                      src := src.resume;
                      nextch();
                   end
             end
          else
-            if src.ch = #"\n" then
+            if ch = #"\n" then
                begin
-                  src^.line := src^.line + 1;
-                  src^.col := 0;
+                  src.line := src.line + 1;
+                  src.col := 0;
                end
             else
                src.col := src.col + 1;
       end
    else
-      err('Read past end of file', src_location());
-end;
+      err("Read past end of file", src_location());
+
+load_source(file_name: string) =
+   let
+      f = open_input(file_name)
+      s = source {
+         file_name = file_name,
+         open = true,
+         src = f,
+         line = 1,
+         col = 0,
+         resume = src
+      }
+   in
+      src := s
+      nextch()
+   end
