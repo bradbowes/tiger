@@ -1,0 +1,48 @@
+type buffer = {
+   str: string,
+   ptr: int
+}
+
+make_buffer(n: int): buffer =
+   buffer { str = string_buffer(n), ptr = 0 }
+
+clear_buffer(buf: buffer) =
+   begin
+      for i := 0 to length(buf.str) - 1 do
+         buf.str[i] := chr(0)
+      buf.ptr := 0
+   end
+
+push_buffer(buf: buffer, ch: char) =
+   begin
+      buf.str[buf.ptr] := ch
+      buf.ptr := buf.ptr + 1
+   end
+
+get_buffer(buf: buffer): string =
+   substring(buf.str, 0, buf.ptr)
+
+append_buffer(buf: buffer, s: string) =
+   let
+      len = length(s)
+   in
+      for i := 0 to len - 1 do
+         push_buffer(buf, s[i])
+   end
+
+set_buffer(buf: buffer, str: string) =
+   begin
+      clear_buffer(buf)
+      append_buffer(buf, str)
+   end
+
+compare_buffer(buf: buffer, str: string) : bool =
+   let
+      result = length(str) = buf.ptr
+   in
+      if result then
+         for i := 0 to buf.ptr - 1 do
+            if buf.str[i] <> str[i] then
+               result := false
+      result
+   end

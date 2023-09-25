@@ -1,0 +1,63 @@
+use "buffer.tig"
+
+type symbol = {
+   id: string,
+   next: symbol
+}
+
+type symbol_table = array of symbol
+
+hash_size = 1021
+symtab = symbol_table[hash_size] of nil
+next_tmp = 0
+sbuf = make_buffer(32)
+
+hash(buf: buffer): int =
+   let
+      h = 31
+      s = buf.str
+   in
+      for i := 0 to buf.ptr - 1 do
+         h := (ord(s[i]) + (h * 37)) mod 514229
+      h mod hash_size;
+   end
+
+intern(buf: buffer): symbol =
+   let
+      h = hash(buf)
+   in
+      if symtab[h] = nil then
+         let
+            sym = symbol { id = get_buffer(buf), next = nil }
+         in
+            symtab[h] := sym
+            sym
+         end
+      else
+         let
+            sym = symtab[h]
+         in
+            while compare_buffer(buf, sym.id) = false do
+               begin
+                  if sym.next = nil then
+                     sym.next := symbol { id = get_buffer(buf), next = nil }
+                  sym := sym.next
+               end
+            sym
+         end
+   end
+
+gensym(): symbol =
+   let
+      append_num(i: int) =
+         if i > 0 then
+            begin
+               append_num(i / 10)
+               push_buffer(sbuf, chr(i - i / 10 * 10) + #"0")
+            end
+   in
+      next_tmp := next_tmp + 1
+      set_buffer(sbuf, "tmp$_")
+      append_num(next_tmp)
+      intern(sbuf)
+   end
