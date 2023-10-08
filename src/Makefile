@@ -69,3 +69,5 @@ clean:
 	rm -f ../examples/merge
 	rm -f ../examples/queens
 	rm -f ../examples/wordcount
+	rm -f ../boot/*.o
+	rm -f ../boot/*.s

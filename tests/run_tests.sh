@@ -547,7 +547,7 @@ in
 end" "helto"
 
 test_code "let
-   a = string_buffer(5)
+   a = make_string(5)
 in
    a[0] := #\"H\"
    a[1] := #\"E\"

@@ -6,7 +6,7 @@ uses sources, nodes, parser, sysutils, strutils, process, transforms, x86_emitte
 
 var
    ast: node;
-   source, base, assem, obj, exe, output: string;
+   source, base, assem, obj, exe: string;
 
 
 function source_name(s: string): string;

@@ -1,3 +1,4 @@
+   popq %rbp
 heap_size = 16 * 1024 * 1024
 SEEK_SET	= 0
 SEEK_CUR = 1
@@ -39,9 +40,9 @@ main_fail:
 main_done:
    // addq $40, %rsp
    movq %rbp, %rsp
-   xorq %rax, %rax
    popq %rbp
-   ret
+   xorq %rdi, %rdi
+   call _exit
 
 
 .p2align 3
@@ -143,8 +144,8 @@ f$_str:
 
 
 .p2align 3
-.globl f$_string_buffer
-f$_string_buffer:
+.globl f$_make_string
+f$_make_string:
    movq 16(%rsp), %rbx
    movq %rbx, (%r15)
    addq $15, %rbx

@@ -22,10 +22,12 @@ type
                fun_decl_node,
                record_desc_node,
                array_desc_node,
+               enum_desc_node,
                unary_op_node,
                binary_op_node,
                field_node,
                field_desc_node,
+               enum_node,
                if_else_node,
                if_node,
                while_node,
@@ -84,10 +86,12 @@ function make_var_decl_node(name, ty: symbol; expr: node; loc: source_location):
 function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
 function make_record_desc_node(fields: node_list; loc: source_location): node;
 function make_array_desc_node(base: symbol; loc: source_location): node;
+function make_enum_desc_node(items: node_list; loc: source_location): node;
 function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
 function make_binary_op_node(op: op_tag; left, right: node; loc: source_location): node;
 function make_field_node(name: symbol; expr: node; loc: source_location): node;
 function make_field_desc_node(name, ty: symbol; loc: source_location): node;
+function make_enum_node(name: symbol; loc: source_location): node;
 function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
 function make_if_node(condition, consequent: node; loc: source_location): node;
 function make_while_node(condition, body: node; loc: source_location): node;
@@ -342,6 +346,16 @@ begin
    make_array_desc_node := n;
 end;
 
+function make_enum_desc_node(items: node_list; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(enum_desc_node, loc);
+   n^.list := items;
+   n^.ins_count := 0;
+   make_enum_desc_node := n;
+end;
+
 function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
 var
    n: node;
@@ -385,6 +399,16 @@ begin
    n^.type_name := ty;
    n^.ins_count := 0;
    make_field_desc_node := n;
+end;
+
+function make_enum_node(name: symbol; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(enum_node, loc);
+   n^.name := name;
+   n^.ins_count := 0;
+   make_enum_node := n;
 end;
 
 function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;

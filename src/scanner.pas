@@ -41,6 +41,7 @@ type
                 number_token,
                 of_token,
                 or_token,
+                pipe_token,
                 plus_token,
                 rbrace_token,
                 rbracket_token,
@@ -257,6 +258,7 @@ begin
             ']': recognize(rbracket_token);
             '{': recognize(lbrace_token);
             '}': recognize(rbrace_token);
+            '|': recognize(pipe_token);
             '+': recognize(plus_token);
             '-': recognize(minus_token);
             '*': recognize(mul_token);

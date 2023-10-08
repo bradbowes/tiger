@@ -52,14 +52,36 @@ while_token = 48
 
 type token = {
    tag: int,
-   value: string,
+   value: symbol,
    file_name: string,
    line: int,
    col: int
 }
 
-tok = token { tag = 0, value = "", file_name = "", line = 0, col = 0 }
+tok = token { tag = 0, value = nil, file_name = "", line = 0, col = 0 }
 buf = make_buffer(4096)
+
+and_kw = intern_string("and")
+array_kw = intern_string("array")
+begin_kw = intern_string("begin")
+do_kw = intern_string("do")
+else_kw = intern_string("else")
+end_kw = intern_string("end")
+false_kw = intern_string("false")
+for_kw = intern_string("for")
+if_kw = intern_string("if")
+in_kw = intern_string("in")
+let_kw = intern_string("let")
+mod_kw = intern_string("mod")
+nil_kw = intern_string("nil")
+of_kw = intern_string("of")
+or_kw = intern_string("or")
+then_kw = intern_string("then")
+true_kw = intern_string("true")
+type_kw = intern_string("type")
+use_kw = intern_string("use")
+while_kw = intern_string("while")
+
 
 push_buf() =
    begin
@@ -81,7 +103,7 @@ skip_spaces() =
 recognize(tag: int) =
    begin
       tok.tag := tag
-      tok.value := get_buffer(buf)
+      tok.value := intern(buf)
    end
 
 push_tag(tag: int) =
@@ -125,9 +147,9 @@ scan_string() =
                else if ch = #"^" then
                   begin
                      nextch()
-                     if ch >= #"A" and ch <= #"Z" then
+                     if is_upper(ch) then
                         escape := chr(ord(ch) - 64)
-                     else if ch <= #"a" and ch <= #"z" then
+                     else if is_lower(ch) then
                         escape := chr(ord(ch) - 96)
                      else
                         err("illegal escape sequence", src_location())
@@ -179,7 +201,7 @@ scan_char() =
          scan_string()
       else
          err("illegal character literal", src_location())
-      if length(tok.value) <> 1 then
+      if length(tok.value.id) <> 1 then
          err("illegal character literal", tok_location())
       recognize(char_token)
    end;
@@ -196,33 +218,38 @@ scan_id() =
       while is_alpha(ch) or is_digit(ch) or ch = #"_" do
          push_buf();
       recognize(id_token)
-      if string_compare(tok.value, "and") = 0 then tok.tag := and_token
-      else if string_compare(tok.value, "array") = 0 then tok.tag := array_token
-      else if string_compare(tok.value, "begin") = 0 then tok.tag := begin_token
-      else if string_compare(tok.value, "do") = 0 then tok.tag := do_token
-      else if string_compare(tok.value, "else") = 0 then tok.tag := else_token
-      else if string_compare(tok.value, "end") = 0 then tok.tag := end_token
-      else if string_compare(tok.value, "false") = 0 then tok.tag := false_token
-      else if string_compare(tok.value, "for") = 0 then tok.tag := for_token
-      else if string_compare(tok.value, "if") = 0 then tok.tag := if_token
-      else if string_compare(tok.value, "in") = 0 then tok.tag := in_token
-      else if string_compare(tok.value, "let") = 0 then tok.tag := let_token
-      else if string_compare(tok.value, "mod") = 0 then tok.tag := mod_token
-      else if string_compare(tok.value, "nil") = 0 then tok.tag := nil_token
-      else if string_compare(tok.value, "of") = 0 then tok.tag := of_token
-      else if string_compare(tok.value, "or") = 0 then tok.tag := or_token
-      else if string_compare(tok.value, "then") = 0 then tok.tag := then_token
-      else if string_compare(tok.value, "true") = 0 then tok.tag := true_token
-      else if string_compare(tok.value, "type") = 0 then tok.tag := type_token
-      else if string_compare(tok.value, "use") = 0 then tok.tag := use_token
-      else if string_compare(tok.value, "while") = 0 then tok.tag := while_token
+      let
+         value = tok.value
+      in
+         tok.tag := if value = and_kw then and_token
+            else if value = array_kw then array_token
+            else if value = begin_kw then begin_token
+            else if value = do_kw then do_token
+            else if value = else_kw then else_token
+            else if value = end_kw then end_token
+            else if value = false_kw then false_token
+            else if value = for_kw then for_token
+            else if value = if_kw then if_token
+            else if value = in_kw then in_token
+            else if value = let_kw then let_token
+            else if value = mod_kw then mod_token
+            else if value = nil_kw then nil_token
+            else if value = of_kw then of_token
+            else if value = or_kw then or_token
+            else if value = then_kw then then_token
+            else if value = true_kw then true_token
+            else if value = type_kw then type_token
+            else if value = use_kw then use_token
+            else if value = while_kw then while_token
+            else id_token
+      end
    end
 
 scan() =
    begin
       skip_spaces()
       clear_buffer(buf)
-      tok.value := ""
+      tok.value := nil
       tok.file_name := src.file_name
       tok.line := src.line
       tok.col := src.col

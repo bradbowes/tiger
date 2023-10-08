@@ -87,7 +87,7 @@
 - substring(s: string, start: int, len: int): string
 - string_concat(s1: string, s2: string): string
 - string_compare(s1: string, s2: string): int
-- string_buffer(size: int): string
+- make_string(size: int): string
 
 ## Chars
 

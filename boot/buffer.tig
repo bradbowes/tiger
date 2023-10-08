@@ -4,7 +4,7 @@ type buffer = {
 }
 
 make_buffer(n: int): buffer =
-   buffer { str = string_buffer(n), ptr = 0 }
+   buffer { str = make_string(n), ptr = 0 }
 
 clear_buffer(buf: buffer) =
    begin

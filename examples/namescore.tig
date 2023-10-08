@@ -41,7 +41,7 @@ let
          total
       end
 
-   buf = string_buffer(64)
+   buf = make_string(64)
    f = open_input("p022_names.txt")
    ch = file_getchar(f)
    n = 0

@@ -15,7 +15,6 @@ var
    lib: node_list;
    expr: node;
 
-
    procedure next();
    begin
       scan();
@@ -23,16 +22,13 @@ var
          scan();
    end;
 
-
    procedure set_source(file_name: string);
    begin
       load_source(file_name);
       next();
    end;
 
-
    function get_expression(): node; forward;
-
 
    function get_identifier(): symbol;
    var
@@ -49,7 +45,6 @@ var
          err('Expected identifier, got ''' + value + '''', token_location());
    end;
 
-
    procedure advance(t: token_tag; display: string);
    begin
       if token.tag = t then
@@ -58,7 +53,6 @@ var
          err('Expected ''' + display + ''', got ''' +
              token.value + '''', token_location());
    end;
-
 
    function get_expression_list() : node_list;
    var
@@ -73,7 +67,6 @@ var
          end;
       get_expression_list := list;
    end;
-
 
    function get_sequence() : node;
    var
@@ -91,7 +84,6 @@ var
       get_sequence := make_sequence_node(list, loc);
    end;
 
-
    function get_field(): node;
    var
       name: symbol;
@@ -102,7 +94,6 @@ var
       advance(eq_token, '=');
       get_field := make_field_node(name, get_expression(), loc);
    end;
-
 
    function get_field_list(): node_list;
    var
@@ -120,7 +111,6 @@ var
          end;
       get_field_list := list;
    end;
-
 
    function get_factor(): node;
    var
@@ -244,7 +234,6 @@ var
       get_factor := factor;
    end;
 
-
    function get_product(): node;
    var
       loc: source_location;
@@ -268,7 +257,6 @@ var
       get_product := left;
    end;
 
-
    function get_sum(): node;
    var
       loc: source_location;
@@ -290,7 +278,6 @@ var
 
       get_sum := left;
    end;
-
 
    function get_boolean(): node;
    var
@@ -318,7 +305,6 @@ var
       get_boolean := left;
    end;
 
-
    function get_conjunction(): node;
    var
       loc: source_location;
@@ -336,7 +322,6 @@ var
       get_conjunction := left;
    end;
 
-
    function get_disjunction(): node;
    var
       loc: source_location;
@@ -344,16 +329,13 @@ var
    begin
       loc := token_location();
       left := get_conjunction();
-
       while token.tag = or_token do
          begin
             next();
             left := make_binary_op_node(or_op, left, get_conjunction(), loc);
          end;
-
       get_disjunction := left;
    end;
-
 
    function get_assignment(): node;
    var
@@ -374,7 +356,6 @@ var
       else
          get_assignment := left_side;
    end;
-
 
    function get_if_expression(): node;
    var
@@ -398,7 +379,6 @@ var
          get_if_expression := make_if_node(condition, consequent, loc);
    end;
 
-
    function get_while_expression(): node;
    var
       condition: node;
@@ -411,7 +391,6 @@ var
       advance(do_token, 'do');
       get_while_expression := make_while_node(condition, get_expression(), loc);
    end;
-
 
    function get_for_expression(): node;
    var
@@ -431,7 +410,6 @@ var
       get_for_expression := make_for_node(iter, start, finish, body, loc);
    end;
 
-
    function get_field_desc(): node;
    var
       name: symbol;
@@ -442,7 +420,6 @@ var
       advance(colon_token, ':');
       get_field_desc := make_field_desc_node(name, get_identifier(), loc);
    end;
-
 
    function get_field_desc_list(): node_list;
    var
@@ -461,6 +438,22 @@ var
       get_field_desc_list := list;
    end;
 
+   function get_enum_list(): node_list;
+   var
+      list: node_list;
+      loc: source_location;
+   begin
+      list := make_node_list();
+      loc := token_location();
+      append_node(list, make_enum_node(get_identifier(), loc));
+      while token.tag = pipe_token do
+         begin
+            next();
+            loc := token_location();
+            append_node(list, make_enum_node(get_identifier(), loc));
+         end;
+      get_enum_list := list;
+   end;
 
    function get_type_spec(): node;
    var
@@ -481,12 +474,13 @@ var
                advance(of_token, 'of');
                desc := make_array_desc_node(get_identifier(), loc);
             end;
+         id_token:
+            desc := make_enum_desc_node(get_enum_list(), loc);
          else
             err('Expected type spec, got ''' + token.value, loc);
       end;
       get_type_spec := desc;
    end;
-
 
    function get_function_declaration(name: symbol): node;
    var
@@ -512,7 +506,6 @@ var
          end;
       get_function_declaration := make_fun_decl_node(name, params, ty, body, loc);
    end;
-
 
    function get_var_declaration(): node;
    var
@@ -546,7 +539,6 @@ var
          end;
    end;
 
-
    function get_type_declaration(): node;
    var
       loc: source_location;
@@ -559,7 +551,6 @@ var
       get_type_declaration := make_type_decl_node(name, get_type_spec(), loc);
    end;
 
-
    function get_declaration(): node;
    begin
       get_declaration := nil;
@@ -571,7 +562,6 @@ var
       end;
       if token.tag = semicolon_token then next();
    end;
-
 
    function get_declaration_list(): node_list;
    var
@@ -599,7 +589,6 @@ var
       get_declaration_list := decls
    end;
 
-
    function get_let_expression(): node;
    var
       loc: source_location;
@@ -614,7 +603,6 @@ var
       get_let_expression := make_let_node(decls, body, loc);
    end;
 
-
    function get_expression(): node;
    begin
       case token.tag of
@@ -627,7 +615,6 @@ var
       end;
    end;
 
-
 begin
    set_source('/usr/local/share/tiger/lib/core.tlib');
    lib := get_declaration_list();
@@ -637,6 +624,5 @@ begin
    if token.tag <> eof_token then
       err('extraneous input', token_location());
 end;
-
 
 end.

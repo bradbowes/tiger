@@ -47,6 +47,12 @@ intern(buf: buffer): symbol =
          end
    end
 
+intern_string(s: string): symbol =
+   begin
+      set_buffer(sbuf, s)
+      intern(sbuf)
+   end
+
 gensym(): symbol =
    let
       append_num(i: int) =
