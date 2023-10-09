@@ -6,20 +6,11 @@
 */
 
 let
-   type token = { op: char, value: int }
+   type tag = quit | num | plus | minus | mul | div
+              | lpar | rpar | newline | err
+   type token = { op: tag, value: int }
+
    ch = #" "
-
-   quit = EOF
-   num = #"0"
-   plus = #"+"
-   minus = #"-"
-   mul = #"*"
-   div = #"/"
-   lpar = #"("
-   rpar = #")"
-   newline = #"\n"
-   err = #"e"
-
    msg = ""
 
    error(s: string): token =
@@ -50,20 +41,31 @@ let
                   end
                n
             end
+         op = quit
       in
          skip()
-         if ch = plus or ch = minus or
-            ch = mul or ch = div or
-            ch = lpar or ch = rpar then
+         op := if ch = #"+" then plus
+               else if ch = #"-" then minus
+               else if ch = #"*" then mul
+               else if ch = #"/" then div
+               else if ch = #"(" then lpar
+               else if ch = #")" then rpar
+               else if ch = #"\n" then newline
+               else if ch = EOF then quit
+               else if digit() then num
+               else err
+         if op = plus or op = minus or
+            op = mul or op = div or
+            op = lpar or op = rpar then
                let
-                  t = token { op = ch, value = 0 }
+                  t = token { op = op, value = 0 }
                in
                   ch := getchar()
                   t
                end
-         else if ch = newline or ch = quit then
-            token { op = ch, value = 0 }
-         else if digit() then
+         else if op = newline or op = quit then
+            token { op = op, value = 0 }
+         else if op = num then
             token { op = num, value = number() }
          else
             error("syntax error")
@@ -151,10 +153,9 @@ in
             end
          else
             writeln("syntax error")
-         while ch = newline do
+         while ch = #"\n" do
             ch := getchar()
          t := scan()
          value := sum()
       end
-
 end

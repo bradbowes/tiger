@@ -477,13 +477,14 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
    function check_indexed_var(): spec;
    var
-      ty: spec;
+      ty, ty2: spec;
    begin
       ty := check(n^.left, si, nest, env, tenv);
       if (ty^.tag <> array_type) and (ty <> string_type) then
          err('Object is not an array or string.', n^.loc);
-      if check(n^.right, si + 1, nest, env, tenv) <> int_type then
-         err('Index must be an integer.', n^.right^.loc);
+      ty2 := check(n^.right, si + 1, nest, env, tenv);
+      if (ty2 <> int_type) and (ty2 <> char_type) and (ty2^.tag <> enum_type) then
+         err('Index must be a cardinal type.', n^.right^.loc);
       if ty^.tag = array_type then
          check_indexed_var := ty^.base
       else
