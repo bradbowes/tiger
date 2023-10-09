@@ -9,14 +9,21 @@ function trans2(n: node): node;
 
 implementation
 
-uses sysutils, sources, symbols, bindings;
+uses sysutils, sources, symbols, bindings, datatypes;
 
 var
    tf: tf_function = @trans2;
 
 function var_name(b: binding): symbol;
+var
+   prefix: string;
 begin
-   var_name := intern('v$_' + b^.key^.id + '_' + inttostr(b^.id));
+
+   if b^.constant then
+      prefix := 'const$_'
+   else
+      prefix := 'var$_';
+   var_name := intern(prefix + b^.key^.id + '_' + inttostr(b^.id));
 end;
 
 function fun_name(b: binding): symbol;
@@ -24,7 +31,7 @@ begin
    if b^.external then
       fun_name := b^.key
    else
-      fun_name := intern('f$_' + b^.key^.id + '_' + inttostr(b^.id));
+      fun_name := intern('fun$_' + b^.key^.id + '_' + inttostr(b^.id));
 end;
 
 function trans2(n: node): node;
@@ -54,6 +61,8 @@ begin
          trans2 := make_simple_var_node(var_name(b), loc);
       var_decl_node:
          trans2 := make_var_decl_node(var_name(b), n^.type_name, trans2(n^.right), loc);
+      enum_node:
+         trans2 := make_enum_node(var_name(b), loc);
       fun_decl_node:
          if n^.binding^.external then
             trans2 := copy_node(n, tf)

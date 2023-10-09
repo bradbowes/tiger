@@ -652,7 +652,10 @@ begin
       type_decl_node:
          (* do nothing *);
       simple_var_node:
-         emit_var();
+         if n^.binding^.constant then
+            emit('   movq $%d, %%rax', [n^.binding^.value^.int_val])
+         else
+            emit_var();
       array_node:
          emit_array();
       record_node:

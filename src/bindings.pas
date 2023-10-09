@@ -29,6 +29,7 @@ type
       stack_index: integer;
       nesting_level: integer;
       mutates: boolean;
+      constant: boolean;
       escapes: boolean;
       recursive: boolean;
       reachable: reachability;
@@ -276,6 +277,7 @@ begin
    b^.nesting_level := nesting_level;
    b^.external := false;
    b^.mutates := false;
+   b^.constant := false;
    b^.escapes := false;
    b^.recursive := false;
    b^.reachable := reachable_unknown;

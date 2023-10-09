@@ -41,6 +41,7 @@ clean:
 	rm -f report
 	rm -f *.o
 	rm -f *.s
+	rm -f *.res
 	rm -f a.out
 	rm -f ppas.sh
 	rm -f *.ppu

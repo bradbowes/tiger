@@ -5,7 +5,7 @@ interface
 uses sources, symbols;
 
 type
-   type_tag = (primitive_type, record_type, array_type, function_type, pointer_type);
+   type_tag = (primitive_type, record_type, array_type, function_type, enum_type, pointer_type);
 
    spec = ^spec_t;
    field = ^field_t;
@@ -48,6 +48,7 @@ function get_field(rec: spec; name: symbol; loc: source_location): field;
 function make_array_type(base: spec): spec;
 function make_record_type(): spec;
 function make_function_type(return: spec): spec;
+function make_enum_type(): spec;
 
 
 implementation
@@ -64,7 +65,6 @@ begin
    make_record_type := s;
 end;
 
-
 function make_function_type(return: spec): spec;
 var s: spec;
 begin
@@ -72,9 +72,9 @@ begin
    s^.tag := function_type;
    s^.fields := nil;
    s^.base := return;
+   s^.length := 0;
    make_function_type := s;
 end;
-
 
 procedure append(list: field; f: field; loc: source_location);
 begin
@@ -85,7 +85,6 @@ begin
    else
       append(list^.next, f, loc);
 end;
-
 
 procedure add_param(rec: spec; name: symbol; ty: spec; loc: source_location);
 var f: field;
@@ -101,7 +100,6 @@ begin
       append(rec^.fields, f, loc);
    rec^.length := rec^.length + 1;
 end;
-
 
 procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: source_location);
 var f: field;
@@ -119,7 +117,6 @@ begin
    rec^.length := rec^.length + 1;
 end;
 
-
 function find(list: field; name: symbol): field;
 begin
    if list = nil then
@@ -130,7 +127,6 @@ begin
       find := find(list^.next, name);
 end;
 
-
 function get_field(rec: spec; name: symbol; loc: source_location): field;
 var f: field;
 begin
@@ -140,7 +136,6 @@ begin
    get_field := f;
 end;
 
-
 function make_array_type(base: spec): spec;
 var s: spec;
 begin
@@ -148,7 +143,19 @@ begin
    s^.tag := array_type;
    s^.fields := nil;
    s^.base := base;
+   s^.length := 0;
    make_array_type := s;
+end;
+
+function make_enum_type(): spec;
+var s: spec;
+begin
+   new(s);
+   s^.tag := enum_type;
+   s^.fields := nil;
+   s^.base := nil;
+   s^.length := 0;
+   make_enum_type := s;
 end;
 
 end.

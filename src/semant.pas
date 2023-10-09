@@ -8,7 +8,7 @@ function type_check(n: node): spec;
 
 implementation
 
-uses sources, bindings, ops, symbols;
+uses sources, bindings, ops, symbols, values;
 
 function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
@@ -173,6 +173,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             ty := make_array_type(lookup(tenv, tyspec^.type_name, tyspec^.loc)^.ty);
          record_desc_node:
             ty := make_record_type();
+         enum_desc_node:
+            ty := make_enum_type();
       end;
 
       n^.binding := bind(tenv, n^.name, ty, 0, 0, n^.loc);
@@ -201,6 +203,27 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          end;
    end;
 
+   procedure check_enum_decl_body(n: node; tenv: scope);
+   var
+      it: node_list_item;
+      fld: node;
+      offset: integer = 0;
+      ty: spec;
+      b: binding;
+   begin
+      ty := n^.binding^.ty;
+      it := n^.right^.list^.first;
+      while it <> nil do
+         begin
+            fld := it^.node;
+            b := bind(env, fld^.name, ty, 0, 0, fld^.loc);
+            b^.value := make_integer_value(offset);
+            b^.constant := true;
+            offset := offset + 1;
+            it := it^.next;
+            fld^.binding := b;
+         end;
+   end;
 
    function check_let(): spec;
       type
@@ -257,8 +280,12 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                      it := group^.first;
                      while it <> nil do
                         begin
-                           if it^.node^.right^.tag = record_desc_node then
-                              check_record_decl_body(it^.node, new_tenv);
+                           case it^.node^.right^.tag  of
+                              record_desc_node:
+                                 check_record_decl_body(it^.node, new_tenv);
+                              enum_desc_node:
+                                 check_enum_decl_body(it^.node, new_tenv);
+                           end;
                            it := it^.next
                         end;
                      dispose_group();
@@ -405,7 +432,11 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       if not compatible(ty, check(n^.right, new_si, nest, env, tenv)) then
          err('assignment type mismatch', n^.loc);
       if left^.tag = simple_var_node then
-         left^.binding^.mutates := true;
+         begin
+            if left^.binding^.constant then
+               err('assignment to constant ' + n^.binding^.key^.id, n^.loc);
+            left^.binding^.mutates := true;
+         end;
       check_assign := void_type;
    end;
 

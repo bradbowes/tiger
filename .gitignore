@@ -4,6 +4,7 @@
 *.ppu
 a.out
 *.s
+*.res
 ppas.sh
 tc
 tprint

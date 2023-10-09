@@ -75,7 +75,7 @@ begin
          format := format(n^.left) + ' := ' + format(n^.right);
       call_node, tail_call_node:
          format :=  n^.name^.id + '(' + format_list(n^.list, ', ', false) + ')';
-      simple_var_node:
+      simple_var_node, enum_node:
          format := n^.name^.id;
       field_var_node:
          format := format(n^.left) + '.' + n^.name^.id;
@@ -95,13 +95,13 @@ begin
       nil_node:
          format := 'nil';
       type_decl_node:
-         format := newline + 'type ' + n^.name^.id + ' = ' + format(n^.right);
+         format := 'type ' + n^.name^.id + ' = ' + format(n^.right) + newline;
       var_decl_node:
          begin
             s := n^.name^.id;
             if n^.type_name <> nil then
                s := s + ': ' + n^.type_name^.id;
-            format := s + ' = ' + format( n^.right);
+            format := s + ' = ' + format( n^.right) + newline;
          end;
       fun_decl_node:
          begin
@@ -119,7 +119,9 @@ begin
             format := s + newline;
          end;
       record_desc_node:
-         format := '{' + format_list(n^.list, ',', true) + newline + '}' + newline;
+         format := '{' + format_list(n^.list, ',', true) + newline + '}';
+      enum_desc_node:
+         format := format_list(n^.list, ' | ', false);
       array_desc_node:
          format := 'array of ' + n^.type_name^.id;
       unary_op_node:
@@ -137,9 +139,14 @@ begin
             s := s + newline + format(n^.left);
             dedent;
             s := s + newline + 'else';
-            indent;
-            s := s + newline + format(n^.right);
-            dedent;
+            if n^.right^.tag = if_else_node then
+               s := s + ' ' + format(n^.right)
+            else
+               begin
+                  indent;
+                  s := s + newline + format(n^.right);
+                  dedent;
+               end;
             format := s;
          end;
       if_node:

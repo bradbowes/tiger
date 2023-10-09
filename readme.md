@@ -30,6 +30,7 @@
   use `string_compare` function instead.
 - `use "<file_name>"` to include external definition file in `let`
   declaration block
+- enum types. example `type color = red | green | blue`
 
 # To do
 
@@ -37,7 +38,6 @@
 - tail call optimization
 - anonymous functions, first class functions
 - closures
-- enum
 - array literals
 - garbage collector
 - polymorphic types and functions
