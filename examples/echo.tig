@@ -1,6 +1,6 @@
-/*
+(*
    print command line argments to standard output
-*/
+*)
 
 let
    last = command_argcount() - 1

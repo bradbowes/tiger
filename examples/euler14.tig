@@ -1,4 +1,4 @@
-/*
+(*
    The following iterative sequence is defined for the set
    of positive integers:
 
@@ -20,7 +20,7 @@
 
    NOTE: Once the chain starts the terms are allowed to go above
    one million.
-*/
+*)
 
 let
    chain(n: int, len: int): int =

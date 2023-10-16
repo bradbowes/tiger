@@ -1,3 +1,6 @@
+true = 0 = 0
+false = 0 <> 0
+not(b: bool): bool = if b then false else true
 halt(n: int)
 str(n: int): string
 length(s: string): int

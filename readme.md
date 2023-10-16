@@ -11,7 +11,7 @@
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
 - boolean data type. Relational operators return booleans, `true` and
-  `false` are keyword literals.
+  `false` are pre-defined contants.
 - char data type. Char literals are `#` followed by a single letter in
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
 - file data type (C `FILE*` pointer) 
@@ -23,6 +23,7 @@
 - function declarations: `function` keyword not used, format is
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings can include line breaks and span multiple lines.
+- comments are SML style `(* ... *)`
 - no nested comments
 - type aliases are not implemented.
 - `break` is not implemented.
@@ -88,6 +89,12 @@
 - string_concat(s1: string, s2: string): string
 - string_compare(s1: string, s2: string): int
 - make_string(size: int): string
+
+## Booleans
+
+- true
+- false
+- not(b: bool): bool
 
 ## Chars
 

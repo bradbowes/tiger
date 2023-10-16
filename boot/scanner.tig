@@ -84,7 +84,6 @@ type_kw = intern_string("type")
 use_kw = intern_string("use")
 while_kw = intern_string("while")
 
-
 push_buf() =
    begin
       push_buffer(buf, ch)
@@ -117,7 +116,7 @@ push_tag(tag: token_tag) =
 scan_comment() =
    begin
       push_buf()
-      while buf.ptr < 4 or ch <> #"/" do
+      while buf.ptr < 4 or ch <> #")" do
          begin
             while ch <> #"*" do
                push_buf()
@@ -140,12 +139,14 @@ scan_string() =
                esc = true
             in
                nextch();
-               if ch = #"t" then escape := #"\t"       /* tab */
-               else if ch = #"n" then escape := #"\n"  /* newline */
-               else if ch = #"v" then escape := #"\v"  /* vertical tab */
-               else if ch = #"f" then escape := #"\f"  /* form feed */
-               else if ch = #"r" then escape := #"\r"  /* carriage return */
-               else if ch = #"\\" or ch = #"\"" or ch = #"\'" then escape := ch
+               if ch = #"a" then escape := #"\a"       (* alert *)
+               else if ch = #"b" then escape := #"\b"  (* backspace *)
+               else if ch = #"t" then escape := #"\t"  (* tab *)
+               else if ch = #"n" then escape := #"\n"  (* newline *)
+               else if ch = #"v" then escape := #"\v"  (* vertical tab *)
+               else if ch = #"f" then escape := #"\f"  (* form feed *)
+               else if ch = #"r" then escape := #"\r"  (* carriage return *)
+               else if ch = #"\\" or ch = #"\"" then escape := ch
                else if ch = #"^" then
                   begin
                      nextch()
@@ -259,7 +260,12 @@ scan() =
       else if ch = #"," then push_tag(comma_token)
       else if ch = #";" then push_tag(semicolon_token)
       else if ch = #"." then push_tag(dot_token)
-      else if ch = #"(" then push_tag(lparen_token)
+      else if ch = #"(" then
+         begin
+            push_buf()
+            if ch = #"*" then scan_comment()
+            else recognize(lparen_token)
+         end
       else if ch = #")" then push_tag(rparen_token)
       else if ch = #"[" then push_tag(lbracket_token)
       else if ch = #"]" then push_tag(rbracket_token)
@@ -269,12 +275,7 @@ scan() =
       else if ch = #"+" then push_tag(plus_token)
       else if ch = #"-" then push_tag(minus_token)
       else if ch = #"*" then push_tag(mul_token)
-      else if ch = #"/" then
-         begin
-            push_buf()
-            if ch = #"*" then scan_comment()
-            else recognize(div_token)
-         end
+      else if ch = #"/" then push_tag(div_token)
       else if ch = #"=" then push_tag(eq_token)
       else if ch = #"<" then
          begin

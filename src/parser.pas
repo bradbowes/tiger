@@ -138,16 +138,6 @@ var
                next();
                factor := make_string_node(intern(value), loc);
             end;
-         true_token:
-            begin
-               next();
-               factor := make_boolean_node(true, loc);
-            end;
-         false_token:
-            begin
-               next();
-               factor := make_boolean_node(false, loc);
-            end;
          nil_token:
             begin
                next();

@@ -1,7 +1,7 @@
-/*
+(*
    Write file to STD_OUTPUT. Use
    STD_INPUT if no file is specified.
-*/
+*)
 
 let
    input =

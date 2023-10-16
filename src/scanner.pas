@@ -20,7 +20,6 @@ type
                 end_token,
                 eof_token,
                 eq_token,
-                false_token,
                 for_token,
                 geq_token,
                 gt_token,
@@ -50,7 +49,6 @@ type
                 string_token,
                 then_token,
                 to_token,
-                true_token,
                 type_token,
                 use_token,
                 while_token);
@@ -98,7 +96,7 @@ procedure scan();
 
    procedure skip_comment;
    begin
-      token.value := '/*';
+      token.value := '(*'; (*---*)
       repeat
          repeat
             getch();
@@ -107,9 +105,9 @@ procedure scan();
          getch();
          while src^.ch = '*' do
             getch();
-      until src^.ch = '/';
+      until src^.ch = ')';
       getch();
-      token.value := token.value + '/';
+      token.value := token.value + ')';
       token.tag := comment_token;
    end;
 
@@ -125,6 +123,8 @@ procedure scan();
             begin
                getch();
                case src^.ch of
+                  'a': escape := #7;  (* alert *)
+                  'b': escape := #8;  (* backspace *)
                   't': escape := #9;  (* tab *)
                   'n': escape := #10; (* newline *)
                   'v': escape := #11; (* vertical tab *)
@@ -132,7 +132,6 @@ procedure scan();
                   'r': escape := #13; (* carriage return *)
                   '\': escape := '\';
                   '"': escape := '"';
-                  '''': escape := '''';
                   '^':
                      begin
                         getch();
@@ -216,7 +215,6 @@ procedure scan();
          'do': token.tag := do_token;
          'else': token.tag := else_token;
          'end': token.tag := end_token;
-         'false': token.tag := false_token;
          'for': token.tag := for_token;
          'if': token.tag := if_token;
          'in': token.tag := in_token;
@@ -227,7 +225,6 @@ procedure scan();
          'or': token.tag := or_token;
          'then': token.tag := then_token;
          'to': token.tag := to_token;
-         'true': token.tag := true_token;
          'type': token.tag := type_token;
          'use': token.tag := use_token;
          'while': token.tag := while_token;
@@ -252,7 +249,12 @@ begin
             ',': recognize(comma_token);
             ';': recognize(semicolon_token);
             '.': recognize(dot_token);
-            '(': recognize(lparen_token);
+            '(':
+               begin
+                  push_char;
+                  if src^.ch = '*' then skip_comment
+                  else token.tag := lparen_token;
+               end;
             ')': recognize(rparen_token);
             '[': recognize(lbracket_token);
             ']': recognize(rbracket_token);
@@ -262,12 +264,7 @@ begin
             '+': recognize(plus_token);
             '-': recognize(minus_token);
             '*': recognize(mul_token);
-            '/':
-               begin
-                  push_char;
-                  if src^.ch = '*' then skip_comment
-                  else token.tag := div_token;
-               end;
+            '/': recognize(div_token);
             '=': recognize(eq_token);
             '<':
                begin

@@ -1,9 +1,9 @@
-/*
+(*
    Simple calculator. Supports integer add, subtract,
    multiply and divide with parentheses.
    Shows result after <enter> is pressed.
    Control-D to end session
-*/
+*)
 
 let
    type tag = quit | num | plus | minus | mul | div

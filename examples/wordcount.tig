@@ -1,6 +1,6 @@
-/*
+(*
    Count the lines, words and characters in standard input
-*/
+*)
 
 let
    ch = getchar()
