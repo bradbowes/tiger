@@ -9,6 +9,7 @@ type
                 array_token,
                 assign_token,
                 begin_token,
+                case_token,
                 char_token,
                 colon_token,
                 comma_token,
@@ -212,6 +213,7 @@ procedure scan();
          'and': token.tag := and_token;
          'array': token.tag := array_token;
          'begin': token.tag := begin_token;
+         'case': token.tag := case_token;
          'do': token.tag := do_token;
          'else': token.tag := else_token;
          'end': token.tag := end_token;

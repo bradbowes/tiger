@@ -6,6 +6,7 @@ type token_tag = err_token
                | array_token
                | assign_token
                | begin_token
+               | case_token
                | char_token
                | colon_token
                | comma_token
@@ -17,7 +18,6 @@ type token_tag = err_token
                | end_token
                | eof_token
                | eq_token
-               | false_token
                | for_token
                | geq_token
                | gt_token
@@ -47,7 +47,6 @@ type token_tag = err_token
                | string_token
                | then_token
                | to_token
-               | true_token
                | type_token
                | use_token
                | while_token
@@ -66,10 +65,10 @@ buf = make_buffer(4096)
 and_kw = intern_string("and")
 array_kw = intern_string("array")
 begin_kw = intern_string("begin")
+case_kw = intern_string("case")
 do_kw = intern_string("do")
 else_kw = intern_string("else")
 end_kw = intern_string("end")
-false_kw = intern_string("false")
 for_kw = intern_string("for")
 if_kw = intern_string("if")
 in_kw = intern_string("in")
@@ -79,7 +78,6 @@ nil_kw = intern_string("nil")
 of_kw = intern_string("of")
 or_kw = intern_string("or")
 then_kw = intern_string("then")
-true_kw = intern_string("true")
 type_kw = intern_string("type")
 use_kw = intern_string("use")
 while_kw = intern_string("while")
@@ -227,10 +225,10 @@ scan_id() =
          tok.tag := if value = and_kw then and_token
             else if value = array_kw then array_token
             else if value = begin_kw then begin_token
+            else if value = case_kw then case_token
             else if value = do_kw then do_token
             else if value = else_kw then else_token
             else if value = end_kw then end_token
-            else if value = false_kw then false_token
             else if value = for_kw then for_token
             else if value = if_kw then if_token
             else if value = in_kw then in_token
@@ -240,7 +238,6 @@ scan_id() =
             else if value = of_kw then of_token
             else if value = or_kw then or_token
             else if value = then_kw then then_token
-            else if value = true_kw then true_token
             else if value = type_kw then type_token
             else if value = use_kw then use_token
             else if value = while_kw then while_token

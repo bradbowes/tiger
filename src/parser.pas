@@ -24,6 +24,7 @@ var
 
    procedure set_source(file_name: string);
    begin
+      clear_source();
       load_source(file_name);
       next();
    end;

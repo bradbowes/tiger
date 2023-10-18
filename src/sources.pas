@@ -12,6 +12,7 @@ type
    source = ^source_t;
    source_t = record
                   file_name: string;
+                  path: string;
                   open: boolean;
                   src: text;
                   ch: char;
@@ -24,6 +25,7 @@ var
 
 
 procedure load_source(file_name: string);
+procedure clear_source();
 procedure getch();
 procedure err(msg: string);
 procedure err(msg: string; loc: source_location);
@@ -35,11 +37,24 @@ implementation
 uses sysutils;
 
 procedure load_source(file_name: string);
-var s: source;
+var
+   s: source;
+   path, fn: string;
+
 begin
    new(s);
-   s^.file_name := file_name;
-   assign(s^.src, file_name);
+   fn := expandfilename(file_name);
+   if fn <> file_name then
+      begin
+         if (src = nil) then
+            path := extractfilepath('.')
+         else
+            path := src^.path;
+         fn := expandfilename(path + file_name);
+      end;
+   s^.file_name := fn;
+   s^.path := extractfilepath(fn);
+   assign(s^.src, fn);
    reset(s^.src);
    s^.open := true;
    read(s^.src, s^.ch);
@@ -52,6 +67,10 @@ begin
    src := s;
 end;
 
+procedure clear_source();
+begin
+   src := nil;
+end;
 
 procedure getch();
 begin
@@ -81,7 +100,6 @@ begin
          err('Read past end of file', src_location());
 end;
 
-
 function src_location(): source_location;
 var
    loc: source_location;
@@ -93,18 +111,15 @@ begin
    src_location := loc;
 end;
 
-
 procedure err(msg: string);
 begin
    writeln(stderr, 'Error: ', msg);
    halt(1);
 end;
 
-
 procedure err(msg: string; loc: source_location);
 begin
    err('in ' + loc^.file_name + ', line ' +  inttostr(loc^.line) + ', column ' +  inttostr(loc^.col) + ': ' + msg);
 end;
-
 
 end.
