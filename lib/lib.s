@@ -1,9 +1,7 @@
-   popq %rbp
 heap_size = 16 * 1024 * 1024
 SEEK_SET	= 0
 SEEK_CUR = 1
 SEEK_END = 2
-
 
 .text
 .p2align 3
@@ -44,13 +42,11 @@ main_done:
    xorq %rdi, %rdi
    call _exit
 
-
 .p2align 3
 .globl f$_halt
 f$_halt:
    movq 16(%rsp), %rdi
    call _exit
-
 
 .p2align 3
 .globl f$_open_input
@@ -61,7 +57,6 @@ f$_open_input:
    call _fopen
    ret
 
-
 .p2align 3
 .globl f$_open_output
 f$_open_output:
@@ -71,14 +66,12 @@ f$_open_output:
    call _fopen
    ret
 
-
 .p2align 3
 .globl f$_close_file
 f$_close_file:
    movq 16(%rsp), %rdi
    call _fclose
    ret
-
 
 .p2align 3
 .globl f$_get_stdin_ptr
@@ -87,7 +80,6 @@ f$_get_stdin_ptr:
 	movq (%rax), %rax
    ret
 
-
 .p2align 3
 .globl f$_get_stdout_ptr
 f$_get_stdout_ptr:
@@ -95,14 +87,12 @@ f$_get_stdout_ptr:
 	movq (%rax), %rax
    ret
 
-
 .p2align 3
 .globl f$_get_stderr_ptr
 f$_get_stderr_ptr:
 	movq ___stderrp@GOTPCREL(%rip), %rax
 	movq (%rax), %rax
    ret
-
 
 .p2align 3
 .globl f$_file_getchar
@@ -112,7 +102,6 @@ f$_file_getchar:
    movsx %eax, %rax                    // sign-extend int (EOF = -1)
    ret
 
-
 .p2align 3
 .globl f$_file_putchar
 f$_file_putchar:
@@ -120,7 +109,6 @@ f$_file_putchar:
    movq 24(%rsp), %rsi
    call _fputc
    ret
-
 
 .p2align 3
 .globl f$_str
@@ -141,7 +129,6 @@ f$_str:
    popq %rcx
    popq %rbx
    ret
-
 
 .p2align 3
 .globl f$_make_string
@@ -164,7 +151,6 @@ buffer_done:
    andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
-
 .p2align 3
 .globl f$_length
 f$_length:
@@ -172,18 +158,15 @@ f$_length:
    movq (%rax), %rax
    ret
 
-
 .p2align 3
 .globl f$_ord
 f$_ord:
    ret                                 // cast char to int, does nothing
 
-
 .p2align 3
 .globl f$_chr
 f$_chr:                                // cast int to char, does nothing
    ret
-
 
 .p2align 3
 copy:
@@ -198,7 +181,6 @@ copy_loop:
 copy_done:
    movb $0, (%rdi, %rbx, 1)
    ret
-
 
 .p2align 3
 .globl f$_string_concat
@@ -222,7 +204,6 @@ f$_string_concat:
    andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
-
 .p2align 3
 .globl f$_substring
 f$_substring:
@@ -239,7 +220,6 @@ f$_substring:
    addq %rcx, %r15
    andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
-
 
 .p2align 3
 .globl f$_string_compare
@@ -272,13 +252,11 @@ loop_done:
 compare_done:
    ret
 
-
 .p2align 3
 .globl f$_toh
 f$_toh:
    movq %r15, %rax
    ret
-
 
 .p2align 3
 .globl f$_command_argcount
@@ -286,23 +264,20 @@ f$_command_argcount:
    movq 32(%r14), %rax
    ret
 
-
 .p2align 3
-.globl f$_command_arg
-f$_command_arg:
-   movq 16(%rsp), %rbx                 // argv number
-   movq 24(%r14), %rsi                 // get pointer to argv
-   movq (%rsi, %rbx, 8), %rsi          // get offset
+zcopy:
    leaq 8(%r15), %rdi                  // copy string here
    xorq %rbx, %rbx
-getarg_loop:
+   cmpq $0, %rsi
+   je zcopy_done
+zcopy_loop:
    cmpb $0, (%rsi, %rbx, 1)            // end of string?
-   je getarg_done
+   je zcopy_done
    movb (%rsi, %rbx, 1), %al           // copy char
    movb %al, (%rdi, %rbx, 1)
    incq %rbx                           // next char
-   jmp getarg_loop
-getarg_done:
+   jmp zcopy_loop
+zcopy_done:
    movq %rbx, (%r15)                   // string length
    movq %r15, %rax
    addq $15, %rbx                      // add space for length plus p2alignment
@@ -310,6 +285,36 @@ getarg_done:
    andq $0xfffffffffffffff8, %r15      // p2align 8 bytes
    ret
 
+.p2align 3
+.globl f$_command_arg
+f$_command_arg:
+   movq 16(%rsp), %rbx                 // argv number
+   movq 24(%r14), %rsi                 // get pointer to argv
+   movq (%rsi, %rbx, 8), %rsi          // get offset
+   call zcopy
+   ret
+
+.p2align 3
+.globl f$_realpath
+f$_realpath:
+   movq 16(%rsp), %rdi
+   addq $8, %rdi
+   xorq %rsi, %rsi
+   call _realpath
+   movq %rax, %rsi
+   call zcopy
+   ret
+
+.p2align 3
+.globl f$_dirname
+f$_dirname:
+   movq 16(%rsp), %rdi
+   addq $8, %rdi
+   xorq %rsi, %rsi
+   call _dirname
+   movq %rax, %rsi
+   call zcopy
+   ret
 
 .data
 

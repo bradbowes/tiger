@@ -21,6 +21,8 @@ command_arg(i: int): string
 open_input(path: string): file
 open_output(path: string): file
 close_file(f: file)
+realpath(s: string): string
+dirname(s: string): string
 
 STD_INPUT = get_stdin_ptr()
 STD_OUTPUT = get_stdout_ptr()

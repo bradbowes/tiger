@@ -23,14 +23,12 @@ type
 var
    src: source = nil;
 
-
 procedure load_source(file_name: string);
 procedure clear_source();
 procedure getch();
 procedure err(msg: string);
 procedure err(msg: string; loc: source_location);
 function src_location(): source_location;
-
 
 implementation
 
@@ -67,12 +65,25 @@ begin
    src := s;
 end;
 
+procedure clear_src(var s: source);
+begin
+   if (s <> nil) then
+      begin
+         if (s^.resume <> nil) then
+            clear_src(s^.resume);
+         dispose(s);
+         s := nil;
+      end;
+end;
+
 procedure clear_source();
 begin
-   src := nil;
+   clear_src(src);
 end;
 
 procedure getch();
+var
+   s: source;
 begin
    if src^.open then
       if eof(src^.src) then
@@ -82,7 +93,9 @@ begin
             src^.open := false;
             if src^.resume <> nil then
                begin
+                  s := src;
                   src := src^.resume;
+                  dispose(s);
                   getch();
                end
          end

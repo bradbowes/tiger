@@ -6,6 +6,7 @@ type location = {
 
 type source = {
    file_name: string,
+   path: string,
    open: bool,
    src: file,
    line: int,
@@ -71,16 +72,29 @@ nextch() =
 
 load_source(file_name: string) =
    let
-      f = open_input(file_name)
-      s = source {
-         file_name = file_name,
-         open = true,
-         src = f,
-         line = 1,
-         col = 0,
-         resume = src
-      }
+      fn = realpath(file_name)
+      path = if src = nil then realpath(".") else src.path
    in
-      src := s
-      nextch()
+      if string_compare(fn, "") = 0 then
+         err(string_concat("file not found: ", file_name), src_location())
+      if fn <> file_name then
+         fn := realpath(string_concat(string_concat(path, "/"), file_name))
+      let
+         f = open_input(fn)
+         s = source {
+            file_name = fn,
+            path = dirname(fn),
+            open = true,
+            src = f,
+            line = 1,
+            col = 0,
+            resume = src
+         }
+      in
+         src := s
+         nextch()
+      end
    end
+
+clear_source() =
+   src := nil;
