@@ -126,68 +126,75 @@ scan_comment() =
    end
 
 scan_string() =
-   let
-      escape = chr(0)
-      code = 0
-   in
+   begin
       nextch()
       while ch <> #"\"" do
          if ch = #"\\" then
-            let
-               esc = true
-            in
-               nextch();
-               if ch = #"a" then escape := #"\a"       (* alert *)
-               else if ch = #"b" then escape := #"\b"  (* backspace *)
-               else if ch = #"t" then escape := #"\t"  (* tab *)
-               else if ch = #"n" then escape := #"\n"  (* newline *)
-               else if ch = #"v" then escape := #"\v"  (* vertical tab *)
-               else if ch = #"f" then escape := #"\f"  (* form feed *)
-               else if ch = #"r" then escape := #"\r"  (* carriage return *)
-               else if ch = #"\\" or ch = #"\"" then escape := ch
-               else if ch = #"^" then
-                  begin
-                     nextch()
-                     if is_upper(ch) then
-                        escape := chr(ord(ch) - 64)
-                     else if is_lower(ch) then
-                        escape := chr(ord(ch) - 96)
+            begin
+               nextch()
+               let
+                  escape_err(): char =
+                     begin
+                        err("illegal escape s sequence", src_location())
+                        chr(0)
+                     end
+                  esc = true
+                  escape = if ch = #"a" then #"\a"       (* alert *)
+                     else if ch = #"b" then #"\b"        (* backspace *)
+                     else if ch = #"t" then #"\t"        (* tab *)
+                     else if ch = #"n" then #"\n"        (* newline *)
+                     else if ch = #"v" then #"\v"        (* vertical tab *)
+                     else if ch = #"f" then #"\f"        (* form feed *)
+                     else if ch = #"r" then #"\r"        (* carriage return *)
+                     else if ch = #"\\" or ch = #"\"" then ch
+                     else if ch = #"^" then
+                        begin
+                           nextch()
+                           if is_upper(ch) then
+                              chr(ord(ch) - 64)
+                           else if is_lower(ch) then
+                              chr(ord(ch) - 96)
+                           else
+                              escape_err()
+                        end
+                     else if is_digit(ch) then
+                        let
+                           digit(n: int): int =
+                              begin
+                                 nextch()
+                                 if is_digit(ch) then
+                                    n * 10 + ord(ch) - ord(#"0")
+                                 else
+                                    256
+                              end
+                           code = digit(digit(ord(ch) - ord(#"0")))
+                        in
+                           if code > 255 then
+                              escape_err()
+                           else
+                              chr(code)
+                        end
+                     else if is_space(ch) then
+                        begin
+                           esc := false
+                           skip_spaces()
+                           if ch = #"\\" then
+                              begin
+                                 nextch()
+                                 chr(0)
+                              end
+                           else
+                              escape_err()
+                        end
                      else
-                        err("illegal escape sequence", src_location())
-                  end
-               else if is_digit(ch) then
-                  begin
-                     code := ord(ch) - ord(#"0")
-                     nextch()
-                     if is_digit(ch) then
-                        code := code * 10 + ord(ch) - ord(#"0")
-                     else
-                        err("illegal escape sequence", src_location())
-                     nextch();
-                     if is_digit(ch) then
-                        code := code * 10 + ord(ch) - ord(#"0")
-                     else
-                        err("illegal escape sequence", src_location())
-                     if code > 255 then
-                        err("illegal escape sequence", src_location())
-                     escape := chr(code);
-                  end
-               else if is_space(ch) then
-                  begin
-                     skip_spaces()
-                     if ch = #"\\" then
+                        escape_err()
+               in
+                  if esc then
+                     begin
+                        push_buffer(buf, escape)
                         nextch()
-                     else
-                        err("illegal escape sequence", src_location())
-                     esc := false
-                  end
-               else
-                  err("illegal escape sequence", src_location())
-               if esc then
-                  begin
-                     push_buffer(buf, escape)
-                     nextch()
-                  end
+                     end
+               end
             end
          else
             push_buf()
