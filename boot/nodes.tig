@@ -1,0 +1,127 @@
+use "sources.tig"
+use "symbols.tig"
+use "values.tig"
+
+type node_tag = assign_node
+              | call_node
+              | tail_call_node
+              | simple_var_node
+              | field_var_node
+              | indexed_var_node
+              | integer_node
+              | string_node
+              | char_node
+              | boolean_node
+              | nil_node
+              | empty_node
+              | type_decl_node
+              | var_decl_node
+              | fun_decl_node
+              | record_desc_node
+              | array_desc_node
+              | enum_desc_node
+              | unary_op_node
+              | mul_node
+              | div_node
+              | mod_node
+              | plus_node
+              | minus_node
+              | eq_node
+              | neq_node
+              | gt_node
+              | gte_node
+              | lt_node
+              | lte_node
+              | and_node
+              | or_node
+              | field_node
+              | field_desc_node
+              | enum_node
+              | if_else_node
+              | if_node
+              | case_node
+              | clause_node
+              | while_node
+              | for_node
+              | let_node
+              | sequence_node
+              | record_node
+              | array_node
+              | list_node
+
+type node = {
+   tag: node_tag,
+   loc: location,
+   val: value,
+   left: node,
+   right: node
+}
+
+make_list_node(loc: location): node =
+   node {
+      tag = list_node,
+      loc = loc,
+      val = nil,
+      left = nil,
+      right = nil
+   }
+
+append_node(list: node, item: node) =
+   if list.left = nil then
+      list.left := item
+   else if list.right = nil then
+      list.right := node {
+                      tag = list_node,
+                      loc = item.loc,
+                      val = nil,
+                      left = item,
+                      right = nil
+                   }
+   else
+      append_node(list.right, item)
+
+make_assign_node(var: node, expr: node, loc: location): node =
+   node {
+      tag = assign_node,
+      loc = loc,
+      val = nil,
+      left = var,
+      right = expr
+   }
+
+make_call_node(name: symbol, args: node, loc: location): node =
+   node {
+      tag = call_node,
+      loc = loc,
+      val = make_sym_value(name),
+      left = args,
+      right = nil
+   }
+
+make_simple_var_node(name: symbol, loc: location): node =
+   node {
+      tag = simple_var_node,
+      loc = loc,
+      val = make_sym_value(name),
+      left = nil,
+      right = nil
+   }
+
+make_field_var_node(obj: node, field: symbol, loc: location): node =
+   node {
+      tag = field_var_node,
+      loc = loc,
+      val = make_sym_value(field),
+      left = nil,
+      right = nil
+   }
+
+make_indexed_var_node(arr: node, index: node, loc: location): node =
+   node {
+      tag = indexed_var_node,
+      loc = loc,
+      val = nil,
+      left = arr,
+      right = index
+   }
+

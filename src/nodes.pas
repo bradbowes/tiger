@@ -30,6 +30,8 @@ type
                enum_node,
                if_else_node,
                if_node,
+               case_node,
+               clause_node,
                while_node,
                for_node,
                let_node,
@@ -94,6 +96,8 @@ function make_field_desc_node(name, ty: symbol; loc: source_location): node;
 function make_enum_node(name: symbol; loc: source_location): node;
 function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
 function make_if_node(condition, consequent: node; loc: source_location): node;
+function make_case_node(arg: node; clauses: node_list; loc: source_location): node;
+function make_clause_node(matches: node_list; result: node; loc: source_location): node;
 function make_while_node(condition, body: node; loc: source_location): node;
 function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
 function make_let_node(decls: node_list; body: node; loc: source_location): node;
@@ -432,6 +436,28 @@ begin
    n^.left := consequent;
    n^.ins_count := condition^.ins_count + consequent^.ins_count + 1;
    make_if_node := n;
+end;
+
+function make_case_node(arg: node; clauses: node_list; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(case_node, loc);
+   n^.cond := arg;
+   n^.list := clauses;
+   n^.ins_count := arg^.ins_count + list_ins_count(clauses);
+   make_case_node := n;
+end;
+
+function make_clause_node(matches: node_list; result: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(clause_node, loc);
+   n^.list := matches;
+   n^.right := result;
+   n^.ins_count := list_ins_count(matches) + result^.ins_count;
+   make_clause_node := n;
 end;
 
 function make_while_node(condition, body: node; loc: source_location): node;

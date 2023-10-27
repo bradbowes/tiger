@@ -11,14 +11,14 @@ type
 
    source = ^source_t;
    source_t = record
-                  file_name: string;
-                  path: string;
-                  open: boolean;
-                  src: text;
-                  ch: char;
-                  line, col: longint;
-                  resume: source;
-               end;
+      file_name: string;
+      path: string;
+      open: boolean;
+      src: text;
+      ch: char;
+      line, col: longint;
+      resume: source;
+   end;
 
 var
    src: source = nil;
@@ -34,13 +34,49 @@ implementation
 
 uses sysutils;
 
+type
+   source_list = ^source_list_t;
+   source_list_t = record
+       file_name: string;
+       next: source_list;
+   end;
+
+var sl: source_list = nil;
+
+procedure register_source(file_name: string);
+var
+   current, new_sl: source_list;
+begin
+   new(new_sl);
+   new_sl^.file_name := file_name;
+   new_sl^.next := nil;
+   if sl = nil then
+      sl := new_sl
+   else
+      begin
+         current := sl;
+         while current^.next <> nil do
+            current := current^.next;
+         current^.next := new_sl;
+      end;
+end;
+
+function source_registered(s: source_list; file_name: string): boolean;
+begin
+   if s = nil then
+      source_registered := false
+   else if s^.file_name = file_name then
+      source_registered := true
+   else
+      source_registered := source_registered(s^.next, file_name);
+end;
+
 procedure load_source(file_name: string);
 var
    s: source;
    path, fn: string;
 
 begin
-   new(s);
    fn := expandfilename(file_name);
    if fn <> file_name then
       begin
@@ -50,6 +86,8 @@ begin
             path := src^.path;
          fn := expandfilename(path + file_name);
       end;
+   if source_registered(sl, fn) then exit;
+   new(s);
    s^.file_name := fn;
    s^.path := extractfilepath(fn);
    assign(s^.src, fn);
@@ -63,6 +101,7 @@ begin
    else
       s^.resume := nil;
    src := s;
+   register_source(fn);
 end;
 
 procedure clear_src(var s: source);

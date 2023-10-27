@@ -1,18 +1,16 @@
-use symbols
+use "symbols.tig"
 
 type value = {
-   string_val: symbol,
+   sym_val: symbol,
    int_val: int,
    bool_val: bool
 }
 
-make_integer_value(n: int): value =
-   value { string_val = nil, int_val = n, bool_val = false }
+make_int_value(n: int): value =
+   value { sym_val = nil, int_val = n, bool_val = false }
 
-make_string_value(s: symbol): value =
-   value { string_val = s, int_val = 0, bool_val = false }
+make_sym_value(s: symbol): value =
+   value { sym_val = s, int_val = 0, bool_val = false }
 
-make_boolean_value(b: boolean): value =
-   value { string_val = nil, int_val = 0, bool_val = b }
-
-
+make_bool_value(b: bool): value =
+   value { sym_val = nil, int_val = 0, bool_val = b }

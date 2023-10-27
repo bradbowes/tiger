@@ -14,8 +14,38 @@ type source = {
    resume: source
 }
 
+type source_list = {
+   file_name: string,
+   next: source_list
+}
+
 src: source = nil
+sl: source_list = nil
 ch = chr(0)
+
+register_source(file_name: string) =
+   let
+      new_sl = source_list { file_name = file_name, next = nil }
+   in
+      if sl = nil then
+         sl := new_sl
+      else
+         let
+            current = sl
+         in
+            while current.next <> nil do
+               current := current.next
+            current.next := new_sl
+         end
+   end
+
+source_registered(s: source_list, file_name: string): bool =
+   if s = nil then
+      false
+   else if s.file_name = file_name then
+      true
+   else
+      source_registered(s.next, file_name);
 
 src_location(): location =
    if src = nil then
@@ -79,21 +109,19 @@ load_source(file_name: string) =
          err(string_concat("file not found: ", file_name), src_location())
       if fn <> file_name then
          fn := realpath(string_concat(string_concat(path, "/"), file_name))
-      let
-         f = open_input(fn)
-         s = source {
-            file_name = fn,
-            path = dirname(fn),
-            open = true,
-            src = f,
-            line = 1,
-            col = 0,
-            resume = src
-         }
-      in
-         src := s
-         nextch()
-      end
+      if not(source_registered(sl, fn)) then
+         begin
+            src := source {
+               file_name = fn,
+               path = dirname(fn),
+               open = true,
+               src = open_input(fn),
+               line = 1,
+               col = 0,
+               resume = src
+            }
+            nextch()
+         end
    end
 
 clear_source() =
