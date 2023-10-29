@@ -17,6 +17,7 @@ type node_tag = assign_node
               | type_decl_node
               | var_decl_node
               | fun_decl_node
+              | fun_body_node
               | record_desc_node
               | array_desc_node
               | enum_desc_node
@@ -112,7 +113,7 @@ make_field_var_node(obj: node, field: symbol, loc: location): node =
       tag = field_var_node,
       loc = loc,
       val = make_sym_value(field),
-      left = nil,
+      left = obj,
       right = nil
    }
 
@@ -123,5 +124,92 @@ make_indexed_var_node(arr: node, index: node, loc: location): node =
       val = nil,
       left = arr,
       right = index
+   }
+
+make_integer_node(val: int, loc: location): node =
+   node {
+      tag = integer_node,
+      loc = loc,
+      val = make_int_value(val),
+      left = nil,
+      right = nil
+   }
+
+make_string_node(val: symbol, loc: location): node =
+   node {
+      tag = string_node,
+      loc = loc,
+      val = make_sym_value(val),
+      left = nil,
+      right = nil
+   }
+
+make_char_node(val: char, loc: location): node =
+   node {
+      tag = char_node,
+      loc = loc,
+      val = make_int_value(ord(val)),
+      left = nil,
+      right = nil
+   }
+
+make_boolean_node(val: bool, loc: location): node =
+   node {
+      tag = boolean_node,
+      loc = loc,
+      val = make_bool_value(val),
+      left = nil,
+      right = nil
+   }
+
+make_nil_node(loc: location): node =
+   node {
+      tag = nil_node,
+      loc = loc,
+      val = nil,
+      left = nil,
+      right = nil
+   }
+
+make_empty_node(loc: location): node =
+   node {
+      tag = empty_node,
+      loc = loc,
+      val = nil,
+      left = nil,
+      right = nil
+   }
+
+make_type_decl_node(name: symbol, spec: node, loc: location): node =
+   node {
+      tag = type_decl_node,
+      loc = loc,
+      val = make_sym_value(name),
+      left = nil,
+      right = spec
+   }
+
+make_var_decl_node(name: symbol, ty: symbol, expr: node, loc: location): node =
+   node {
+      tag = var_decl_node,
+      loc = loc,
+      val = make_sym_value(name),
+      left = if ty = nil then nil else make_simple_var_node(ty, loc),
+      right = expr
+   }
+
+make_fun_decl_node(name: symbol, params: node, return_type: symbol, body: node, loc: location): node =
+   node {
+      tag = fun_decl_node,
+      loc = loc,
+      val = make_sym_value(name),
+      left = params,
+      right = node {
+         tag = fun_body_node,
+         loc = body.loc,
+         val = make_sym_value(return_type),
+         left = nil,
+         right = body
+      }
    }
 

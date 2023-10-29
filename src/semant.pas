@@ -12,14 +12,12 @@ uses sources, bindings, ops, symbols, values;
 
 function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
-
    function compatible(a, b: spec): boolean;
    begin
       compatible := (a = b) or
                     ((b = nil_type) and not (a^.tag in [primitive_type, function_type])) or
                     ((a = nil_type) and not (b^.tag in [primitive_type, function_type]));
    end;
-
 
    function check_unary_op(): spec;
    begin
@@ -28,7 +26,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          err('sign operator incompatible type', n^.loc);
       check_unary_op := int_type;
    end;
-
 
    function check_binary_op(): spec;
    var op: op_tag; ty1, ty2: spec;
@@ -39,7 +36,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty2 := check(n^.right, si, nest, env, tenv);
       if not compatible(ty1, ty2) then
          err('operator incompatible types', n^.loc);
-
       if (op in numeric_ops) and (ty1 = int_type) then
          check_binary_op := int_type
       else if (op in char_ops) and (ty1 = char_type) then
@@ -54,7 +50,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       else
          err('incompatible types for operator ''' + op_display[op] + '''', n^.loc);
    end;
-
 
    procedure check_var_decl(n: node; si, offset: integer; env, tenv: scope);
    var
@@ -76,18 +71,13 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             ty2 := ty1
       else
          ty2 := lookup(tenv, n^.type_name, loc)^.ty;
-
       if not compatible(ty1, ty2) then
          err('initializer doesn''t match type spec', loc);
-
       b := bind(env, n^.name, ty2, offset, nest, loc);
-
       if  right^.tag in [integer_node, char_node, string_node, boolean_node] then
          b^.value := right^.value;
-
       n^.binding := b;
    end;
-
 
    procedure check_fun_decl(n: node; si: integer; env, tenv: scope);
    var
@@ -123,7 +113,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       n^.binding := bind(env, n^.name, ty, si, nest, n^.loc);
    end;
 
-
    procedure find_tail_calls(n: node);
    begin
       case n^.tag of
@@ -144,7 +133,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
    end;
 
-
    procedure check_fun_body(n: node; si: integer; env, tenv: scope);
    var
       ty, body_type: spec;
@@ -160,7 +148,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       else
          n^.binding^.external := true;
    end;
-
 
    procedure check_type_decl(n: node; tenv: scope);
    var
@@ -179,7 +166,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
       n^.binding := bind(tenv, n^.name, ty, 0, 0, n^.loc);
    end;
-
 
    procedure check_record_decl_body(n: node; tenv: scope);
    var
@@ -259,7 +245,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             var_state:
                if new_state <> var_state then
                   group := make_node_list();
-
             fun_state:
                if new_state <> fun_state then
                   begin
@@ -273,7 +258,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                      if new_state = type_state then
                         group := make_node_list();
                   end;
-
             type_state:
                if new_state <> type_state then
                   begin
@@ -300,7 +284,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       state := var_state;
       offset := si;
       stack_index := si;
-
       it := n^.list^.first;
       while it <> nil do
          begin
@@ -308,10 +291,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                stack_index := stack_index + 1;
             it := it^.next;
          end;
-
       new_tenv := add_scope(tenv);
       new_env := add_scope(env);
-
       it := n^.list^.first;
       while it <> nil do
          begin
@@ -338,7 +319,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             it := it^.next;
          end;
       update_state(var_state);
-
       new_env^.stack_index := stack_index;
       n^.env := new_env;
       n^.tenv := new_tenv;
@@ -347,7 +327,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       else
          check_let := check(n^.right, stack_index, nest, new_env, new_tenv);
    end;
-
 
    function check_simple_var(): spec;
    var
@@ -360,18 +339,20 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_simple_var := b^.ty;
    end;
 
-
    function check_if_else(): spec;
-   var ty: spec;
+   var ty1, ty2: spec;
    begin
       if check(n^.cond, si, nest, env, tenv) <> bool_type then
          err('if condition is not a boolean value', n^.loc);
-      ty := check(n^.left, si, nest, env, tenv);
-      if not compatible(ty, check(n^.right, si, nest, env, tenv)) then
+      ty1 := check(n^.left, si, nest, env, tenv);
+      ty2 := check(n^.right, si, nest, env, tenv);
+      if not compatible(ty1, ty2) then
          err('if and else clauses incompatible types', n^.loc);
-      check_if_else := ty;
+      if ty1 <> nil_type then
+         check_if_else := ty1
+      else
+         check_if_else := ty2;
    end;
-
 
    function check_if(): spec;
    begin
@@ -381,7 +362,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          err('if without else cannot return a value', n^.loc);
       check_if := void_type;
    end;
-
 
    function check_call(): spec;
    var
@@ -415,7 +395,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_call := f^.base;
    end;
 
-
    function check_assign(): spec;
    var
       ty: spec;
@@ -440,7 +419,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_assign := void_type;
    end;
 
-
    function check_sequence(): spec;
    var
       ty: spec;
@@ -454,7 +432,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          end;
       check_sequence := ty;
    end;
-
 
    function check_array(): spec;
    var
@@ -474,7 +451,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_array := ty1;
    end;
 
-
    function check_indexed_var(): spec;
    var
       ty, ty2: spec;
@@ -491,7 +467,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          check_indexed_var := char_type;
    end;
 
-
    function check_for(): spec;
    var
       new_env: scope;
@@ -507,7 +482,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_for := void_type;
    end;
 
-
    function check_while(): spec;
    begin
       if check(n^.cond, si, nest, env, tenv) <> bool_type then
@@ -516,7 +490,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          err('while body cannot return a value', n^.left^.loc);
       check_while := void_type;
    end;
-
 
    function check_record(): spec;
    type
@@ -561,7 +534,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          find_check := fc;
       end;
 
-
    begin
       rec_type := n^.type_name;
       b := lookup(tenv, rec_type, n^.loc);
@@ -592,7 +564,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                err('''' + name^.id + ''' field is wrong type', value^.loc);
             it  := it^.next;
          end;
-
       fc := checks;
       while fc <> nil do
          begin
@@ -600,7 +571,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                err('''' + fc^.f^.name^.id + ''' field is missing from record', n^.loc);
             fc := fc^.next;
          end;
-
       n^.binding := b;
       check_record := ty;
    end;

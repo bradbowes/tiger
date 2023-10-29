@@ -4,7 +4,7 @@ height(n: node): int =
    if n = nil then 0 else n.height
 
 balance(n: node): int =
-   if n= nil then 0
+   if n = nil then 0
    else height(n.left) - height(n.right)
 
 rotate_left(n: node): node =

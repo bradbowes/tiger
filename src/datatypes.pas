@@ -24,7 +24,6 @@ type
       length: longint;
    end;
 
-
 const
    _void_type: spec_t = (tag: primitive_type; fields: nil; base: nil; length: 0);
    void_type: spec = @_void_type;
@@ -41,7 +40,6 @@ const
    _file_type: spec_t = (tag: pointer_type; fields: nil; base: nil; length: 0);
    file_type: spec = @_file_type;
 
-
 procedure add_param(rec: spec; name: symbol; ty: spec; loc: source_location);
 procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: source_location);
 function get_field(rec: spec; name: symbol; loc: source_location): field;
@@ -50,9 +48,7 @@ function make_record_type(): spec;
 function make_function_type(return: spec): spec;
 function make_enum_type(): spec;
 
-
 implementation
-
 
 function make_record_type(): spec;
 var s: spec;
