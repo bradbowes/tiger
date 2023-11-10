@@ -101,7 +101,7 @@ begin
             s := n^.name^.id;
             if n^.type_name <> nil then
                s := s + ': ' + n^.type_name^.id;
-            format := s + ' = ' + format( n^.right) + newline;
+            format := s + ' = ' + format( n^.right);
          end;
       fun_decl_node:
          begin
@@ -113,13 +113,25 @@ begin
                begin
                   s := s + ' = ';
                   indent;
-                  s := s + newline + format(n^.right);
+                  s := s + newline + format(n^.right) + newline;
                   dedent;
                end;
-            format := s + newline;
+            format := s;
          end;
       record_desc_node:
          format := '{' + format_list(n^.list, ',', true) + newline + '}';
+      case_node:
+         begin
+            s := 'case ' + format(n^.cond) + ' of';
+            indent();
+            s := s + newline + '  ' + format_list(n^.list, newline + '| ', false);
+            if n^.right <> nil then
+               s := s + newline + 'else ' + format(n^.right);
+            dedent();
+            format := s;
+         end;
+      clause_node:
+         format := format(n^.left) + ' : ' + format(n^.right);
       enum_desc_node:
          format := format_list(n^.list, ' | ', false);
       array_desc_node:

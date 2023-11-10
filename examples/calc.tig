@@ -44,16 +44,17 @@ let
          op = quit
       in
          skip()
-         op := if ch = #"+" then plus
-               else if ch = #"-" then minus
-               else if ch = #"*" then mul
-               else if ch = #"/" then div
-               else if ch = #"(" then lpar
-               else if ch = #")" then rpar
-               else if ch = #"\n" then newline
-               else if ch = EOF then quit
-               else if digit() then num
-               else err
+         op := case ch of
+             #"+"  : plus
+           | #"-" : minus
+           | #"*" : mul
+           | #"/" : div
+           | #"(" : lpar
+           | #")" : rpar
+           | #"\n" : newline
+           | EOF : quit
+             else if digit() then num else err
+
          if op = plus or op = minus or
             op = mul or op = div or
             op = lpar or op = rpar then

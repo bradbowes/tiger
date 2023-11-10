@@ -52,8 +52,7 @@ type
                 to_token,
                 type_token,
                 use_token,
-                while_token,
-                wildcard_token);
+                while_token);
 
    token_t = record
                 tag: token_tag;
@@ -269,7 +268,6 @@ begin
             '*': recognize(mul_token);
             '/': recognize(div_token);
             '=': recognize(eq_token);
-            '_': recognize(wildcard_token);
             '<':
                begin
                   push_char;
