@@ -45,15 +45,15 @@ let
       in
          skip()
          op := case ch of
-             #"+"  : plus
-           | #"-" : minus
-           | #"*" : mul
-           | #"/" : div
-           | #"(" : lpar
-           | #")" : rpar
-           | #"\n" : newline
-           | EOF : quit
-             else if digit() then num else err
+            #"+" : plus
+            #"-" : minus
+            #"*" : mul
+            #"/" : div
+            #"(" : lpar
+            #")" : rpar
+            #"\n" : newline
+            EOF : quit
+            else if digit() then num else err
 
          if op = plus or op = minus or
             op = mul or op = div or

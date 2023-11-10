@@ -37,12 +37,12 @@ begin
    newline := chr(10) + space(indent_level * 3);
 end;
 
-procedure indent;
+procedure indent();
 begin
   indent_level := indent_level + 1;
 end;
 
-procedure dedent;
+procedure dedent();
 begin
   if indent_level > 0 then
      indent_level := indent_level - 1;
@@ -52,7 +52,7 @@ function format_list(l: node_list; sep: string; break_lines: boolean): string;
 var it: node_list_item;
     s: string;
 begin
-   indent;
+   indent();
    s := '';
    it := l^.first;
    while it <> nil do
@@ -63,7 +63,7 @@ begin
             s := s + sep;
          it := it^.next;
       end;
-   dedent;
+   dedent();
    format_list := s;
 end;
 
@@ -112,9 +112,9 @@ begin
             if n^.right <> nil then
                begin
                   s := s + ' = ';
-                  indent;
+                  indent();
                   s := s + newline + format(n^.right) + newline;
-                  dedent;
+                  dedent();
                end;
             format := s;
          end;
@@ -123,11 +123,13 @@ begin
       case_node:
          begin
             s := 'case ' + format(n^.cond) + ' of';
-            indent();
-            s := s + newline + '  ' + format_list(n^.list, newline + '| ', false);
+            s := s + format_list(n^.list, '', true);
             if n^.right <> nil then
-               s := s + newline + 'else ' + format(n^.right);
-            dedent();
+               begin
+                  indent();
+                  s := s + newline + 'else ' + format(n^.right);
+                  dedent();
+               end;
             format := s;
          end;
       clause_node:
@@ -147,42 +149,42 @@ begin
       if_else_node:
          begin
             s := 'if ' + format(n^.cond) + ' then';
-            indent;
+            indent();
             s := s + newline + format(n^.left);
-            dedent;
+            dedent();
             s := s + newline + 'else';
             if n^.right^.tag = if_else_node then
                s := s + ' ' + format(n^.right)
             else
                begin
-                  indent;
+                  indent();
                   s := s + newline + format(n^.right);
-                  dedent;
+                  dedent();
                end;
             format := s;
          end;
       if_node:
          begin
             s := 'if ' + format(n^.cond) + ' then';
-            indent;
+            indent();
             s := s + newline + format(n^.left);
-            dedent;
+            dedent();
             format := s;
          end;
       while_node:
          begin
             s := 'while ' + format(n^.cond) + ' do';
-            indent;
+            indent();
             s := s + newline + format(n^.left);
-            dedent;
+            dedent();
             format := s;
          end;
       for_node:
          begin
             s := 'for ' + n^.name^.id + ' := ' + format(n^.left) + ' to ' + format(n^.cond) + ' do';
-            indent;
+            indent();
             s := s + newline + format(n^.right);
-            dedent;
+            dedent();
             format := s;
          end;
       let_node:
@@ -193,9 +195,9 @@ begin
                   s := s + format_list(n^.right^.list, ';', true)
                else
                   begin
-                     indent;
+                     indent();
                      s := s + newline + format(n^.right);
-                     dedent;
+                     dedent();
                   end;
             format := s + newline + 'end';
          end;

@@ -421,11 +421,8 @@ var
       advance(of_token, 'of');
       clauses := make_node_list();
       append_node(clauses, get_clause());
-      while token.tag = pipe_token do
-         begin
-            next();
-            append_node(clauses, get_clause());
-         end;
+      while token.tag in [id_token, number_token, char_token] do
+         append_node(clauses, get_clause());
       if token.tag = else_token then
          begin
             next();
