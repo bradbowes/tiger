@@ -21,7 +21,7 @@ type node_tag = assign_node
               | record_desc_node
               | array_desc_node
               | enum_desc_node
-              | unary_op_node
+              | negate_node
               | mul_node
               | div_node
               | mod_node
@@ -39,6 +39,7 @@ type node_tag = assign_node
               | field_desc_node
               | enum_node
               | if_else_node
+              | alt_node
               | if_node
               | case_node
               | clause_node
@@ -52,19 +53,19 @@ type node_tag = assign_node
 
 type node = {
    tag: node_tag,
-   loc: location,
    val: value,
    left: node,
-   right: node
+   right: node,
+   loc: location
 }
 
 make_list_node(loc: location): node =
    node {
       tag = list_node,
-      loc = loc,
       val = nil,
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 append_node(list: node, item: node) =
@@ -73,10 +74,10 @@ append_node(list: node, item: node) =
    else if list.right = nil then
       list.right := node {
                       tag = list_node,
-                      loc = item.loc,
                       val = nil,
                       left = item,
-                      right = nil
+                      right = nil,
+                      loc = item.loc
                    }
    else
       append_node(list.right, item)
@@ -84,132 +85,329 @@ append_node(list: node, item: node) =
 make_assign_node(var: node, expr: node, loc: location): node =
    node {
       tag = assign_node,
-      loc = loc,
       val = nil,
       left = var,
-      right = expr
+      right = expr,
+      loc = loc
    }
 
 make_call_node(name: symbol, args: node, loc: location): node =
    node {
       tag = call_node,
-      loc = loc,
       val = make_sym_value(name),
       left = args,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_simple_var_node(name: symbol, loc: location): node =
    node {
       tag = simple_var_node,
-      loc = loc,
       val = make_sym_value(name),
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_field_var_node(obj: node, field: symbol, loc: location): node =
    node {
       tag = field_var_node,
-      loc = loc,
       val = make_sym_value(field),
       left = obj,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_indexed_var_node(arr: node, index: node, loc: location): node =
    node {
       tag = indexed_var_node,
-      loc = loc,
       val = nil,
       left = arr,
-      right = index
+      right = index,
+      loc = loc
    }
 
 make_integer_node(val: int, loc: location): node =
    node {
       tag = integer_node,
-      loc = loc,
       val = make_int_value(val),
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_string_node(val: symbol, loc: location): node =
    node {
       tag = string_node,
-      loc = loc,
       val = make_sym_value(val),
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_char_node(val: char, loc: location): node =
    node {
       tag = char_node,
-      loc = loc,
       val = make_int_value(ord(val)),
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_boolean_node(val: bool, loc: location): node =
    node {
       tag = boolean_node,
-      loc = loc,
       val = make_bool_value(val),
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_nil_node(loc: location): node =
    node {
       tag = nil_node,
-      loc = loc,
       val = nil,
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_empty_node(loc: location): node =
    node {
       tag = empty_node,
-      loc = loc,
       val = nil,
       left = nil,
-      right = nil
+      right = nil,
+      loc = loc
    }
 
 make_type_decl_node(name: symbol, spec: node, loc: location): node =
    node {
       tag = type_decl_node,
-      loc = loc,
       val = make_sym_value(name),
       left = nil,
-      right = spec
+      right = spec,
+      loc = loc
    }
 
 make_var_decl_node(name: symbol, ty: symbol, expr: node, loc: location): node =
    node {
       tag = var_decl_node,
-      loc = loc,
       val = make_sym_value(name),
       left = if ty = nil then nil else make_simple_var_node(ty, loc),
-      right = expr
+      right = expr,
+      loc = loc
    }
 
-make_fun_decl_node(name: symbol, params: node, return_type: symbol, body: node, loc: location): node =
+make_fun_decl_node(name: symbol, params: node, return_type: symbol,
+                   body: node, loc: location): node =
    node {
       tag = fun_decl_node,
-      loc = loc,
       val = make_sym_value(name),
       left = params,
       right = node {
          tag = fun_body_node,
-         loc = body.loc,
          val = make_sym_value(return_type),
          left = nil,
-         right = body
-      }
+         right = body,
+         loc = body.loc
+      },
+      loc = loc
+   }
+
+make_record_desc_node(fields: node, loc: location): node =
+   node {
+      tag = record_desc_node,
+      val = nil,
+      left = fields,
+      right = nil,
+      loc = loc
+   }
+
+make_array_desc_node(base: symbol, loc: location): node =
+   node {
+      tag = array_desc_node,
+      val = make_sym_value(base),
+      left = nil,
+      right = nil,
+      loc = loc
+   }
+
+make_enum_desc_node(items: node, loc: location): node =
+   node {
+      tag = enum_desc_node,
+      val = nil,
+      left = items,
+      right = nil,
+      loc = loc
+   }
+
+make_negate_node(exp: node, loc: location): node =
+   node {
+      tag = negate_node,
+      val = nil,
+      left = exp,
+      right = nil,
+      loc = loc
+   }
+
+make_mul_node(left: node, right: node, loc: location): node =
+   node {
+      tag = mul_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_div_node(left: node, right: node, loc: location): node =
+   node {
+      tag = div_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_mod_node(left: node, right: node, loc: location): node =
+   node {
+      tag = mod_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_plus_node(left: node, right: node, loc: location): node =
+   node {
+      tag = plus_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_minus_node(left: node, right: node, loc: location): node =
+   node {
+      tag = minus_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_eq_node(left: node, right: node, loc: location): node =
+   node {
+      tag = eq_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_neq_node(left: node, right: node, loc: location): node =
+   node {
+      tag = neq_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_gt_node(left: node, right: node, loc: location): node =
+   node {
+      tag = gt_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_gte_node(left: node, right: node, loc: location): node =
+   node {
+      tag = gte_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_lt_node(left: node, right: node, loc: location): node =
+   node {
+      tag = lt_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_lte_node(left: node, right: node, loc: location): node =
+   node {
+      tag = lte_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_and_node(left: node, right: node, loc: location): node =
+   node {
+      tag = and_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_or_node(left: node, right: node, loc: location): node =
+   node {
+      tag = or_node,
+      val = nil,
+      left = left,
+      right = right,
+      loc = loc
+   }
+
+make_field_node(name: symbol, expr: node, loc: location): node =
+   node {
+      tag = field_node,
+      val = make_sym_value(name),
+      left = expr,
+      right = nil,
+      loc = loc
+   }
+
+make_field_desc_node(name: symbol, ty: symbol, loc: location): node =
+   node {
+      tag = field_desc_node,
+      val = make_sym_value(name),
+      left = make_simple_var_node(ty, loc),
+      right = nil,
+      loc = loc
+   }
+
+make_enum_node(name: symbol, loc: location): node =
+   node {
+      tag = enum_node,
+      val = make_sym_value(name),
+      left = nil,
+      right = nil,
+      loc = loc
+   }
+
+make_if_else_node(cond: node, consequent: node,
+                  alt: node, loc: location): node =
+   node {
+      tag = if_else_node,
+      val = nil,
+      left = cond,
+      right = node {
+         tag = alt_node,
+         val = nil,
+         left = consequent,
+         right = alt,
+         loc = loc
+      },
+      loc = loc
    }
 

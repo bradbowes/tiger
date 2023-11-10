@@ -46,6 +46,23 @@ var
          err('Expected identifier, got ''' + value + '''', token_location());
    end;
 
+   function get_number(): int64;
+   var
+      i: int64;
+      value: string;
+   begin
+      value := token.value;
+      get_number := 0;
+      next();
+      if trystrtoint64(token.value, i) then
+         begin
+            get_number := i;
+            next();
+         end
+      else
+         err('Bad integer format: ''' + value + '''', token_location());
+   end;
+
    procedure advance(t: token_tag; display: string);
    begin
       if token.tag = t then
@@ -120,20 +137,13 @@ var
       list: node_list;
       factor: node = nil;
       id: symbol;
-      i: int64;
    begin
       loc := token_location();
       value := token.value;
       get_factor := nil;
       case token.tag of
          number_token:
-            begin
-               next();
-               if trystrtoint64(value, i) then
-                  factor := make_integer_node(i, loc)
-               else
-                  err('Bad integer format: ''' + value + '''', loc);
-            end;
+            factor := make_integer_node(get_number(), loc);
          string_token:
             begin
                next();
@@ -189,7 +199,6 @@ var
                         else
                            factor :=  make_indexed_var_node(make_simple_var_node(id, loc), factor, loc);
                      end;
-
                   else
                      factor := make_simple_var_node(id, loc);
                end;
@@ -368,6 +377,66 @@ var
          end
       else
          get_if_expression := make_if_node(condition, consequent, loc);
+   end;
+
+   function get_case_expression(): node;
+   var
+      arg: node;
+      clauses: node_list;
+      loc: source_location;
+
+      function get_match(): node;
+      var
+         loc: source_location;
+      begin
+         loc := token_location();
+         case token.tag of
+            id_token: get_match := make_simple_var_node(get_identifier(), loc);
+            number_token: get_match := make_integer_node(get_number(), loc);
+            char_token:
+               begin
+                  get_match := make_char_node(ord(token.value[1]), loc);
+                  next();
+               end;
+            wildcard_token:
+               begin
+                  get_match := make_wildcard_node(loc);
+                  next();
+               end;
+            else err('case must be an integer, char or identifier', loc);
+         end;
+      end;
+
+      function get_clause(): node;
+      var
+         matches: node_list;
+         loc: source_location;
+      begin
+         loc := token_location();
+         matches := make_node_list();
+         append_node(matches, get_match());
+         while token.tag = comma_token do
+            begin
+               next();
+               append_node(matches, get_match());
+            end;
+         advance(colon_token, ':');
+         get_clause := make_clause_node(matches, get_expression(), loc);
+      end;
+
+   begin
+      loc := token_location();
+      next();
+      arg := get_expression();
+      advance(of_token, 'of');
+      clauses := make_node_list();
+      append_node(clauses, get_clause());
+      while token.tag = pipe_token do
+         begin
+            next();
+            append_node(clauses, get_clause());
+         end;
+      get_case_expression := make_case_node(arg, clauses, loc);
    end;
 
    function get_while_expression(): node;
@@ -598,6 +667,7 @@ var
    begin
       case token.tag of
          if_token: get_expression := get_if_expression();
+         (* case_token: get_expression := get_case_expression(); *)
          while_token: get_expression := get_while_expression();
          for_token: get_expression := get_for_expression();
          let_token: get_expression := get_let_expression();

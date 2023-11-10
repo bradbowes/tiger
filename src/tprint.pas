@@ -4,6 +4,7 @@ uses
 var
    ast: node;
 begin
-   ast := transform(parse(paramstr(1)));
+   (* ast := transform(parse(paramstr(1))); *)
+   ast := parse(paramstr(1));
    writeln(format(ast));
 end.

@@ -53,7 +53,7 @@ clean:
 	rm -f ../examples/calc
 	rm -f ../examples/copy
 	rm -f ../examples/echo
-	rm -f ../examples/euler1
+	rm -f ../examples/multiples
 	rm -f ../examples/euler2
 	rm -f ../examples/euler3
 	rm -f ../examples/euler4

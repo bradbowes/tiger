@@ -17,6 +17,7 @@ type
                boolean_node,
                nil_node,
                empty_node,
+               wildcard_node,
                type_decl_node,
                var_decl_node,
                fun_decl_node,
@@ -83,6 +84,7 @@ function make_char_node(val: int64; loc: source_location): node;
 function make_boolean_node(val: boolean; loc: source_location): node;
 function make_nil_node(loc: source_location): node;
 function make_empty_node(loc: source_location): node;
+function make_wildcard_node(loc: source_location): node;
 function make_type_decl_node(name: symbol; spec: node; loc: source_location): node;
 function make_var_decl_node(name, ty: symbol; expr: node; loc: source_location): node;
 function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
@@ -289,6 +291,15 @@ begin
    n := make_node(empty_node, loc);
    n^.ins_count := 0;
    make_empty_node := n;
+end;
+
+function make_wildcard_node(loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(wildcard_node, loc);
+   n^.ins_count := 0;
+   make_wildcard_node := n;
 end;
 
 function make_type_decl_node(name: symbol; spec: node; loc: source_location): node;
