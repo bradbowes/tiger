@@ -123,13 +123,11 @@ begin
       case_node:
          begin
             s := 'case ' + format(n^.cond) + ' of';
-            s := s + format_list(n^.list, '', true);
+            indent();
+            s := s + newline + '  ' + format_list(n^.list, newline + '| ', false);
             if n^.right <> nil then
-               begin
-                  indent();
-                  s := s + newline + 'else ' + format(n^.right);
-                  dedent();
-               end;
+               s := s + newline + 'else ' + format(n^.right);
+            dedent();
             format := s;
          end;
       clause_node:

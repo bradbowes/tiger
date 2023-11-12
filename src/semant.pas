@@ -19,6 +19,14 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                     ((a = nil_type) and not (b^.tag in [primitive_type, function_type]));
    end;
 
+   function type_or_nil(a, b: spec): spec;
+   begin
+      if a = nil_type then
+         type_or_nil := b
+      else
+         type_or_nil := b
+   end;
+
    function check_unary_op(): spec;
    begin
       { minus is the only unary op }
@@ -348,10 +356,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty2 := check(n^.right, si, nest, env, tenv);
       if not compatible(ty1, ty2) then
          err('if and else clauses incompatible types', n^.loc);
-      if ty1 <> nil_type then
-         check_if_else := ty1
-      else
-         check_if_else := ty2;
+      check_if_else := type_or_nil(ty1, ty2);
    end;
 
    function check_if(): spec;
@@ -489,6 +494,43 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       if check(n^.left, si, nest, env, tenv) <> void_type then
          err('while body cannot return a value', n^.left^.loc);
       check_while := void_type;
+   end;
+
+   function check_case(): spec;
+   var
+      ty, ty2, ty_result: spec;
+      it: node_list_item;
+      clause: node;
+   begin
+      ty_result := nil;
+      ty := check(n^.cond, si, nest, env, tenv);
+      if (ty <> int_type) and (ty <> char_type) and (ty^.tag <> enum_type) then
+         err('case variable must be a cardinal type', n^.cond^.loc);
+      it := n^.list^.first;
+      while it <> nil do
+         begin
+            clause := it^.node;
+            if check(clause^.left, si, nest, env, tenv) <> ty then
+               err('match must be same type as case variable', clause^.left^.loc);
+            ty2 := check(clause^.right, si, nest, env, tenv);
+            if ty_result = nil then
+               ty_result := ty2
+            else
+               begin
+                  if not compatible(ty2, ty_result) then
+                     err('case clauses are incompatible types', clause^.right^.loc);
+                  ty_result := type_or_nil(ty_result, ty2);
+               end;
+            it := it^.next;
+         end;
+      if n^.right <> nil then (* default clause *)
+         begin
+            ty2 := check(n^.right, si, nest, env, tenv);
+            if not compatible(ty2, ty_result) then
+               err('case default clause incompatible type', clause^.right^.loc);
+            ty_result := type_or_nil(ty_result, ty2);
+         end;
+      check_case := ty_result;
    end;
 
    function check_record(): spec;
@@ -629,6 +671,8 @@ begin
          check := check_for();
       while_node:
          check := check_while();
+      case_node:
+         check := check_case();
       else
          begin
             writeln(n^.tag);

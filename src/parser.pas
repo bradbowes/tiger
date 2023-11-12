@@ -421,8 +421,14 @@ var
       advance(of_token, 'of');
       clauses := make_node_list();
       append_node(clauses, get_clause());
-      while token.tag in [id_token, number_token, char_token] do
-         append_node(clauses, get_clause());
+      while token.tag = pipe_token do
+         begin
+            next();
+            if token.tag in [id_token, number_token, char_token] then
+               append_node(clauses, get_clause())
+            else
+               err('expected id, number or char, got ''' + token.value + '''', token_location());
+         end;
       if token.tag = else_token then
          begin
             next();
@@ -529,7 +535,7 @@ var
          id_token:
             desc := make_enum_desc_node(get_enum_list(), loc);
          else
-            err('Expected type spec, got ''' + token.value, loc);
+            err('Expected type spec, got ''' + token.value + '''', loc);
       end;
       get_type_spec := desc;
    end;
