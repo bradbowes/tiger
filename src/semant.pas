@@ -15,8 +15,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    function compatible(a, b: spec): boolean;
    begin
       compatible := (a = b) or
-                    ((b = nil_type) and not (a^.tag in [primitive_type, function_type])) or
-                    ((a = nil_type) and not (b^.tag in [primitive_type, function_type]));
+                    ((b = nil_type) and not (a^.tag in [primitive_type, enum_type, function_type])) or
+                    ((a = nil_type) and not (b^.tag in [primitive_type, enum_type, function_type]));
    end;
 
    function type_or_nil(a, b: spec): spec;
