@@ -31,8 +31,8 @@
   use `string_compare` function instead.
 - `use "<file_name>"` to include external definition file in `let`
   declaration block
-- enum types. example `type color = red | green | blue`
-- case expression `case c of red : 1 | green : 2 | blue : 3 else -1`
+- enum types. `type <id> = <id>`{`| <id>`}. Example `type color = red | green | blue`.
+- case expression `case <exp> of <const> : <exp> `{`| <const> : <exp>`}` else <exp>`.
 
 # To do
 
