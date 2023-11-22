@@ -151,7 +151,7 @@ begin
             s := s + newline + format(n^.left);
             dedent();
             s := s + newline + 'else';
-            if n^.right^.tag = if_else_node then
+            if n^.right^.tag in [if_else_node, if_node, let_node, while_node, for_node] then
                s := s + ' ' + format(n^.right)
             else
                begin

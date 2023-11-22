@@ -62,7 +62,7 @@ clean:
 	rm -f ../examples/euler7
 	rm -f ../examples/euler8
 	rm -f ../examples/euler9
-	rm -f ../examples/euler13
+	rm -f ../examples/long_number
 	rm -f ../examples/euler14
 	rm -f ../examples/euler15
 	rm -f ../examples/euler17

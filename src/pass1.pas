@@ -242,6 +242,36 @@ var
       end;
    end;
 
+   function trans_case(): node;
+   var
+      list: node_list;
+      cmp: symbol;
+
+      function build_if(it: node_list_item): node;
+      var
+         clause: node;
+         c, result: node;
+         loc: source_location;
+      begin
+         clause := it^.node;
+         loc := clause^.loc;
+         result := trans1(clause^.right);
+         c := make_binary_op_node(eq_op, make_simple_var_node(cmp,  loc), trans1(clause^.left), loc);
+         if it^.next <> nil then
+            build_if := make_if_else_node(c, result, build_if(it^.next), loc)
+         else if n^.right <> nil then
+            build_if := make_if_else_node(c, result, trans1(n^.right), loc)
+         else
+            build_if := make_if_node(c, result, loc);
+      end;
+
+   begin
+      cmp := gensym();
+      list := make_node_list();
+      append_node(list, make_var_decl_node(cmp, nil, trans1(cond), loc));
+      trans_case := make_let_node(list, build_if(n^.list^.first), loc)
+   end;
+
 begin
    loc := n^.loc;
    cond := n^.cond;
@@ -267,6 +297,8 @@ begin
          trans1 := trans_let();
       sequence_node:
          trans1 := trans_sequence();
+      case_node:
+         trans1 := trans_case();
       else
          trans1 := copy_node(n, tf);
    end;
