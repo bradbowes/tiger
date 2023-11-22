@@ -32,6 +32,7 @@
 - `use "<file_name>"` to include external definition file in `let`
   declaration block
 - enum types. example `type color = red | green | blue`
+- case expression `case c of red : 1 | green : 2 | blue : 3 else -1`
 
 # To do
 
