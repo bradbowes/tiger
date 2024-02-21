@@ -44,6 +44,7 @@ insert(item: string, n: node): node =
                   n.left := insert(item, n.left)
                else if cmp > 0 then
                   n.right := insert(item, n.right)
+               n.height := max(height(n.left), height(n.right)) + 1
                n
             end
       bal = balance(n1)

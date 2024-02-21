@@ -240,6 +240,8 @@ begin
    else
       t^.right := insert(t^.right, b);
 
+   t^.height := max(height(t^.left), height(t^.right)) + 1;
+
    bal := balance(t);
 
    if (bal > 1) and (b^.key < t^.left^.binding^.key) then
