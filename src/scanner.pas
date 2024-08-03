@@ -72,14 +72,11 @@ uses sysutils;
 
 procedure scan();
 
-
-
    procedure push_char();
    begin
       token.value := token.value + src^.ch;
       getch();
    end;
-
 
    procedure recognize(tag: token_tag);
    begin
@@ -87,13 +84,11 @@ procedure scan();
       token.tag := tag;
    end;
 
-
    procedure skip_white;
    begin
       while src^.ch in [' ', #9 .. #13] do
          getch();
    end;
-
 
    procedure skip_comment;
    begin
@@ -111,7 +106,6 @@ procedure scan();
       token.value := token.value + ')';
       token.tag := comment_token;
    end;
-
 
    procedure get_string;
    var
@@ -183,7 +177,6 @@ procedure scan();
       token.tag := string_token;
    end;
 
-
    procedure get_char();
    begin
       getch();
@@ -196,14 +189,12 @@ procedure scan();
       token.tag := char_token;
    end;
 
-
    procedure get_number;
    begin
       while src^.ch in ['0'..'9'] do
          push_char();
       token.tag := number_token;
    end;
-
 
    procedure get_id;
    begin
@@ -301,7 +292,6 @@ begin
       end;
 end;
 
-
 function token_location(): source_location;
 var
    loc: source_location;
@@ -312,6 +302,5 @@ begin
    loc^.file_name := src^.file_name;
    token_location := loc;
 end;
-
 
 end.

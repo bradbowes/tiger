@@ -2,7 +2,7 @@ unit nodes;
 
 interface
 
-uses sources, symbols, ops, values, bindings;
+uses sources, symbols, values, bindings;
 
 type
    node_tag = (assign_node,
@@ -23,8 +23,20 @@ type
                record_desc_node,
                array_desc_node,
                enum_desc_node,
-               unary_op_node,
-               binary_op_node,
+               unary_minus_node,
+               plus_node,
+               minus_node,
+               mul_node,
+               div_node,
+               mod_node,
+               eq_node,
+               neq_node,
+               lt_node,
+               leq_node,
+               gt_node,
+               geq_node,
+               and_node,
+               or_node,
                field_node,
                field_desc_node,
                enum_node,
@@ -62,7 +74,6 @@ type
       binding: binding;
       name, type_name: symbol;
       cond, left, right: node;
-      op: op_tag;
       list: node_list;
       env: scope;
       tenv: scope;
@@ -89,8 +100,20 @@ function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol
 function make_record_desc_node(fields: node_list; loc: source_location): node;
 function make_array_desc_node(base: symbol; loc: source_location): node;
 function make_enum_desc_node(items: node_list; loc: source_location): node;
-function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
-function make_binary_op_node(op: op_tag; left, right: node; loc: source_location): node;
+function make_unary_minus_node(exp: node; loc: source_location): node;
+function make_plus_node(left, right: node; loc: source_location): node;
+function make_minus_node(left, right: node; loc: source_location): node;
+function make_mul_node(left, right: node; loc: source_location): node;
+function make_div_node(left, right: node; loc: source_location): node;
+function make_mod_node(left, right: node; loc: source_location): node;
+function make_eq_node(left, right: node; loc: source_location): node;
+function make_neq_node(left, right: node; loc: source_location): node;
+function make_lt_node(left, right: node; loc: source_location): node;
+function make_leq_node(left, right: node; loc: source_location): node;
+function make_gt_node(left, right: node; loc: source_location): node;
+function make_geq_node(left, right: node; loc: source_location): node;
+function make_and_node(left, right: node; loc: source_location): node;
+function make_or_node(left, right: node; loc: source_location): node;
 function make_field_node(name: symbol; expr: node; loc: source_location): node;
 function make_field_desc_node(name, ty: symbol; loc: source_location): node;
 function make_enum_node(name: symbol; loc: source_location): node;
@@ -172,7 +195,6 @@ begin
    n^.cond := nil;
    n^.left := nil;
    n^.right := nil;
-   n^.op := nul_op;
    n^.list := nil;
    n^.env := nil;
    n^.tenv := nil;
@@ -360,27 +382,157 @@ begin
    make_enum_desc_node := n;
 end;
 
-function make_unary_op_node(op: op_tag; exp: node; loc: source_location): node;
+function make_unary_minus_node(exp: node; loc: source_location): node;
 var
    n: node;
 begin
-   n := make_node(unary_op_node, loc);
-   n^.op := op;
+   n := make_node(unary_minus_node, loc);
    n^.left := exp;
    n^.ins_count := exp^.ins_count + 1;
-   make_unary_op_node := n;
+   make_unary_minus_node := n;
 end;
 
-function make_binary_op_node(op: op_tag; left, right: node; loc: source_location): node;
+function make_plus_node(left, right: node; loc: source_location): node;
 var
    n: node;
 begin
-   n := make_node(binary_op_node, loc);
-   n^.op := op;
+   n := make_node(plus_node, loc);
    n^.left := left;
    n^.right := right;
    n^.ins_count := left^.ins_count + right^.ins_count + 1;
-   make_binary_op_node := n;
+   make_plus_node := n;
+end;
+
+function make_minus_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(minus_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_minus_node := n;
+end;
+
+function make_mul_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(mul_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_mul_node := n;
+end;
+
+function make_div_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(div_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_div_node := n;
+end;
+
+function make_mod_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(mod_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_mod_node := n;
+end;
+
+function make_eq_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(eq_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_eq_node := n;
+end;
+
+function make_neq_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(neq_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_neq_node := n;
+end;
+
+function make_lt_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(lt_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_lt_node := n;
+end;
+
+function make_leq_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(leq_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_leq_node := n;
+end;
+
+function make_gt_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(gt_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_gt_node := n;
+end;
+
+function make_geq_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(geq_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_geq_node := n;
+end;
+
+function make_and_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(and_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_and_node := n;
+end;
+
+function make_or_node(left, right: node; loc: source_location): node;
+var
+   n: node;
+begin
+   n := make_node(or_node, loc);
+   n^.left := left;
+   n^.right := right;
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
+   make_or_node := n;
 end;
 
 function make_field_node(name: symbol; expr: node; loc: source_location): node;
@@ -574,7 +726,6 @@ begin
    new_node^.value := n^.value;
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
-   new_node^.op := n^.op;
    if n^.list <> nil then
       begin
          ls := make_node_list();

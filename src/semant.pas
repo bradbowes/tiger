@@ -8,7 +8,7 @@ function type_check(n: node): spec;
 
 implementation
 
-uses sources, bindings, ops, symbols, values;
+uses sources, bindings, symbols, values;
 
 function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
@@ -27,36 +27,11 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          type_or_nil := b
    end;
 
-   function check_unary_op(): spec;
+   function check_unary_minus(): spec;
    begin
-      { minus is the only unary op }
       if check(n^.left, si, nest, env, tenv) <> int_type then
          err('sign operator incompatible type', n^.loc);
-      check_unary_op := int_type;
-   end;
-
-   function check_binary_op(): spec;
-   var op: op_tag; ty1, ty2: spec;
-   begin
-      check_binary_op := void_type;
-      op := n^.op;
-      ty1 := check(n^.left, si, nest, env, tenv);
-      ty2 := check(n^.right, si, nest, env, tenv);
-      if not compatible(ty1, ty2) then
-         err('operator incompatible types', n^.loc);
-      if (op in numeric_ops) and (ty1 = int_type) then
-         check_binary_op := int_type
-      else if (op in char_ops) and (ty1 = char_type) then
-         check_binary_op := char_type
-      else if (op in comparison_ops) and
-              ((ty1 = int_type) or (ty1 = char_type)) then
-         check_binary_op := bool_type
-      else if (op in boolean_ops) and (ty1 = bool_type) then
-         check_binary_op := bool_type
-      else if op in equality_ops then
-         check_binary_op := bool_type
-      else
-         err('incompatible types for operator ''' + op_display[op] + '''', n^.loc);
+      check_unary_minus := int_type;
    end;
 
    procedure check_var_decl(n: node; si, offset: integer; env, tenv: scope);
@@ -626,6 +601,40 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       check_field_var := get_field(ty, n^.name, n^.loc)^.ty;
    end;
 
+   function check_ordinal_op(): spec;
+   var t1: spec;
+   begin
+      t1 := check(n^.left, si, nest, env, tenv);
+      check_ordinal_op := t1;
+      if ((t1 <> char_type) and (t1 <> int_type))
+            or (t1 <> check(n^.right, si, nest, env, tenv)) then
+         err('incompatible type for operator', n^.loc);
+   end;
+
+   function check_int_op(): spec;
+   begin
+      check_int_op := int_type;
+      if (check(n^.left, si, nest, env, tenv) <> int_type)
+         or (check(n^.right, si, nest, env, tenv) <> int_type) then
+         err('incompatible type for operator', n^.right^.loc);
+   end;
+
+   function check_bool_op(): spec;
+   begin
+      check_bool_op := bool_type;
+      if (check(n^.left, si, nest, env, tenv) <> bool_type)
+         or (check(n^.right, si, nest, env, tenv) <> bool_type) then
+         err('incompatible type for operator', n^.right^.loc);
+   end;
+
+   function check_eq_op(): spec;
+   begin
+      check_eq_op := bool_type;
+      if not compatible(check(n^.left, si, nest, env, tenv),
+                        check(n^.right, si, nest, env, tenv)) then
+         err('incompatible type for operator', n^.loc);
+   end;
+
 begin
    check := void_type;
    case n^.tag of
@@ -641,10 +650,16 @@ begin
          check := char_type;
       empty_node:
          check := void_type;
-      unary_op_node:
-         check := check_unary_op();
-      binary_op_node:
-         check := check_binary_op();
+      unary_minus_node:
+         check := check_unary_minus();
+      plus_node, minus_node, lt_node, leq_node, gt_node, geq_node:
+         check_ordinal_op();
+      mul_node, div_node, mod_node:
+         check_int_op();
+      and_node, or_node:
+         check_bool_op();
+      eq_node, neq_node:
+         check_eq_op();
       let_node:
          check := check_let();
       simple_var_node:

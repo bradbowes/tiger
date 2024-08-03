@@ -13,9 +13,7 @@ implementation
 uses sysutils, symbols, parser,
      sources, ops, bindings, datatypes;
 
-
 procedure emit_expression(n: node; si, nest: longint); forward;
-
 
 const prologue =
    '.text' + lineending +
@@ -25,11 +23,9 @@ const prologue =
    '   pushq %%rbp' + lineending +
    '   movq %%rsp, %%rbp';
 
-
 const epilogue =
    '   popq %%rbp' + lineending +
    '   ret';
-
 
 type
    string_list = ^string_list_t;
@@ -47,14 +43,12 @@ type
       next: function_list;
    end;
 
-
 var
    f: textfile;
    strings: string_list = nil;
    functions: function_list = nil;
    next_string_id: integer = 1;
    next_label_id: integer = 1;
-
 
 function add_string(s: symbol): string_list;
 var
@@ -76,7 +70,6 @@ begin
    add_string := sl;
 end;
 
-
 procedure add_function(f: node);
 var
    fl, next: function_list;
@@ -95,19 +88,16 @@ begin
       end;
 end;
 
-
 function new_label(): string;
 begin
    new_label := format('L%.5d', [next_label_id]);
    next_label_id := next_label_id + 1;
 end;
 
-
 procedure emit(fmt: string; args: array of const);
 begin
    writeln(f, format(fmt, args));
 end;
-
 
 procedure emit_data();
 var
@@ -131,7 +121,6 @@ begin
       end;
 end;
 
-
 procedure emit_functions();
 var
    fl: function_list;
@@ -153,7 +142,6 @@ begin
       end;
 end;
 
-
 procedure emit_expression(n: node; si, nest: longint);
 var
    tmp: string;
@@ -174,7 +162,6 @@ var
          emit_expression(n^.right, stack_index, nest);
    end;
 
-
    procedure emit_if_else();
    var
       lbl1, lbl2: string;
@@ -191,7 +178,6 @@ var
       emit('%s:', [lbl2]);
    end;
 
-
    procedure emit_if();
    var
       lbl: string;
@@ -204,7 +190,6 @@ var
       emit('%s:', [lbl]);
    end;
 
-
    procedure emit_string();
    var
       slabel: string;
@@ -214,7 +199,6 @@ var
       slabel := 'tiger$_string_' + inttostr(sl^.id) + '@GOTPCREL(%rip)';
       emit('   movq %s, %%rax', [slabel]);
    end;
-
 
    procedure emit_var();
    var
@@ -234,7 +218,6 @@ var
             emit('   movq %d(%%rbx), %%rax', [offset]);
          end;
    end;
-
 
    procedure emit_simple_assign();
    var
@@ -258,7 +241,6 @@ var
          end;
    end;
 
-
    procedure emit_indexed_assign();
    var
       arr: node;
@@ -279,7 +261,6 @@ var
          emit('   movq %%rax, 8(%%rsi, %%rbx, 8)', []);
    end;
 
-
    procedure emit_field_assign();
    var
       offset: longint;
@@ -297,7 +278,6 @@ var
       emit('   movq %d(%%rbp), %%rsi', [si]);
    end;
 
-
    procedure emit_assign();
    begin
       case n^.left^.tag of
@@ -309,7 +289,6 @@ var
             emit_field_assign();
       end;
    end;
-
 
    procedure emit_tail_call();
    var
@@ -346,7 +325,6 @@ var
       else
          emit('   jmp f%d$_%s', [n^.binding^.id, n^.name^.id]);
    end;
-
 
    procedure emit_call();
    var
@@ -387,7 +365,6 @@ var
       emit('   addq $%d, %%rsp', [stack_size]);
    end;
 
-
    procedure emit_sequence();
    var
       it: node_list_item;
@@ -399,7 +376,6 @@ var
             it := it^.next;
          end;
    end;
-
 
    procedure emit_array();
    var
@@ -418,7 +394,6 @@ var
            '   movq (%%r15), %%rcx' + lineending +
            '   leaq 8(%%r15, %%rcx, 8), %%r15', [lbl, lbl]);
    end;
-
 
    procedure emit_record();
    var
@@ -448,7 +423,6 @@ var
            '   addq $%d, %%r15', [size * 8]);
    end;
 
-
    procedure emit_indexed_var();
    begin
       emit_expression(n^.left, si, nest);
@@ -466,7 +440,6 @@ var
       emit('   movq %d(%%rbp), %%rsi', [si]);
    end;
 
-
    procedure emit_field_var();
    var
       ty: spec;
@@ -480,7 +453,6 @@ var
       emit('   movq %d(%%rsi), %%rax', [8 * offset]);
       emit('   movq %d(%%rbp), %%rsi', [si]);
    end;
-
 
    procedure emit_for();
    var
@@ -515,7 +487,6 @@ var
       emit('   movq %d(%%rbp), %%rbx', [offset - 16]);
       emit('   movq %d(%%rbp), %%rcx', [offset - 8]);
    end;
-
 
    procedure emit_while();
    var
@@ -645,10 +616,6 @@ begin
          emit_sequence();
       assign_node:
          emit_assign();
-      (*
-      for_node:
-         emit_for();
-      *)
       while_node:
          emit_while();
       else
