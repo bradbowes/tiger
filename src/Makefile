@@ -7,13 +7,13 @@ all:	tc tprint lib.o
 tc:	sources.pas symbols.pas scanner.pas ops.pas nodes.pas \
 	values.pas parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas x86_emitter.pas tc.pas
-	fpc -Sh -Px86_64 -O3 tc
+	fpc -Sh -O3 tc
 	strip tc
 
 tprint:	sources.pas symbols.pas scanner.pas ops.pas nodes.pas \
 	values.pas parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas tprint.pas
-	fpc -Sh -Px86_64 -O3 tprint
+	fpc -Sh -O3 tprint
 	strip tprint
 
 test:	tc tprint lib.o
@@ -54,11 +54,11 @@ clean:
 	rm -f ../examples/copy
 	rm -f ../examples/echo
 	rm -f ../examples/multiples
-	rm -f ../examples/euler2
-	rm -f ../examples/euler3
-	rm -f ../examples/euler4
-	rm -f ../examples/euler5
-	rm -f ../examples/euler6
+	rm -f ../examples/evenfib
+	rm -f ../examples/primefactor
+	rm -f ../examples/paliproduct
+	rm -f ../examples/smallestmultiple
+	rm -f ../examples/sumsquarediff
 	rm -f ../examples/euler7
 	rm -f ../examples/euler8
 	rm -f ../examples/euler9
@@ -71,5 +71,6 @@ clean:
 	rm -f ../examples/merge
 	rm -f ../examples/queens
 	rm -f ../examples/wordcount
+	rm -f ../examples/tak
 	rm -f ../boot/*.o
 	rm -f ../boot/*.s

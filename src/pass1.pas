@@ -113,7 +113,7 @@ var
             neq_op:
                trans_binary_op := make_boolean_node(e1^.value^.bool_val <> e2^.value^.bool_val, loc);
             and_op:
-               trans_binary_op :=  make_boolean_node(e1^.value^.bool_val and e2^.value^.bool_val, loc);
+               trans_binary_op := make_boolean_node(e1^.value^.bool_val and e2^.value^.bool_val, loc);
             or_op:
                trans_binary_op := make_boolean_node(e1^.value^.bool_val or e2^.value^.bool_val, loc);
             else
@@ -128,7 +128,7 @@ var
          else if (e2^.tag = boolean_node) and e2^.value^.bool_val then
             trans_binary_op := e1
          else
-            trans_binary_op := copy_node(n, tf)
+            trans_binary_op := make_if_else_node(e1, e2, make_boolean_node(false, loc), loc)
       else if (op = or_op) then
          if e1^.tag = boolean_node then
             if e1^.value^.bool_val then
@@ -138,7 +138,7 @@ var
          else if (e2^.tag = boolean_node) and (not e2^.value^.bool_val) then
             trans_binary_op := e1
          else
-            trans_binary_op := copy_node(n, tf)
+            trans_binary_op := make_if_else_node(e1, make_boolean_node(true, loc), e2, loc)
       else
          trans_binary_op := copy_node(n, tf);
    end;

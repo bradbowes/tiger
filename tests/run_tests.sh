@@ -22,7 +22,6 @@ test_code () {
 }
 
 # : << END_COMMENT
-
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
 test_code "writeln(str(-36545))" "-36545"
@@ -56,9 +55,15 @@ test_code "writeln(if 153 >= 153 then \"true\" else \"false\")" "true"
 test_code "writeln(if 100 >= 153 then \"true\" else \"false\")" "false"
 test_code "writeln(if 9 - 4 = 5 then \"true\" else \"false\")" "true"
 test_code "writeln(if 9 - 4 = 4 then \"true\" else \"false\")" "false"
-test_code "writeln(if 1 = 1 and 2 = 2 then \"true\" else \"false\")" "true"
+test_code "writeln(if 1 = 1 and 2 = 2 and 3 = 3 then \"true\" else \"false\")" "true"
 test_code "writeln(if 1 = 1 and 1 = 2 then \"true\" else \"false\")" "false"
 test_code "writeln(if 1 = 2 and 2 = 2 then \"true\" else \"false\")" "false"
+
+test_code "writeln(if 1 = 1 or 1 = 2 and 1 = 3 then \"true\" else \"false\")" "true"
+test_code "writeln(if 1 = 2 or 1 = 1 then \"true\" else \"false\")" "true"
+test_code "writeln(if 1 = 2 or 2 = 3 then \"true\" else \"false\")" "false"
+
+
 test_code "writeln(if true then \"true\" else \"false\")" "true"
 test_code "writeln(if false then \"true\" else \"false\")" "false"
 test_code "writeln(if true = true then \"true\" else \"false\")" "true"
@@ -537,7 +542,6 @@ end" "5"
 
 test_code "writeln(str(command_argcount()))" "1"
 
-# END_COMMENT
 
 test_code "let
    a = substring(\"hello\", 0, 5)
@@ -556,3 +560,4 @@ in
    a[4] := #\"O\"
    writeln(a)
 end" "HELLO"
+# END_COMMENT
