@@ -236,7 +236,8 @@ var
    function get_product(): node;
    var
       loc: source_location;
-      left, op: node;
+      left: node;
+      op: node_tag = empty_node;
    begin
       loc := token_location();
       left := get_factor();
@@ -244,12 +245,13 @@ var
       while token.tag in [mul_token, div_token, mod_token] do
          begin
             case token.tag of
-               mul_token: op := make_mul_node(left, get_factor(), loc);
-               div_token: op := make_div_node(left, get_factor(), loc);
-               mod_token: op := make_mod_node(left, get_factor(), loc);
+               mul_token: op := mul_node;
+               div_token: op := div_node;
+               mod_token: op := mod_node;
             end;
             next();
-            left := op;
+            left := make_binary_node(op, left, get_factor(), loc);
+            loc := token_location();
          end;
 
       get_product := left;
@@ -258,7 +260,8 @@ var
    function get_sum(): node;
    var
       loc: source_location;
-      left, op: node;
+      left: node;
+      op: node_tag = empty_node;
    begin
       loc := token_location();
       left := get_product();
@@ -266,11 +269,12 @@ var
       while token.tag in [plus_token, minus_token] do
          begin
             case token.tag of
-               plus_token: op := make_plus_node(left, get_product(), loc);
-               minus_token: op := make_minus_node(left, get_product(), loc);
+               plus_token:  op := plus_node;
+               minus_token: op := minus_node;
             end;
             next();
-            left := op;
+            left := make_binary_node(op, left, get_product(), loc);
+            loc := token_location();
          end;
 
       get_sum := left;
@@ -279,7 +283,8 @@ var
    function get_boolean(): node;
    var
       loc: source_location;
-      left, op: node;
+      left: node;
+      op: node_tag = empty_node;
    begin
       loc := token_location();
       left := get_sum();
@@ -287,15 +292,16 @@ var
       while token.tag in [eq_token, neq_token, lt_token, leq_token, gt_token, geq_token] do
          begin
             case token.tag of
-               eq_token: op := make_eq_node(left, get_sum(), loc);
-               neq_token: op := make_neq_node(left, get_sum(), loc);
-               lt_token: op := make_lt_node(left, get_sum(), loc);
-               leq_token: op := make_leq_node(left, get_sum(), loc);
-               gt_token: op := make_gt_node(left, get_sum(), loc);
-               geq_token: op := make_geq_node(left, get_sum(), loc);
+               eq_token:  op := eq_node;
+               neq_token: op := neq_node;
+               lt_token:  op := lt_node;
+               leq_token: op := leq_node;
+               gt_token:  op := gt_node;
+               geq_token: op := geq_node;
             end;
             next();
-            left := op;
+            left := make_binary_node(op, left, get_sum(), loc);
+            loc := token_location();
          end;
 
       get_boolean := left;
@@ -313,7 +319,7 @@ var
          begin
             next();
             left := make_and_node(left, get_boolean(), loc);
-         end;
+      end;
 
       get_conjunction := left;
    end;

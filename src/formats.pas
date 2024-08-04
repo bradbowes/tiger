@@ -8,7 +8,7 @@ function format(n: node): string;
 
 implementation
 
-uses ops, sysutils;
+uses  sysutils;
 
 var indent_level: integer;
 
@@ -136,10 +136,34 @@ begin
          format := format_list(n^.list, ' | ', false);
       array_desc_node:
          format := 'array of ' + n^.type_name^.id;
-      unary_op_node:
-         format := op_display[n^.op] + ' ' + format(n^.left);
-      binary_op_node:
-         format := '(' + format(n^.left) + ' ' + op_display[n^.op] + ' ' + format(n^.right) + ')';
+      unary_minus_node:
+         format := '- ' + format(n^.left);
+      plus_node:
+         format := '(' + format(n^.left) + ' + ' + format(n^.right) + ')';
+      minus_node:
+         format := '(' + format(n^.left) + ' - ' + format(n^.right) + ')';
+      mul_node:
+         format := '(' + format(n^.left) + ' * ' + format(n^.right) + ')';
+      div_node:
+         format := '(' + format(n^.left) + ' / ' + format(n^.right) + ')';
+      mod_node:
+         format := '(' + format(n^.left) + ' mod ' + format(n^.right) + ')';
+      eq_node:
+         format := '(' + format(n^.left) + ' = ' + format(n^.right) + ')';
+      neq_node:
+         format := '(' + format(n^.left) + ' <> ' + format(n^.right) + ')';
+      lt_node:
+         format := '(' + format(n^.left) + ' < ' + format(n^.right) + ')';
+      leq_node:
+         format := '(' + format(n^.left) + ' <= ' + format(n^.right) + ')';
+      gt_node:
+         format := '(' + format(n^.left) + ' > ' + format(n^.right) + ')';
+      geq_node:
+         format := '(' + format(n^.left) + ' >= ' + format(n^.right) + ')';
+      and_node:
+         format := '(' + format(n^.left) + ' and ' + format(n^.right) + ')';
+      or_node:
+         format := '(' + format(n^.left) + ' or ' + format(n^.right) + ')';
       field_node:
          format := n^.name^.id + ' = ' + format(n^.left);
       field_desc_node:

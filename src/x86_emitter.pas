@@ -11,7 +11,7 @@ procedure emit_x86(ast: node; file_name: string);
 implementation
 
 uses sysutils, symbols, parser,
-     sources, ops, bindings, datatypes;
+     sources, bindings, datatypes;
 
 procedure emit_expression(n: node; si, nest: longint); forward;
 
@@ -507,62 +507,56 @@ begin
    case n^.tag of
       integer_node, char_node:
          emit('   movq $%d, %%rax', [n^.value^.int_val]);
-      unary_op_node:
+      unary_minus_node:
          begin
             emit_expression(n^.left, si, nest);
             emit('   negq %%rax', []);
          end;
-      binary_op_node:
+      plus_node, minus_node, mul_node, div_node, mod_node, eq_node,
+                 neq_node, lt_node, leq_node, gt_node, geq_node:
          begin
-            // tmp := inttostr(si) + '(%rbp)';
             tmp := '%rcx';
             emit_expression(n^.right, si, nest);
             emit('   movq %%rax, %s', [tmp]);
-            // emit_expression(n^.left, si - 8, nest);
             emit_expression(n^.left, si, nest);
-            case n^.op of
-               plus_op:
+            case n^.tag of
+               plus_node:
                   emit('   addq %s, %%rax', [tmp]);
-               minus_op:
+               minus_node:
                   emit('   subq %s, %%rax', [tmp]);
-               mul_op:
+               mul_node:
                   emit('   imulq %s, %%rax', [tmp]);
-               div_op:
+               div_node:
                   emit('   cqto' + lineending +
                        '   idivq %s', [tmp]);
-               mod_op:
+               mod_node:
                   emit('   cqto' + lineending +
                        '   idivq %s' + lineending +
                        '   movq %%rdx, %%rax', [tmp]);
-               eq_op:
+               eq_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   sete %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-   	         neq_op:
+   	         neq_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   setne %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-   	         lt_op:
+   	         lt_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   setl %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-   	         leq_op:
+   	         leq_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   setle %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-   	         gt_op:
+   	         gt_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   setg %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-   	         geq_op:
+   	         geq_node:
                   emit('   cmpq %s, %%rax' + lineending +
                        '   setge %%al' + lineending +
                        '   andq $1, %%rax', [tmp]);
-               else
-                  begin
-                     writeln(n^.op);
-                     err('emit: operator not implemented yet!', n^.loc);
-                  end;
             end;
          end;
       boolean_node:

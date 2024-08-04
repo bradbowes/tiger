@@ -619,6 +619,16 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          err('incompatible type for operator', n^.right^.loc);
    end;
 
+   function check_compare_op(): spec;
+   var t1: spec;
+   begin
+      check_compare_op := bool_type;
+      t1 := check(n^.left, si, nest, env, tenv);
+      if ((t1 <> char_type) and (t1 <> int_type))
+            or (t1 <> check(n^.right, si, nest, env, tenv)) then
+         err('incompatible type for operator', n^.loc);
+   end;
+
    function check_bool_op(): spec;
    begin
       check_bool_op := bool_type;
@@ -652,14 +662,16 @@ begin
          check := void_type;
       unary_minus_node:
          check := check_unary_minus();
-      plus_node, minus_node, lt_node, leq_node, gt_node, geq_node:
-         check_ordinal_op();
+      plus_node, minus_node:
+         check := check_ordinal_op();
       mul_node, div_node, mod_node:
-         check_int_op();
+         check := check_int_op();
+      lt_node, leq_node, gt_node, geq_node:
+         check := check_compare_op();
       and_node, or_node:
-         check_bool_op();
+         check := check_bool_op();
       eq_node, neq_node:
-         check_eq_op();
+         check := check_eq_op();
       let_node:
          check := check_let();
       simple_var_node:

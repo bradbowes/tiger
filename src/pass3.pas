@@ -51,21 +51,21 @@ var
          reduce := trans3(n);
    end;
 
-   function expand_binary_op(): node;
+   function expand_binary(): node;
    var
       left, right: node;
    begin
       left := reduce(n^.left);
       right := reduce(n^.right);
-      expand_binary_op := expand(make_binary_op_node(n^.op, left, right, loc));
+      expand_binary := expand(make_binary_node(n^.tag, left, right, loc));
    end;
 
-   function expand_unary_op(): node;
+   function expand_unary_minus(): node;
    var
       left: node;
    begin
       left := reduce(n^.left);
-      expand_unary_op := expand(make_unary_op_node(n^.op, left, loc));
+      expand_unary_minus := expand(make_unary_minus_node(left, loc));
    end;
 
    function expand_call(): node;
@@ -160,15 +160,25 @@ begin
    decls := make_node_list();
 
    case n^.tag of
-      call_node, tail_call_node: trans3 := expand_call();
-      if_else_node: trans3 := expand_if_else();
-      if_node: trans3 := expand_if();
-      assign_node: trans3 := expand_assign();
-      unary_op_node: trans3 := expand_unary_op();
-      binary_op_node: trans3 := expand_binary_op();
-      indexed_var_node: trans3 := expand_indexed_var();
-      field_var_node: trans3 := expand_field_var();
-      record_node: trans3 := expand_record();
+      call_node, tail_call_node:
+         trans3 := expand_call();
+      if_else_node:
+         trans3 := expand_if_else();
+      if_node:
+         trans3 := expand_if();
+      assign_node:
+         trans3 := expand_assign();
+      unary_minus_node:
+         trans3 := expand_unary_minus();
+      plus_node, minus_node, mul_node, div_node, mod_node, eq_node,
+                 neq_node, lt_node, leq_node, gt_node, geq_node:
+         trans3 := expand_binary();
+      indexed_var_node:
+         trans3 := expand_indexed_var();
+      field_var_node:
+         trans3 := expand_field_var();
+      record_node:
+         trans3 := expand_record();
       else trans3 := copy_node(n, tf);
    end;
 end;
