@@ -120,15 +120,6 @@ var
       expand_assign := expand(make_assign_node(left, right, loc));
    end;
 
-   function expand_indexed_var(): node;
-   var
-      left, right: node;
-   begin
-      left := reduce(n^.left);
-      right := reduce(n^.right);
-      expand_indexed_var := expand(make_indexed_var_node(left, right, loc));
-   end;
-
    function expand_field_var(): node;
    var
       left: node;
@@ -170,11 +161,9 @@ begin
          trans3 := expand_assign();
       unary_minus_node:
          trans3 := expand_unary_minus();
-      plus_node, minus_node, mul_node, div_node, mod_node, eq_node,
-                 neq_node, lt_node, leq_node, gt_node, geq_node:
+      plus_node, minus_node, mul_node, div_node, mod_node, eq_node, neq_node,
+                 lt_node, leq_node, gt_node, geq_node, indexed_var_node:
          trans3 := expand_binary();
-      indexed_var_node:
-         trans3 := expand_indexed_var();
       field_var_node:
          trans3 := expand_field_var();
       record_node:

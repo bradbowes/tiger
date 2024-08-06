@@ -100,9 +100,10 @@ procedure annotate(n: node; nest: integer; fn: binding);
 
 begin
    case n^.tag of
-      unary_op_node, field_var_node:
+      unary_minus_node, field_var_node:
          annotate(n^.left, nest, fn);
-      binary_op_node, indexed_var_node, array_node:
+      plus_node, minus_node, mul_node, div_node, mod_node, eq_node, neq_node,
+                 lt_node, leq_node, gt_node, geq_node, indexed_var_node, array_node:
          begin
             annotate(n^.left, nest, fn);
             annotate(n^.right, nest, fn);
