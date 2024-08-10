@@ -75,12 +75,12 @@ var
    var
       list: node_list;
    begin
-      list := make_node_list();
-      append_node(list, get_expression());
+      list := node_list.create();
+      list.append(get_expression());
       while token.tag = comma_token do
          begin
             next();
-            append_node(list, get_expression());
+            list.append(get_expression());
          end;
       get_expression_list := list;
    end;
@@ -91,10 +91,10 @@ var
       list: node_list;
    begin
       loc := token_location();
-      list := make_node_list();
+      list := node_list.create();
       while token.tag <> end_token do
          begin
-            append_node(list, get_expression());
+            list.append(get_expression());
             if token.tag = semicolon_token then next();
          end;
       next();
@@ -116,14 +116,14 @@ var
    var
       list: node_list;
    begin
-      list := make_node_list();
+      list := node_list.create();
       if not (token.tag in [rparen_token, rbrace_token]) then
          begin
-            append_node(list, get_field);
+            list.append(get_field());
             while token.tag = comma_token do
                begin
                   next();
-                  append_node(list, get_field());
+                  list.append(get_field());
                end;
          end;
       get_field_list := list;
@@ -178,7 +178,7 @@ var
                      begin
                         next();
                         if token.tag = rparen_token then
-                           list := make_node_list()
+                           list := node_list.create()
                         else
                            list := get_expression_list();
                         advance(rparen_token, ')');
@@ -422,13 +422,13 @@ var
       next();
       arg := get_expression();
       advance(of_token, 'of');
-      clauses := make_node_list();
-      append_node(clauses, get_clause());
+      clauses := node_list.create();
+      clauses.append(get_clause());
       while token.tag = pipe_token do
          begin
             next();
             if token.tag in [id_token, number_token, char_token] then
-               append_node(clauses, get_clause())
+               clauses.append(get_clause())
             else
                err('expected id, number or char, got ''' + token.value + '''', token_location());
          end;
@@ -486,14 +486,14 @@ var
    var
       list: node_list;
    begin
-      list := make_node_list();
+      list := node_list.create();
       if not (token.tag in [rparen_token, rbrace_token]) then
          begin
-            append_node(list, get_field_desc);
+            list.append(get_field_desc);
             while token.tag = comma_token do
                begin
                   next();
-                  append_node(list, get_field_desc());
+                  list.append(get_field_desc());
                end;
          end;
       get_field_desc_list := list;
@@ -504,14 +504,14 @@ var
       list: node_list;
       loc: source_location;
    begin
-      list := make_node_list();
+      list := node_list.create();
       loc := token_location();
-      append_node(list, make_enum_node(get_identifier(), loc));
+      list.append(make_enum_node(get_identifier(), loc));
       while token.tag = pipe_token do
          begin
             next();
             loc := token_location();
-            append_node(list, make_enum_node(get_identifier(), loc));
+            list.append(make_enum_node(get_identifier(), loc));
          end;
       get_enum_list := list;
    end;
@@ -629,7 +629,7 @@ var
       decls: node_list;
       use_file: string;
    begin
-      decls := make_node_list();
+      decls := node_list.create();
       while token.tag in [id_token, type_token, use_token] do
          begin
             if token.tag = use_token then
@@ -645,7 +645,7 @@ var
                      err('Expected file name', token_location());
                end
             else
-               append_node(decls, get_declaration());
+               decls.append(get_declaration());
          end;
       get_declaration_list := decls
    end;

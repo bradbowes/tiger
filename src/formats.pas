@@ -49,26 +49,28 @@ begin
 end;
 
 function format_list(l: node_list; sep: string; break_lines: boolean): string;
-var it: node_list_item;
-    s: string;
+var
+   it: node_list_item;
+   s: string;
 begin
    indent();
    s := '';
-   it := l^.first;
+   it := l.first;
    while it <> nil do
       begin
          if break_lines then s := s + newline;
-         s := s + format(it^.node);
-         if it^.next <> nil then
+         s := s + format(it.thing);
+         if it.next <> nil then
             s := s + sep;
-         it := it^.next;
+         it := it.next;
       end;
    dedent();
    format_list := s;
 end;
 
 function format(n: node): string;
-var s: string;
+var
+   s: string;
 begin
    case n^.tag of
       assign_node:

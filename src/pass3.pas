@@ -3,6 +3,9 @@
     need label, goto nodes to transform while loops
 *)
 
+{$mode objfpc}
+{$modeswitch nestedprocvars}
+
 unit pass3;
 interface
 
@@ -29,7 +32,7 @@ var
 
    function expand(n: node): node;
    begin
-      if decls^.length > 0 then
+      if decls.length > 0 then
          expand := make_let_node(decls, n, loc)
       else
          expand := n;
@@ -44,7 +47,7 @@ var
          begin
             v := gensym();
             loc := n^.loc;
-            append_node(decls, make_var_decl_node(v, nil, trans3(n), loc));
+            decls.append(make_var_decl_node(v, nil, trans3(n), loc));
             reduce := make_simple_var_node(v, loc);
          end
       else
@@ -71,15 +74,17 @@ var
    function expand_call(): node;
    var
       args: node_list;
-      it: node_list_item;
+      add_arg: node_list.iter;
+
+      procedure _add_arg(n: node);
+      begin
+         args.append(reduce(n));
+      end;
+
    begin
-      args := make_node_list();
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            append_node(args, reduce(it^.node));
-            it := it^.next;
-         end;
+      add_arg := @_add_arg;
+      args := node_list.create();
+      n^.list.foreach(add_arg);
       expand_call := expand(make_call_node(n^.name, args, loc));
    end;
 
@@ -133,22 +138,24 @@ var
       field, value: node;
       list: node_list;
       it: node_list_item;
+      add_field: node_list.iter;
+
+      procedure _add_field(n: node);
+      begin
+         value := reduce(n^.left);
+         list.append(make_field_node(n^.name, value, n^.loc));
+      end;
+
    begin
-      list := make_node_list();
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            field := it^.node;
-            value := reduce(field^.left);
-            append_node(list, make_field_node(field^.name, value, field^.loc));
-            it := it^.next;
-         end;
+      add_field := @_add_field;
+      list := node_list.create();
+      n^.list.foreach(add_field);
       expand_record := expand(make_record_node(n^.type_name, list, loc));
    end;
 
 begin
    loc := n^.loc;
-   decls := make_node_list();
+   decls := node_list.create();
 
    case n^.tag of
       call_node, tail_call_node:

@@ -1,8 +1,11 @@
+{$mode objfpc}
+{$modeswitch nestedprocvars}
+
 unit nodes;
 
 interface
 
-uses sources, symbols, values, bindings;
+uses lists, sources, symbols, values, bindings;
 
 type
    node_tag = (assign_node,
@@ -51,21 +54,10 @@ type
                record_node,
                array_node);
 
+
    node = ^node_t;
-   node_list_item = ^node_list_item_t;
-   node_list = ^node_list_t;
-
-   node_list_item_t = record
-      node: node;
-      next: node_list_item
-   end;
-
-   node_list_t = record
-      first: node_list_item;
-      last:  node_list_item;
-      length: longint;
-   end;
-
+   node_list = specialize list<node>;
+   node_list_item = specialize list_item<node>;
    node_t = record
       tag: node_tag;
       loc: source_location;
@@ -81,8 +73,6 @@ type
 
    tf_function = function(n: node): node;
 
-function make_node_list(): node_list;
-procedure append_node(list: node_list; n: node);
 function make_assign_node(variable, expr: node; loc: source_location): node;
 function make_call_node(name: symbol; args: node_list; loc: source_location): node;
 function make_simple_var_node(name: symbol; loc: source_location): node;
@@ -120,7 +110,7 @@ function make_enum_node(name: symbol; loc: source_location): node;
 function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
 function make_if_node(condition, consequent: node; loc: source_location): node;
 function make_case_node(arg: node; clauses: node_list; default: node; loc: source_location): node;
-function make_clause_node(match: node; result: node; loc: source_location): node;
+function make_clause_node(match, action: node; loc: source_location): node;
 function make_while_node(condition, body: node; loc: source_location): node;
 function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
 function make_let_node(decls: node_list; body: node; loc: source_location): node;
@@ -131,55 +121,22 @@ function make_binary_node(tag: node_tag; left, right: node; loc: source_location
 procedure delete_node(var n: node);
 function copy_node(n: node; tf: tf_function): node;
 
-
 implementation
 
-function make_node_list(): node_list;
+function list_ins_count(ls: node_list): integer;
 var
-   list: node_list;
-begin
-   new(list);
-   list^.first := nil;
-   list^.last := nil;
-   list^.length := 0;
-   make_node_list := list;
-end;
-
-function make_list_item(n: node): node_list_item;
-var
-   item: node_list_item;
-begin
-   new(item);
-   item^.node := n;
-   item^.next := nil;
-   make_list_item := item;
-end;
-
-function list_ins_count(list: node_list): integer;
-var
-   it: node_list_item;
    count: integer = 0;
-begin
-   it := list^.first;
-   while it <> nil do
-      begin
-         count := count + it^.node^.ins_count;
-         it := it^.next;
-      end;
-   list_ins_count := count;
-end;
+   add_count: node_list.iter;
 
-procedure append_node(list: node_list; n: node);
-var
-   item: node_list_item;
+   procedure _add_count(n: node);
+   begin
+      count := count + n^.ins_count;
+   end;
 begin
-   item := make_list_item(n);
-   if list^.first = nil then
-      list^.first := item
-   else
-      list^.last^.next := item;
-  list^.last := item;
-  list^.length := list^.length + 1;
+   add_count := @_add_count;
+
+   ls.foreach(add_count);
+   list_ins_count := count;
 end;
 
 function make_node(tag: node_tag; loc: source_location): node;
@@ -189,6 +146,7 @@ begin
    new(n);
    n^.tag := tag;
    n^.loc := loc;
+   n^.ins_count := 0;
    n^.value := nil;
    n^.binding := nil;
    n^.name := nil;
@@ -206,19 +164,10 @@ function make_binary_node(tag: node_tag; left, right: node; loc: source_location
 var
    n: node;
 begin
-   new(n);
-   n^.tag := tag;
-   n^.loc := loc;
-   n^.value := nil;
-   n^.binding := nil;
-   n^.name := nil;
-   n^.type_name := nil;
-   n^.cond := nil;
+   n := make_node(tag, loc);
+   n^.ins_count := left^.ins_count + right^.ins_count + 1;
    n^.left := left;
    n^.right := right;
-   n^.list := nil;
-   n^.env := nil;
-   n^.tenv := nil;
    make_binary_node := n;
 end;
 
@@ -545,14 +494,14 @@ begin
    make_case_node := n;
 end;
 
-function make_clause_node(match, result: node; loc: source_location): node;
+function make_clause_node(match, action: node; loc: source_location): node;
 var
    n: node;
 begin
    n := make_node(clause_node, loc);
    n^.left := match;
-   n^.right := result;
-   n^.ins_count := result^.ins_count + 1;
+   n^.right := action;
+   n^.ins_count := action^.ins_count + 1;
    make_clause_node := n;
 end;
 
@@ -626,23 +575,23 @@ end;
 
 procedure delete_node(var n: node);
 var
-   it, tmp: node_list_item;
+   del_item: node_list.iter;
+
+   procedure _del_item(n: node);
+   begin
+      if n <> nil then delete_node(n);
+   end;
+
 begin
+   del_item := @_del_item;
    if n^.cond <> nil then delete_node(n^.cond);
    if n^.left <> nil then delete_node(n^.left);
    if n^.right <> nil then delete_node(n^.right);
    if n^.list <> nil then
-      begin
-         it := n^.list^.first;
-         while it <> nil do
-            begin
-               tmp := it^.next;
-               if it^.node <> nil then delete_node(it^.node);
-               dispose(it);
-               it := tmp;
-            end;
-         dispose(n^.list);
-      end;
+   begin
+      n^.list.foreach(del_item);
+      n^.list.destroy();
+   end;
    if n^.tenv <> nil then delete_scope(n^.tenv);
    if n^.env <> nil then delete_scope(n^.env);
    dispose(n);
@@ -650,11 +599,10 @@ begin
 end;
 
 function copy_node(n: node; tf: tf_function): node;
-
 var
-   new_node, tmp: node;
+   new_node: node;
    ls: node_list;
-   it: node_list_item;
+   list_copy: node_list.iter;
 
    function cp(n: node): node;
    begin
@@ -664,23 +612,25 @@ var
          cp := tf(n);
    end;
 
+   procedure _list_copy(n: node);
+   var tmp: node;
+   begin
+      tmp := cp(n);
+      if tmp <> nil then
+         ls.append(tmp);
+   end;
+
 begin
+   list_copy := @_list_copy;
    new_node := make_node(n^.tag, n^.loc);
    new_node^.value := n^.value;
    new_node^.name := n^.name;
    new_node^.type_name := n^.type_name;
    if n^.list <> nil then
       begin
-         ls := make_node_list();
-         it := n^.list^.first;
-         while it <> nil do
-            begin
-               tmp := cp(it^.node);
-               if tmp <> nil then
-                  append_node(ls, tmp);
-               it := it^.next;
-            end;
-         new_node^.list := ls
+         ls := node_list.create();
+         n^.list.foreach(list_copy);
+         new_node^.list := ls;
       end;
    new_node^.cond := cp(n^.cond);
    new_node^.left := cp(n^.left);

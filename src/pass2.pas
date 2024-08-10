@@ -1,3 +1,6 @@
+{$mode objfpc}
+{$modeswitch nestedprocvars}
+
 unit pass2;
 
 interface
@@ -39,21 +42,29 @@ var
    b: binding;
    loc: source_location;
    list: node_list;
-   it: node_list_item;
-   arg: node;
+   add_arg, add_param: node_list.iter;
+
+   procedure _add_arg(n: node);
+   begin
+      list.append(trans2(n));
+   end;
+
+   procedure _add_param(arg: node);
+   begin
+      list.append(make_field_desc_node(var_name(lookup(n^.env, arg^.name, arg^.loc)), arg^.type_name, loc));
+   end;
+
 begin
+   add_arg := @_add_arg;
+   add_param := @_add_param;
    b := n^.binding;
    loc := n^.loc;
 
    case n^.tag of
       call_node, tail_call_node:
          begin
-            list := make_node_list();
-            it := n^.list^.first;
-            while it <> nil do begin
-               append_node(list, trans2(it^.node));
-               it := it^.next;
-            end;
+            list := node_list.create();
+            n^.list.foreach(add_arg);
             trans2 := make_call_node(fun_name(b), list, loc);
             trans2^.tag := n^.tag;
          end;
@@ -68,14 +79,8 @@ begin
             trans2 := copy_node(n, tf)
          else
             begin
-               list := make_node_list();
-               it := n^.list^.first;
-               while it <> nil do
-                  begin
-                     arg := it^.node;
-                     append_node(list, make_field_desc_node(var_name(lookup(n^.env, arg^.name, n^.loc)), arg^.type_name, loc));
-                     it := it^.next;
-                  end;
+               list := node_list.create();
+               n^.list.foreach(add_param);
                trans2 := make_fun_decl_node(fun_name(b), list, n^.type_name, trans2(n^.right), loc);
             end;
       else

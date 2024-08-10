@@ -1,3 +1,6 @@
+{$mode objfpc}
+{$modeswitch nestedprocvars}
+
 unit pass1;
 
 interface
@@ -270,20 +273,20 @@ var
       list: node_list;
       int_symbol, fin: symbol;
    begin
-      list := make_node_list();
-      append_node(list, trans1(right));
+      list := node_list.create();
+      list.append(trans1(right));
       e1 := make_simple_var_node(n^.name, loc);
       e2 := make_integer_node(1, loc);
       e1 := make_plus_node(e1, e2, loc);
       e2 := make_simple_var_node(n^.name, loc);
       e1 := make_assign_node(e2, e1, loc);
-      append_node(list, e1);
+      list.append(e1);
       e2 := make_sequence_node(list, right^.loc);
-      list := make_node_list();
+      list := node_list.create();
       int_symbol := intern('int');
-      append_node(list, make_var_decl_node(n^.name, int_symbol, trans1(left), left^.loc));
+      list.append(make_var_decl_node(n^.name, int_symbol, trans1(left), left^.loc));
       fin := gensym();
-      append_node(list, make_var_decl_node(fin, int_symbol, trans1(cond), cond^.loc));
+      list.append(make_var_decl_node(fin, int_symbol, trans1(cond), cond^.loc));
       e1 := make_leq_node(make_simple_var_node(n^.name, loc),
                           make_simple_var_node(fin, cond^.loc),
                           cond^.loc);
@@ -306,30 +309,31 @@ var
    function trans_let(): node;
    var
       list: node_list;
-      it: node_list_item;
-      e1, e2: node;
+      e: node;
+      trans_binding: node_list.iter;
+
+      procedure _trans_binding(n: node);
+      begin
+         if (n^.binding <> nil) and ((n^.binding^.mutates) or (n^.binding^.value = nil)) then
+            list.append(trans1(n));
+      end;
+
    begin
-      list := make_node_list();
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            e1 := it^.node;
-            if (e1^.binding <> nil) and ((e1^.binding^.mutates) or (e1^.binding^.value = nil)) then
-               append_node(list, trans1(e1));
-            it := it^.next;
-         end;
-      e2 := trans1(n^.right);
-      if list^.length > 0 then
-         trans_let := make_let_node(list, e2, loc)
+      trans_binding := @_trans_binding;
+      list := node_list.create();
+      n^.list.foreach(trans_binding);
+      e := trans1(n^.right);
+      if list.length > 0 then
+         trans_let := make_let_node(list, e, loc)
       else
-         trans_let := e2;
+         trans_let := e;
    end;
 
    function trans_sequence(): node;
    begin
-      case n^.list^.length of
+      case n^.list.length of
          0: trans_sequence := make_empty_node(loc);
-         1: trans_sequence := trans1(n^.list^.first^.node);
+         1: trans_sequence := trans1(n^.list.first.thing);
          else trans_sequence := copy_node(n, tf);
       end;
    end;
@@ -342,26 +346,26 @@ var
       function build_if(it: node_list_item): node;
       var
          clause: node;
-         c, result: node;
+         c, action: node;
          loc: source_location;
       begin
-         clause := it^.node;
+         clause := it.thing;
          loc := clause^.loc;
-         result := trans1(clause^.right);
+         action := trans1(clause^.right);
          c := make_eq_node(make_simple_var_node(cmp,  loc), trans1(clause^.left), loc);
-         if it^.next <> nil then
-            build_if := make_if_else_node(c, result, build_if(it^.next), loc)
+         if it.next <> nil then
+            build_if := make_if_else_node(c, action, build_if(it.next), loc)
          else if n^.right <> nil then
-            build_if := make_if_else_node(c, result, trans1(n^.right), loc)
+            build_if := make_if_else_node(c, action, trans1(n^.right), loc)
          else
-            build_if := make_if_node(c, result, loc);
+            build_if := make_if_node(c, action, loc);
       end;
 
    begin
       cmp := gensym();
-      list := make_node_list();
-      append_node(list, make_var_decl_node(cmp, nil, trans1(cond), loc));
-      trans_case := make_let_node(list, build_if(n^.list^.first), loc)
+      list := node_list.create();
+      list.append(make_var_decl_node(cmp, nil, trans1(cond), loc));
+      trans_case := make_let_node(list, build_if(n^.list.first), loc)
    end;
 
 begin

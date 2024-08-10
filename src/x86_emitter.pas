@@ -1,5 +1,7 @@
 {$mode objfpc}
-{$H+}
+{$modeswitch nestedprocvars}
+{$h+}
+
 unit x86_emitter;
 
 interface
@@ -148,16 +150,18 @@ var
 
    procedure emit_let();
    var
-      it: node_list_item;
       stack_index: longint;
+      emit_decl: node_list.iter;
+
+      procedure _emit_decl(n: node);
+      begin
+         emit_expression(n, stack_index, nest);
+      end;
+
    begin
+      emit_decl := @_emit_decl;
       stack_index := n^.env^.stack_index * -8 - 8; (* room for pushed %rbp *)
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            emit_expression(it^.node, stack_index, nest);
-            it := it^.next;
-         end;
+      n^.list.foreach(emit_decl);
       if n^.right <> nil then
          emit_expression(n^.right, stack_index, nest);
    end;
@@ -293,9 +297,18 @@ var
    procedure emit_tail_call();
    var
       target, i: longint;
-      arg: node_list_item;
       pos: longint;
+      emit_arg: node_list.iter;
+
+      procedure _emit_arg(n: node);
+      begin
+         emit_expression(n, -8, nest);
+         emit('   movq %%rax, %d(%%rbp)', [pos]);
+         pos := pos + 8;
+      end;
+
    begin
+      emit_arg := @_emit_arg;
       target := n^.binding^.nesting_level;
       pos := 16;
       { link }
@@ -311,14 +324,7 @@ var
                emit('   movq %%rbx, %d(%%rbp)', [pos]);
             end;
       pos := pos + 8;
-      arg := n^.list^.first;
-      while arg <> nil do
-         begin
-            emit_expression(arg^.node, -8, nest);
-            emit('   movq %%rax, %d(%%rbp)', [pos]);
-            pos := pos + 8;
-            arg := arg^.next;
-         end;
+      n^.list.foreach(emit_arg);
       emit('   popq %%rbp', []);
       if n^.binding^.external then
          emit('   jmp f$_%s', [n^.name^.id])
@@ -329,11 +335,20 @@ var
    procedure emit_call();
    var
       stack_size, target, i: longint;
-      arg: node_list_item;
       pos: longint;
+      emit_arg: node_list.iter;
+
+      procedure _emit_arg(n: node);
+      begin
+         emit_expression(n, -(stack_size + 8), nest);
+         emit('   movq %%rax, %d(%%rbp)', [pos]);
+         pos := pos + 8;
+      end;
+
    begin
+      emit_arg := @_emit_arg;
       target := n^.binding^.nesting_level;
-      stack_size := ((8 * n^.list^.length) - si + 15);
+      stack_size := ((8 * n^.list.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
       pos := -stack_size;
       { link }
@@ -349,14 +364,7 @@ var
                emit('   movq %%rbx, %d(%%rbp)', [pos]);
             end;
       pos := pos + 8;
-      arg := n^.list^.first;
-      while arg <> nil do
-         begin
-            emit_expression(arg^.node, -(stack_size + 8), nest);
-            emit('   movq %%rax, %d(%%rbp)', [pos]);
-            pos := pos + 8;
-            arg := arg^.next;
-         end;
+      n^.list.foreach(emit_arg);
       emit('   subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
          emit('   call f$_%s', [n^.name^.id])
@@ -368,13 +376,16 @@ var
    procedure emit_sequence();
    var
       it: node_list_item;
+      emit_expr: node_list.iter;
+
+      procedure _emit_expr(n: node);
+      begin
+         emit_expression(n, si, nest);
+      end;
+
    begin
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            emit_expression(it^.node, si, nest);
-            it := it^.next;
-         end;
+      emit_expr := @_emit_expr;
+      n^.list.foreach(emit_expr);
    end;
 
    procedure emit_array();
@@ -398,22 +409,24 @@ var
    procedure emit_record();
    var
       ty: spec;
-      it: node_list_item;
-      value: node;
-      offset, size, stack_index, i: longint;
+      size, stack_index, i: longint;
+      emit_field: node_list.iter;
+
+      procedure _emit_field(n: node);
+      var
+         offset: longint;
+      begin
+         emit_expression(n^.left, stack_index, nest);
+         offset := get_field(ty, n^.name, n^.loc)^.offset;
+         emit('   movq %%rax, %d(%%rbp)', [si - offset * 8]);
+      end;
+
    begin
-      size := n^.list^.length;
+      emit_field := @_emit_field;
+      size := n^.list.length;
       stack_index := si + (size * -8);
       ty := n^.binding^.ty;
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            value := it^.node;
-            emit_expression(value^.left, stack_index, nest);
-            offset := get_field(ty, value^.name, value^.loc)^.offset;
-            emit('   movq %%rax, %d(%%rbp)', [si - offset * 8]);
-            it := it^.next;
-         end;
+      n^.list.foreach(emit_field);
       for i := 0 to size - 1 do
          begin
             emit('   movq %d(%%rbp), %%rax', [si - i * 8]);
