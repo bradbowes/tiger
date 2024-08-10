@@ -1,3 +1,6 @@
+{$mode objfpc}
+{$modeswitch nestedprocvars}
+
 unit analysis;
 
 interface
@@ -15,14 +18,16 @@ procedure annotate(n: node; nest: integer; fn: binding);
 
    procedure annotate_list();
    var
-      it: node_list_item;
+      annotate_item: node_list.iter;
+
+      procedure _annotate_item(n: node);
+      begin
+         annotate(n, nest, fn);
+      end;
+
    begin
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            annotate(it^.node, nest, fn);
-            it := it^.next;
-         end;
+      annotate_item := @_annotate_item;
+      n^.list.foreach(annotate_item);
    end;
 
    procedure annotate_simple_var();
@@ -56,24 +61,26 @@ procedure annotate(n: node; nest: integer; fn: binding);
 
    procedure annotate_fun_decl();
    var
-      fn_b, param_b: binding;
-      it: node_list_item;
-      param: node;
+      b: binding;
       body: node;
+      annotate_param: node_list.iter;
+
+      procedure _annotate_param(param: node);
+      var
+         b: binding;
+      begin
+         b := lookup(n^.env, param^.name, param^.loc);
+         b^.nesting_level := nest + 1;
+      end;
+
    begin
-      fn_b := n^.binding;
-      fn_b^.nesting_level := nest;
-      it := n^.list^.first;
-      while it <> nil do
-         begin
-            param := it^.node;
-            param_b := lookup(n^.env, param^.name, param^.loc);
-            param_b^.nesting_level := nest + 1;
-            it := it^.next;
-         end;
+      annotate_param := @_annotate_param;
+      b := n^.binding;
+      b^.nesting_level := nest;
+      n^.list.foreach(annotate_param);
       body := n^.right;
       if body <> nil then
-         annotate(body, nest + 1, fn_b);
+         annotate(body, nest + 1, b);
    end;
 
    procedure annotate_call();
@@ -182,10 +189,17 @@ end;
 
 procedure report(n: node);
 var
-   node_it: node_list_item;
    binding_it: binding_list_item;
    b: binding;
+   report_item: node_list.iter;
+
+   procedure _report_item(n: node);
+   begin
+      report(n);
+   end;
+
 begin
+   report_item := @_report_item;
    if (n^.tag = fun_decl_node) and (not n^.binding^.external) then
       begin
          writeln('----------------------------------------');
@@ -226,14 +240,7 @@ begin
    else
       begin
          if n^.list <> nil then
-            begin
-               node_it := n^.list^.first;
-               while node_it <> nil do
-                  begin
-                     report(node_it^.node);
-                     node_it := node_it^.next;
-                  end;
-            end;
+            n^.list.foreach(report_item);
          if n^.cond <> nil then report(n^.cond);
          if n^.left <> nil then report(n^.left);
          if n^.right <> nil then report(n^.right);
