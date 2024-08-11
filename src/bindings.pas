@@ -1,25 +1,12 @@
 unit bindings;
 
 interface
-uses sources, symbols, values, datatypes;
+uses lists, sources, symbols, values, datatypes;
 
 type
    reachability = (reachable_unknown, reachable_yes, reachable_no);
-
    binding = ^binding_t;
-   binding_list_item = ^binding_list_item_t;
-   binding_list = ^binding_list_t;
-
-   binding_list_item_t = record
-      binding: binding;
-      next: binding_list_item
-   end;
-
-   binding_list_t = record
-      first: binding_list_item;
-      last:  binding_list_item;
-      length: longint;
-   end;
+   binding_list = specialize list<binding>;
 
    binding_t = record
       key: symbol;
@@ -75,86 +62,31 @@ uses math;
 var
    next_id: longint = 1;
 
-function make_binding_list(): binding_list;
-var
-   list: binding_list;
-begin
-   new(list);
-   list^.first := nil;
-   list^.last := nil;
-   list^.length := 0;
-   make_binding_list := list;
-end;
-
-function make_list_item(b: binding): binding_list_item;
-var
-   item: binding_list_item;
-begin
-   new(item);
-   item^.binding := b;
-   item^.next := nil;
-   make_list_item := item;
-end;
-
-procedure append_binding(list: binding_list; b: binding);
-var
-   item: binding_list_item;
-begin
-   item := make_list_item(b);
-   if list^.first = nil then
-      list^.first := item
-   else
-      list^.last^.next := item;
-  list^.last := item;
-  list^.length := list^.length + 1;
-end;
-
 procedure add_free_var(fn, free_var: binding);
 var
-   it: binding_list_item;
    free_vars: binding_list;
 begin
    free_vars := fn^.free_vars;
-   it := free_vars^.first;
-   while it <> nil do
-      begin
-         if it^.binding = free_var then
-            exit();
-         it := it^.next;
-      end;
-   append_binding(free_vars, free_var);
+   if not (free_vars.contains(free_var)) then
+      free_vars.append(free_var);
 end;
 
 procedure add_caller(fn, caller: binding);
 var
-   it: binding_list_item;
    callers: binding_list;
 begin
    callers := fn^.callers;
-   it := callers^.first;
-   while it <> nil do
-      begin
-         if it^.binding = caller then
-            exit();
-         it := it^.next;
-      end;
-   append_binding(callers, caller);
+   if not (callers.contains(caller)) then
+      callers.append(caller);
 end;
 
 procedure add_callee(fn, callee: binding);
 var
-   it: binding_list_item;
    callees: binding_list;
 begin
    callees := fn^.callees;
-   it := callees^.first;
-   while it <> nil do
-      begin
-         if it^.binding = callee then
-            exit();
-         it := it^.next;
-      end;
-   append_binding(callees, callee);
+   if not (callees.contains(callee)) then
+      callees.append(callee);
 end;
 
 function add_scope(env: scope): scope;
@@ -283,9 +215,9 @@ begin
    b^.escapes := false;
    b^.recursive := false;
    b^.reachable := reachable_unknown;
-   b^.free_vars := make_binding_list();
-   b^.callers := make_binding_list();
-   b^.callees := make_binding_list();
+   b^.free_vars := binding_list.create();
+   b^.callers := binding_list.create();
+   b^.callees := binding_list.create();
    b^.value := nil;
    env^.bindings := insert(t, b);
    bind := b;

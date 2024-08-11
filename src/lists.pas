@@ -20,6 +20,7 @@ type
       length: integer;
       destructor destroy(); override;
       procedure append(thing: t);
+      function contains(thing: t): boolean;
       procedure foreach(fn: iter);
    end;
 
@@ -37,6 +38,22 @@ begin
       last.next := it;
    last := it;
    length := length + 1;
+end;
+
+function list.contains(thing: t): boolean;
+
+   function find(it: item): boolean;
+   begin
+      if it = nil then
+         find := false
+      else if it.thing = thing then
+         find := true
+      else
+         find := find(it.next);
+   end;
+
+begin
+   contains := find(first);
 end;
 
 procedure list.foreach(fn: iter);

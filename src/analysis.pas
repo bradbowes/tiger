@@ -156,20 +156,20 @@ function shake(n: node): node;
 
    function is_reachable(b: binding): boolean;
    var
-      it: binding_list_item;
-      caller: binding;
+      reach: binding_list.iter;
+
+      procedure _reach(caller: binding);
+      begin
+         if is_reachable(caller) then
+            b^.reachable := reachable_yes;
+      end;
+
    begin
+      reach := @_reach;
       if (b^.reachable = reachable_unknown) and (b^.call_count > 0) then
          begin
             b^.reachable := reachable_no;
-            it := b^.callers^.first;
-            while it <> nil do
-               begin
-                  caller := it^.binding;
-                  if is_reachable(caller) then
-                     b^.reachable := reachable_yes;
-                  it := it^.next
-               end;
+            b^.callers.foreach(reach);
          end;
       is_reachable := b^.reachable = reachable_yes;
    end;
@@ -189,17 +189,26 @@ end;
 
 procedure report(n: node);
 var
-   binding_it: binding_list_item;
    b: binding;
-   report_item: node_list.iter;
+   report_node: node_list.iter;
+   report_binding: binding_list.iter;
 
-   procedure _report_item(n: node);
+   procedure _report_node(n: node);
    begin
       report(n);
    end;
 
+   procedure _report_binding(b: binding);
+   begin
+      if b = nil then
+         writeln('    < - - - - >')
+      else
+         writeln('   ', b^.key^.id);
+   end;
+
 begin
-   report_item := @_report_item;
+   report_node := @_report_node;
+   report_binding := @_report_binding;
    if (n^.tag = fun_decl_node) and (not n^.binding^.external) then
       begin
          writeln('----------------------------------------');
@@ -208,30 +217,11 @@ begin
          writeln('call count: ', n^.binding^.call_count);
          writeln('recursive: ', n^.binding^.recursive);
          writeln('free variables:');
-         binding_it := n^.binding^.free_vars^.first;
-         while binding_it <> nil do
-            begin
-               writeln('   ', binding_it^.binding^.key^.id);
-               binding_it := binding_it^.next;
-            end;
+         n^.binding^.free_vars.foreach(report_binding);
          writeln('callers:');
-         binding_it := n^.binding^.callers^.first;
-         while binding_it <> nil do
-            begin
-               b := binding_it^.binding;
-               if b = nil then
-                  writeln('    <f$_tiger_entry>')
-               else
-                  writeln('   ', binding_it^.binding^.key^.id);
-               binding_it := binding_it^.next;
-            end;
+         n^.binding^.callers.foreach(report_binding);
          writeln('callees:');
-         binding_it := n^.binding^.callees^.first;
-         while binding_it <> nil do
-            begin
-               writeln('   ', binding_it^.binding^.key^.id);
-               binding_it := binding_it^.next;
-            end;
+         n^.binding^.callees.foreach(report_binding);
          writeln('----------------------------------------');
          writeln();
          if n^.right <> nil then
@@ -240,7 +230,7 @@ begin
    else
       begin
          if n^.list <> nil then
-            n^.list.foreach(report_item);
+            n^.list.foreach(report_node);
          if n^.cond <> nil then report(n^.cond);
          if n^.left <> nil then report(n^.left);
          if n^.right <> nil then report(n^.right);
@@ -258,7 +248,5 @@ begin
    report(shaken);
    // report(n);
 end;
-
-
 
 end.

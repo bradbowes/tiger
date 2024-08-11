@@ -54,7 +54,6 @@ type
                record_node,
                array_node);
 
-
    node = ^node_t;
    node_list = specialize list<node>;
    node_list_item = specialize list_item<node>;
@@ -70,7 +69,6 @@ type
       env: scope;
       tenv: scope;
    end;
-
    tf_function = function(n: node): node;
 
 function make_assign_node(variable, expr: node; loc: source_location): node;
