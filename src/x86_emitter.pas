@@ -375,7 +375,6 @@ var
 
    procedure emit_sequence();
    var
-      it: node_list_item;
       emit_expr: node_list.iter;
 
       procedure _emit_expr(n: node);

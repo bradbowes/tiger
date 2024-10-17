@@ -135,9 +135,8 @@ var
 
    function expand_record(): node;
    var
-      field, value: node;
+      value: node;
       list: node_list;
-      it: node_list_item;
       add_field: node_list.iter;
 
       procedure _add_field(n: node);
