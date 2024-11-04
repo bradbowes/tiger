@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses lists, environments, sources, symbols, values, datatypes;
+uses lists, maps, sources, symbols, values, datatypes;
 
 type
    reachability = (reachable_unknown, reachable_yes, reachable_no);
