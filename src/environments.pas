@@ -5,17 +5,20 @@ interface
 
 type
    generic map<t_key, t_item> = class
-      key: t_key;
-      item: t_item;
-      protected valid: boolean;
-      protected left, right: map;
-      protected height: integer;
-      protected procedure init(k: t_key; it: t_item);
-      protected function balance(): integer;
-      protected function rotate_left(): map;
-      protected function rotate_right(): map;
-      function lookup(k: t_key): map;
-      function insert(k: t_key; it: t_item): map;
+      protected
+         valid: boolean;
+         left, right: map;
+         height: integer;
+         procedure init(k: t_key; it: t_item);
+         function balance(): integer;
+         class function rotate_left(m: map): map;
+         class function rotate_right(m: map): map;
+      public
+         key: t_key;
+         item: t_item;
+         destructor destroy(); override;
+         function lookup(k: t_key): map;
+         class function insert(m: map; k: t_key; it: t_item): map;
    end;
 
 implementation
@@ -37,28 +40,28 @@ begin
    balance := left.height - right.height;
 end;
 
-function map.rotate_left(): map;
+class function map.rotate_left(m: map): map;
 var
    t1, tmp: map;
 begin
-   t1 := right;
+   t1 := m.right;
    tmp := t1.left;
-   t1.left := self;
-   right := tmp;
-   height := max(left.height, right.height) + 1;
+   t1.left := m;
+   m.right := tmp;
+   m.height := max(m.left.height, m.right.height) + 1;
    t1.height := max(t1.left.height, t1.right.height) + 1;
    rotate_left := t1;
 end;
 
-function map.rotate_right(): map;
+class function map.rotate_right(m: map): map;
 var
    t1, tmp: map;
 begin
-   t1 := left;
+   t1 := m.left;
    tmp := t1.right;
-   t1.right := self;
-   left := tmp;
-   height := max(left.height, right.height) + 1;
+   t1.right := m;
+   m.left := tmp;
+   m.height := max(m.left.height, m.right.height) + 1;
    t1.height := max(t1.left.height, t1.right.height) + 1;
    rotate_right := t1;
 end;
@@ -75,38 +78,45 @@ begin
       lookup := self;
 end;
 
-function map.insert(k: t_key; it: t_item): map;
+class function map.insert(m: map; k: t_key; it: t_item): map;
 var
    bal: integer;
 begin
-   if (not valid) then
-      init(k, it)
-   else if k < key then
-      left.insert(k, it)
-   else
-      right.insert(k, it);
+   if (not m.valid) then
+      m.init(k, it)
+   else if k < m.key then
+      m.left := insert(m.left, k, it)
+   else if k > m.key then
+      m.right := insert(m.right, k, it);
 
-   height := max(left.height, right.height) + 1;
+   m.height := max(m.left.height, m.right.height) + 1;
 
-   bal := balance();
+   bal := m.balance();
 
-   if (bal > 1) and (k < left.key) then
-      insert := rotate_right()
-   else if (bal < -1) and (k > right.key) then
-      insert := rotate_left()
-   else if (bal > 1) and (k > left.key) then
+   if (bal > 1) and (k < m.left.key) then
+      insert := rotate_right(m)
+   else if (bal < -1) and (k > m.right.key) then
+      insert := rotate_left(m)
+   else if (bal > 1) and (k > m.left.key) then
       begin
-         left := left.rotate_left();
-         insert := rotate_right();
+         m.left := rotate_left(m.left);
+         insert := rotate_right(m);
       end
-   else if (bal < -1) and (k < right.key) then
+   else if (bal < -1) and (k < m.right.key) then
       begin
-         right := right.rotate_right();
-         insert := rotate_left();
+         m.right := rotate_right(m.right);
+         insert := rotate_left(m);
       end
    else
-      insert := self;
+      insert := m;
+end;
 
+destructor map.destroy();
+begin
+   if left <> nil then left.destroy();
+   if right <> nil then right.destroy();
+   dispose(item);
+   inherited;
 end;
 
 end.

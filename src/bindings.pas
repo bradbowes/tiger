@@ -1,7 +1,7 @@
 unit bindings;
 
 interface
-uses lists, sources, symbols, values, datatypes;
+uses lists, environments, sources, symbols, values, datatypes;
 
 type
    reachability = (reachable_unknown, reachable_yes, reachable_no);
@@ -27,12 +27,7 @@ type
       callees: binding_list;
    end;
 
-   tree = ^tree_t;
-   tree_t = record
-      binding: binding;
-      left, right: tree;
-      height: integer;
-   end;
+   tree = specialize map<symbol, binding>;
 
    scope = ^scope_t;
    scope_t = record
@@ -41,11 +36,9 @@ type
       next: scope;
    end;
 
-const
-   _global_env: scope_t = (bindings: nil; stack_index: 0; next: nil);
-   global_env: scope = @_global_env;
-   _global_tenv: scope_t = (bindings: nil; stack_index: 0; next: nil);
-   global_tenv: scope = @_global_tenv;
+var
+   global_env: scope = nil;
+   global_tenv: scope = nil;
 
 function add_scope(env: scope): scope;
 procedure delete_scope(var env: scope);
@@ -94,104 +87,10 @@ var
    s: scope;
 begin
    new(s);
-   s^.bindings := nil;
+   s^.bindings := tree.create();
+   s^.stack_index := 0;
    s^.next := env;
    add_scope := s;
-end;
-
-function make_tree(binding: binding): tree;
-var
-   t: tree;
-begin
-   new(t);
-   t^.binding := binding;
-   t^.left := nil;
-   t^.right := nil;
-   t^.height := 1;
-   make_tree := t;
-end;
-
-function height(t: tree): Integer;
-begin
-   if t = nil then height := 0
-   else height := t^.height;
-end;
-
-function balance(t: tree): Integer;
-begin
-   if t = nil then balance := 0
-   else balance := height(t^.left) - height(t^.right);
-end;
-
-function rotate_left(t: tree): tree;
-var
-   t1, tmp: tree;
-begin
-   t1 := t^.right;
-   tmp := t1^.left;
-   t1^.left := t;
-   t^.right := tmp;
-   t^.height := max(height(t^.left), height(t^.right)) + 1;
-   t1^.height := max(height(t1^.left), height(t1^.right)) + 1;
-   rotate_left := t1;
-end;
-
-function rotate_right(t: tree): tree;
-var
-   t1, tmp: tree;
-begin
-   t1 := t^.left;
-   tmp := t1^.right;
-   t1^.right := t;
-   t^.left := tmp;
-   t^.height := max(height(t^.left), height(t^.right)) + 1;
-   t1^.height := max(height(t1^.left), height(t1^.right)) + 1;
-   rotate_right := t1;
-end;
-
-function find(t: tree; key: symbol): binding;
-begin
-   if t = nil then
-      find := nil
-   else if key < t^.binding^.key then
-      find := find(t^.left, key)
-   else if key > t^.binding^.key then
-      find := find(t^.right, key)
-   else
-      find := t^.binding;
-end;
-
-function insert(t: tree; b: binding) : tree;
-var
-   bal: Integer;
-begin
-   if t = nil then
-      t := make_tree(b)
-   else if b^.key < t^.binding^.key then
-      t^.left := insert(t^.left, b)
-   else
-      t^.right := insert(t^.right, b);
-
-   t^.height := max(height(t^.left), height(t^.right)) + 1;
-
-   bal := balance(t);
-
-   if (bal > 1) and (b^.key < t^.left^.binding^.key) then
-      t := rotate_right(t)
-   else if (bal < -1) and (b^.key > t^.right^.binding^.key) then
-      t := rotate_left(t)
-   else if (bal > 1) and (b^.key >  t^.left^.binding^.key) then
-      begin
-         t^.left := rotate_left(t^.left);
-         t := rotate_right(t);
-      end
-   else if (bal < -1) and (b^.key <  t^.right^.binding^.key) then
-      begin
-         t^.right := rotate_right(t^.right);
-         t := rotate_left(t);
-      end;
-
-   insert := t;
 end;
 
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
@@ -200,7 +99,7 @@ var
    b: binding;
 begin
    t := env^.bindings;
-   if find(t, key) <> nil then
+   if t.lookup(key) <> nil then
       err('identifier ''' + key^.id + ''' was previously defined in scope', loc);
    new(b);
    b^.key := key;
@@ -219,29 +118,21 @@ begin
    b^.callers := binding_list.create();
    b^.callees := binding_list.create();
    b^.value := nil;
-   env^.bindings := insert(t, b);
+   env^.bindings := tree.insert(t, key, b);
    bind := b;
 end;
 
 function lookup(env: scope; key: symbol; loc: source_location): binding;
 var
-   b: binding;
+   t: tree;
 begin
    if env = nil then
       err('identifier ''' + key^.id + ''' is not defined', loc);
-   b := find(env^.bindings, key);
-   if b = nil then
+   t := env^.bindings.lookup(key);
+   if t = nil then
       lookup := lookup(env^.next, key, loc)
    else
-      lookup := b;
-end;
-
-procedure delete_tree(t: tree);
-begin
-   if t^.left <> nil then delete_tree(t^.left);
-   if t^.right <> nil then delete_tree(t^.right);
-   dispose(t^.binding);
-   dispose(t);
+      lookup := t.item;
 end;
 
 procedure delete_scope(var env: scope);
@@ -249,16 +140,17 @@ begin
    if (env <> global_env) and (env <> global_tenv) then
       begin
          if (env^.bindings <> nil) then
-            delete_tree(env^.bindings);
-         dispose(env);
-         env := nil;
+            env^.bindings.destroy();
       end;
 end;
 
 begin
+   global_env := add_scope(global_env);
+   global_tenv := add_scope(global_tenv);
    bind(global_tenv, intern('int'), int_type, 0, 0, nil);
    bind(global_tenv, intern('string'), string_type, 0, 0, nil);
    bind(global_tenv, intern('bool'), bool_type, 0, 0, nil);
    bind(global_tenv, intern('char'), char_type, 0, 0, nil);
    bind(global_tenv, intern('file'), file_type, 0, 0, nil);
 end.
+

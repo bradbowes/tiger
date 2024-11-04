@@ -4,14 +4,14 @@ LIBDIR   = $(TIGERDIR)lib/
 
 all:	tc tprint lib.o
 
-tc:	lists.pas sources.pas symbols.pas scanner.pas nodes.pas \
-	values.pas parser.pas bindings.pas datatypes.pas semant.pas \
+tc:	lists.pas environments.pas sources.pas symbols.pas scanner.pas \
+	nodes.pas values.pas parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas x86_emitter.pas tc.pas
 	fpc -Sh -O3 tc
 	strip tc
 
-tprint:	lists.pas sources.pas symbols.pas scanner.pas nodes.pas \
-	values.pas parser.pas bindings.pas datatypes.pas semant.pas \
+tprint:	lists.pas environments.pas sources.pas symbols.pas scanner.pas \
+	nodes.pas values.pas parser.pas bindings.pas datatypes.pas semant.pas \
 	transforms.pas pass1.pas pass2.pas pass3.pas formats.pas tprint.pas
 	fpc -Sh -O3 tprint
 	strip tprint
