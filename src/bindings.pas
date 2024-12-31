@@ -4,7 +4,7 @@ interface
 uses lists, maps, sources, symbols, values, datatypes;
 
 type
-   reachability = (reachable_unknown, reachable_yes, reachable_no);
+(*   reachability = (reachable_unknown, reachable_yes, reachable_no); *)
    binding = ^binding_t;
    binding_list = specialize list<binding>;
 
@@ -15,16 +15,18 @@ type
       external: boolean;
       stack_index: integer;
       nesting_level: integer;
+      value: value;
       mutates: boolean;
       constant: boolean;
       escapes: boolean;
+(*
       recursive: boolean;
       reachable: reachability;
-      value: value;
       call_count: integer;
       free_vars: binding_list;
       callers: binding_list;
       callees: binding_list;
+*)
    end;
 
    tree = specialize map<symbol, binding>;
@@ -44,9 +46,11 @@ function add_scope(env: scope): scope;
 procedure delete_scope(var env: scope);
 function bind(env: scope; key: symbol; ty: spec; stack_index, nesting_level: longint; loc: source_location): binding;
 function lookup(env: scope; key: symbol; loc: source_location): binding;
+(*
 procedure add_free_var(fn, free_var: binding);
 procedure add_caller(fn, caller: binding);
 procedure add_callee(fn, callee: binding);
+*)
 
 implementation
 
@@ -55,6 +59,7 @@ uses math;
 var
    next_id: longint = 1;
 
+(*
 procedure add_free_var(fn, free_var: binding);
 var
    free_vars: binding_list;
@@ -81,6 +86,7 @@ begin
    if not (callees.contains(callee)) then
       callees.append(callee);
 end;
+*)
 
 function add_scope(env: scope): scope;
 var
@@ -112,11 +118,13 @@ begin
    b^.mutates := false;
    b^.constant := false;
    b^.escapes := false;
+(*
    b^.recursive := false;
    b^.reachable := reachable_unknown;
    b^.free_vars := binding_list.create();
    b^.callers := binding_list.create();
    b^.callees := binding_list.create();
+ *)
    b^.value := nil;
    env^.bindings := tree.insert(t, key, b);
    bind := b;

@@ -39,14 +39,16 @@
 - array bounds checking
 - tail call optimization
 - anonymous functions, first class functions
+- type inference
 - closures
 - array literals
 - garbage collector
-- polymorphic types and functions
+- algebraic types and polymorphic functions
 - modules
 - optimization
 - ffi
 - unicode
+- alternate backends
 
 # Standard Library
 

@@ -397,7 +397,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
    function check_sequence(): spec;
    var
-      ty: spec;
+      ty: spec = nil;
       chk_expr: node_list.iter;
 
       procedure _chk_expr(n: node);
