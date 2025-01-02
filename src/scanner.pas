@@ -74,7 +74,7 @@ procedure scan();
 
    procedure push_char();
    begin
-      token.value := token.value + src^.ch;
+      token.value := token.value + src.ch;
       getch();
    end;
 
@@ -86,7 +86,7 @@ procedure scan();
 
    procedure skip_white;
    begin
-      while src^.ch in [' ', #9 .. #13] do
+      while src.ch in [' ', #9 .. #13] do
          getch();
    end;
 
@@ -96,12 +96,12 @@ procedure scan();
       repeat
          repeat
             getch();
-            token.value := token.value + src^.ch;
-         until src^.ch = '*';
+            token.value := token.value + src.ch;
+         until src.ch = '*';
          getch();
-         while src^.ch = '*' do
+         while src.ch = '*' do
             getch();
-      until src^.ch = ')';
+      until src.ch = ')';
       getch();
       token.value := token.value + ')';
       token.tag := comment_token;
@@ -113,11 +113,11 @@ procedure scan();
       code: string;
    begin
       getch();
-      while src^.ch <> '"' do
-         if src^.ch = '\' then
+      while src.ch <> '"' do
+         if src.ch = '\' then
             begin
                getch();
-               case src^.ch of
+               case src.ch of
                   'a': escape := #7;  (* alert *)
                   'b': escape := #8;  (* backspace *)
                   't': escape := #9;  (* tab *)
@@ -130,24 +130,24 @@ procedure scan();
                   '^':
                      begin
                         getch();
-                        if src^.ch in ['A'..'Z'] then
-                           escape := chr(ord(src^.ch) - 64)
-                        else if src^.ch in ['a'.. 'z'] then
-                           escape := chr(ord(src^.ch) - 96)
+                        if src.ch in ['A'..'Z'] then
+                           escape := chr(ord(src.ch) - 64)
+                        else if src.ch in ['a'.. 'z'] then
+                           escape := chr(ord(src.ch) - 96)
                         else
                            err('illegal escape sequence', src_location());
                      end;
                   '0'..'9':
                      begin
-                        code := src^.ch;
+                        code := src.ch;
                         getch();
-                        if src^.ch in ['0'..'9'] then
-                           code := code + src^.ch
+                        if src.ch in ['0'..'9'] then
+                           code := code + src.ch
                         else
                            err('illegal escape sequence', src_location());
                         getch();
-                        if src^.ch in ['0'..'9'] then
-                           code := code + src^.ch
+                        if src.ch in ['0'..'9'] then
+                           code := code + src.ch
                         else
                            err('illegal escape sequence', src_location());
                         if code > '255' then
@@ -157,7 +157,7 @@ procedure scan();
                   ' ', chr(9) .. chr(13):
                      begin
                         skip_white;
-                        if src^.ch = '\' then
+                        if src.ch = '\' then
                            begin
                               getch();
                               continue;
@@ -180,7 +180,7 @@ procedure scan();
    procedure get_char();
    begin
       getch();
-      if src^.ch = '"' then
+      if src.ch = '"' then
          get_string()
       else
          err('illegal character literal', src_location());
@@ -191,14 +191,14 @@ procedure scan();
 
    procedure get_number;
    begin
-      while src^.ch in ['0'..'9'] do
+      while src.ch in ['0'..'9'] do
          push_char();
       token.tag := number_token;
    end;
 
    procedure get_id;
    begin
-      while src^.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
+      while src.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
          push_char;
       case token.value of
          'and': token.tag := and_token;
@@ -229,23 +229,23 @@ procedure scan();
 begin
    skip_white;
    token.value := '';
-   line := src^.line;
-   col := src^.col;
-   if not src^.open then
+   line := src.line;
+   col := src.col;
+   if not src.open then
       begin
          token.tag := eof_token;
          token.value := '<EOF>';
       end
    else
       begin
-         case src^.ch of
+         case src.ch of
             ',': recognize(comma_token);
             ';': recognize(semicolon_token);
             '.': recognize(dot_token);
             '(':
                begin
                   push_char;
-                  if src^.ch = '*' then skip_comment
+                  if src.ch = '*' then skip_comment
                   else token.tag := lparen_token;
                end;
             ')': recognize(rparen_token);
@@ -262,7 +262,7 @@ begin
             '<':
                begin
                   push_char;
-                  case src^.ch of
+                  case src.ch of
                      '>': recognize(neq_token);
                      '=': recognize(leq_token);
                   else
@@ -272,22 +272,22 @@ begin
             '>':
                begin
                   push_char;
-                  if src^.ch = '=' then recognize(geq_token)
+                  if src.ch = '=' then recognize(geq_token)
                   else token.tag := gt_token;
                end;
             ':':
                begin
                   push_char;
-                  if src^.ch = '=' then recognize(assign_token)
+                  if src.ch = '=' then recognize(assign_token)
                   else token.tag := colon_token;
                end;
             '0'..'9': get_number;
             '"': get_string;
             '#': get_char;
             'a'..'z', 'A'..'Z': get_id;
-         else if eof(src^.src) then getch()
+         else if eof(src.src) then getch()
          else
-            err('Illegal token ''' + src^.ch + '''', token_location());
+            err('Illegal token ''' + src.ch + '''', token_location());
          end;
       end;
 end;
@@ -296,10 +296,10 @@ function token_location(): source_location;
 var
    loc: source_location;
 begin
-   new(loc);
-   loc^.line := line;
-   loc^.col := col;
-   loc^.file_name := src^.file_name;
+   loc := source_location.create();
+   loc.line := line;
+   loc.col := col;
+   loc.file_name := src.file_name;
    token_location := loc;
 end;
 
