@@ -12,11 +12,12 @@ type
 
    source = class
       file_name: string;
+      ch: char;
+      line, col: longint;
+   protected
       path: string;
       open: boolean;
       src: text;
-      ch: char;
-      line, col: longint;
       resume: source;
    end;
 
@@ -140,12 +141,13 @@ begin
       else
          begin
             read(src.src, src.ch);
-            src.col := src.col + 1;
             if src.ch = chr(10) then
                begin
                   src.line := src.line + 1;
                   src.col := 0;
                end
+            else
+               src.col := src.col + 1;
          end
    else
       err('Read past end of file', src_location());

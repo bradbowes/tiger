@@ -231,65 +231,61 @@ begin
    token.value := '';
    line := src.line;
    col := src.col;
-   if not src.open then
-      begin
-         token.tag := eof_token;
-         token.value := '<EOF>';
-      end
-   else
-      begin
-         case src.ch of
-            ',': recognize(comma_token);
-            ';': recognize(semicolon_token);
-            '.': recognize(dot_token);
-            '(':
-               begin
-                  push_char;
-                  if src.ch = '*' then skip_comment
-                  else token.tag := lparen_token;
-               end;
-            ')': recognize(rparen_token);
-            '[': recognize(lbracket_token);
-            ']': recognize(rbracket_token);
-            '{': recognize(lbrace_token);
-            '}': recognize(rbrace_token);
-            '|': recognize(pipe_token);
-            '+': recognize(plus_token);
-            '-': recognize(minus_token);
-            '*': recognize(mul_token);
-            '/': recognize(div_token);
-            '=': recognize(eq_token);
-            '<':
-               begin
-                  push_char;
-                  case src.ch of
-                     '>': recognize(neq_token);
-                     '=': recognize(leq_token);
-                  else
-                     token.tag:= lt_token;
-                  end;
-               end;
-            '>':
-               begin
-                  push_char;
-                  if src.ch = '=' then recognize(geq_token)
-                  else token.tag := gt_token;
-               end;
-            ':':
-               begin
-                  push_char;
-                  if src.ch = '=' then recognize(assign_token)
-                  else token.tag := colon_token;
-               end;
-            '0'..'9': get_number;
-            '"': get_string;
-            '#': get_char;
-            'a'..'z', 'A'..'Z': get_id;
-         else if eof(src.src) then getch()
-         else
-            err('Illegal token ''' + src.ch + '''', token_location());
+   case src.ch of
+      ',': recognize(comma_token);
+      ';': recognize(semicolon_token);
+      '.': recognize(dot_token);
+      '(':
+         begin
+            push_char;
+            if src.ch = '*' then skip_comment
+            else token.tag := lparen_token;
          end;
-      end;
+      ')': recognize(rparen_token);
+      '[': recognize(lbracket_token);
+      ']': recognize(rbracket_token);
+      '{': recognize(lbrace_token);
+      '}': recognize(rbrace_token);
+      '|': recognize(pipe_token);
+      '+': recognize(plus_token);
+      '-': recognize(minus_token);
+      '*': recognize(mul_token);
+      '/': recognize(div_token);
+      '=': recognize(eq_token);
+      '<':
+         begin
+            push_char;
+            case src.ch of
+               '>': recognize(neq_token);
+               '=': recognize(leq_token);
+            else
+               token.tag:= lt_token;
+            end;
+         end;
+      '>':
+         begin
+            push_char;
+            if src.ch = '=' then recognize(geq_token)
+            else token.tag := gt_token;
+         end;
+      ':':
+         begin
+            push_char;
+            if src.ch = '=' then recognize(assign_token)
+            else token.tag := colon_token;
+         end;
+      '0'..'9': get_number;
+      '"': get_string;
+      '#': get_char;
+      'a'..'z', 'A'..'Z': get_id;
+      #4:
+         begin
+            token.tag := eof_token;
+            token.value := '<EOF>';
+         end
+   else
+      err('Illegal token ''' + src.ch + '''', token_location());
+   end;
 end;
 
 function token_location(): source_location;
