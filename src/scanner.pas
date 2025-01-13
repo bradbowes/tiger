@@ -90,21 +90,23 @@ procedure scan();
          getch();
    end;
 
-   procedure skip_comment;
+   procedure skip_comment(nested: boolean);
    begin
-      token.value := '(*'; (*---*)
       repeat
          repeat
-            getch();
-            token.value := token.value + src.ch;
+            push_char();
+            if src.ch = '(' then
+               begin
+                  push_char();
+                  if src.ch = '*' then
+                     skip_comment(true);
+               end
          until src.ch = '*';
-         getch();
          while src.ch = '*' do
-            getch();
+            push_char();
       until src.ch = ')';
-      getch();
-      token.value := token.value + ')';
-      token.tag := comment_token;
+      if not nested then
+         recognize(comment_token);
    end;
 
    procedure get_string;
@@ -227,7 +229,7 @@ procedure scan();
    end;
 
 begin
-   skip_white;
+   skip_white();
    token.value := '';
    line := src.line;
    col := src.col;
@@ -237,8 +239,8 @@ begin
       '.': recognize(dot_token);
       '(':
          begin
-            push_char;
-            if src.ch = '*' then skip_comment
+            push_char();
+            if src.ch = '*' then skip_comment(false)
             else token.tag := lparen_token;
          end;
       ')': recognize(rparen_token);

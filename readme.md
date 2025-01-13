@@ -24,7 +24,6 @@
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
 - strings can include line breaks and span multiple lines.
 - comments are SML style `(* ... *)`
-- no nested comments
 - type aliases are not implemented.
 - `break` is not implemented.
 - string comparison operators (`<`, `<=`, `>`, `>=`) not implemented --

@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
 test_code "writeln(str(-36545))" "-36545"
@@ -162,7 +162,7 @@ end" "5"
 
 test_code "writeln(\"Falsches Üben von Xylophonmusik quält jeden größeren Zwerg\")" "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 test_code "writeln(\"Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο\")" "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο"
-
+test_code "writeln(\"🐁🐃🐅🐈🐉🐍🐎🐐🐒🐓🐕🐖\")" "🐁🐃🐅🐈🐉🐍🐎🐐🐒🐓🐕🐖"
 test_code "writeln(\"イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン\")" "イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム
 ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン"
@@ -560,4 +560,13 @@ in
    a[4] := #\"O\"
    writeln(a)
 end" "HELLO"
-# END_COMMENT
+
+END_COMMENT
+test_code "(* this is a comment *) writeln(\"ok\")" "ok"
+test_code "(**********) writeln(\"ok\")" "ok"
+test_code "(* this is a comment
+*
+*
+*) writeln(\"ok\")" "ok"
+test_code "(* this is a comment (* this is a nested comment *) *) writeln(\"ok\")" "ok"
+
