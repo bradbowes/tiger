@@ -157,11 +157,6 @@ var
                next();
                factor := make_char_node(ord(value[1]), loc);
             end;
-         minus_token:
-            begin
-               next();
-               factor := make_unary_minus_node(get_factor(), loc);
-            end;
          array_token:
             begin
                next();
@@ -236,6 +231,20 @@ var
       get_subscript := left;
    end;
 
+   function get_unary(): node;
+   var
+      loc: source_location;
+   begin
+      loc := token_location;
+      if token.tag = minus_token then
+         begin
+            next();
+            get_unary := make_unary_minus_node(get_subscript(), loc);
+         end
+      else
+         get_unary := get_subscript();
+   end;
+
    function get_product(): node;
    var
       loc: source_location;
@@ -243,7 +252,7 @@ var
       op: node_tag = empty_node;
    begin
       loc := token_location();
-      left := get_subscript();
+      left := get_unary();
 
       while token.tag in [mul_token, div_token, mod_token] do
          begin
@@ -253,7 +262,7 @@ var
                mod_token: op := mod_node;
             end;
             next();
-            left := make_binary_node(op, left, get_subscript(), loc);
+            left := make_binary_node(op, left, get_unary(), loc);
             loc := token_location();
          end;
 
