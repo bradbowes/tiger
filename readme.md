@@ -28,11 +28,15 @@
 - `break` is not implemented.
 - string comparison operators (`<`, `<=`, `>`, `>=`) not implemented --
   use `string_compare` function instead.
-- `use "<file_name>"` to include external definition file in `let`
+- `use "<file_name>"` to include external definition file inside a `let`
   declaration block
 - enum types. `type <id> = <id>`{`| <id>`}. Example `type color = red | green | blue`.
 - case expression `case <exp> of <const> : <exp> `{`| <const> : <exp>`}` else <exp>`.
-- array initialization `array[<exp>] of <type>`. Example `array[5] of int`.
+- Array initialization uses the keyword `array` rather than a type name.
+  `array[<exp>] of <value>`. Example `array[5] of 0`. 
+  Arrays type have structural equivalence and don't have to be declared (unless the
+  initialization value is `nil`).
+
 
 # To do
 
