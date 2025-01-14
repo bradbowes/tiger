@@ -32,6 +32,7 @@
   declaration block
 - enum types. `type <id> = <id>`{`| <id>`}. Example `type color = red | green | blue`.
 - case expression `case <exp> of <const> : <exp> `{`| <const> : <exp>`}` else <exp>`.
+- array initialization `array[<exp>] of <type>`. Example `array[5] of int`.
 
 # To do
 

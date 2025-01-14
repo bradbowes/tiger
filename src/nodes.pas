@@ -72,7 +72,7 @@ type
    tf_function = function(n: node): node;
 
 function make_assign_node(variable, expr: node; loc: source_location): node;
-function make_call_node(name: symbol; args: node_list; loc: source_location): node;
+function make_call_node(fn: node; args: node_list; loc: source_location): node;
 function make_simple_var_node(name: symbol; loc: source_location): node;
 function make_field_var_node(obj: node; field: symbol; loc: source_location): node;
 function make_indexed_var_node(arr, index: node; loc: source_location): node;
@@ -114,7 +114,7 @@ function make_for_node(iter: symbol; start, finish, body: node; loc: source_loca
 function make_let_node(decls: node_list; body: node; loc: source_location): node;
 function make_sequence_node(sequence: node_list; loc: source_location): node;
 function make_record_node(ty: symbol; fields: node_list; loc: source_location): node;
-function make_array_node(ty: symbol; size, value: node; loc: source_location): node;
+function make_array_node(size, value: node; loc: source_location): node;
 function make_binary_node(tag: node_tag; left, right: node; loc: source_location): node;
 procedure delete_node(var n: node);
 function copy_node(n: node; tf: tf_function): node;
@@ -180,12 +180,12 @@ begin
    make_assign_node := n;
 end;
 
-function make_call_node(name: symbol; args: node_list; loc: source_location): node;
+function make_call_node(fn: node; args: node_list; loc: source_location): node;
 var
    n: node;
 begin
    n := make_node(call_node, loc);
-   n^.name := name;
+   n^.left := fn;
    n^.list := args;
    n^.ins_count := list_ins_count(args) + 1;
    make_call_node := n;
@@ -559,12 +559,11 @@ begin
    make_record_node := n;
 end;
 
-function make_array_node(ty: symbol; size, value: node; loc: source_location): node;
+function make_array_node(size, value: node; loc: source_location): node;
 var
    n: node;
 begin
    n := make_node(array_node, loc);
-   n^.type_name := ty;
    n^.left := size;
    n^.right := value;
    n^.ins_count := size^.ins_count + value^.ins_count + 1;

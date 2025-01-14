@@ -85,7 +85,7 @@ var
       add_arg := @_add_arg;
       args := node_list.create();
       n^.list.foreach(add_arg);
-      expand_call := expand(make_call_node(n^.name, args, loc));
+      expand_call := expand(make_call_node(trans3(n^.left), args, loc));
    end;
 
    function expand_if_else(): node;

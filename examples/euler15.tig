@@ -46,8 +46,7 @@ let
    solve(n: int): int =
       let
          points = n + 1
-         type int_array = array of int
-         grid = int_array[points * points] of 0
+         grid = array[points * points] of 0
          get(x: int, y: int): int = grid[x * points + y]
          set(x: int, y: int, value: int) = grid[x * points + y] := value
       in

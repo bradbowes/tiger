@@ -15,12 +15,10 @@
 *)
 
 let
-   type s_array = array of string
-   type i_array = array of int
-   word = s_array[20] of ""
-   tens = s_array[10] of ""
-   word_count = i_array[20] of 0
-   tens_count = i_array[10] of 0
+   word = array[20] of ""
+   tens = array[10] of ""
+   word_count = array[20] of 0
+   tens_count = array[10] of 0
    total = 0
 
    wordify(n: int): string =

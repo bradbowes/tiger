@@ -9,12 +9,9 @@
 *)
 
 let
-
-   type int_array = array of int
-
-   primes = int_array[8] of 0
-   number = int_array[20 * 8] of 0
-   total = int_array[8] of 0
+   primes = array[8] of 0
+   number = array[20 * 8] of 0
+   total = array[8] of 0
 
    the_total = 1
 

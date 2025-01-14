@@ -21,20 +21,16 @@ function var_name(b: binding): symbol;
 var
    prefix: string;
 begin
-
-   if b^.constant then
-      prefix := 'const$_'
-   else
-      prefix := 'var$_';
-   var_name := intern(prefix + b^.key^.id + '_' + inttostr(b^.id));
-end;
-
-function fun_name(b: binding): symbol;
-begin
    if b^.external then
-      fun_name := b^.key
+      var_name := b^.key
    else
-      fun_name := intern('fun$_' + b^.key^.id + '_' + inttostr(b^.id));
+      begin
+         if b^.constant then
+            prefix := 'const$_'
+         else
+            prefix := 'var$_';
+         var_name := intern(prefix + b^.key^.id + '_' + inttostr(b^.id));
+      end;
 end;
 
 function trans2(n: node): node;
@@ -65,7 +61,7 @@ begin
          begin
             list := node_list.create();
             n^.list.foreach(add_arg);
-            trans2 := make_call_node(fun_name(b), list, loc);
+            trans2 := make_call_node(trans2(n^.left), list, loc);
             trans2^.tag := n^.tag;
          end;
       simple_var_node:
@@ -81,7 +77,7 @@ begin
             begin
                list := node_list.create();
                n^.list.foreach(add_param);
-               trans2 := make_fun_decl_node(fun_name(b), list, n^.type_name, trans2(n^.right), loc);
+               trans2 := make_fun_decl_node(var_name(b), list, n^.type_name, trans2(n^.right), loc);
             end;
       else
          trans2 := copy_node(n, tf);

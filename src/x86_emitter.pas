@@ -136,7 +136,7 @@ begin
               '   .p2align 3' + lineending +
               '%s:' + lineending +
               '   pushq %%rbp' + lineending +
-              '   movq %%rsp, %%rbp', [f^.name^.id]);
+              '   movq %%rsp, %%rbp', [f^.binding^.key^.id]);
          emit_expression(f^.right, -8, f^.binding^.nesting_level + 1);
          emit('   popq %%rbp' + lineending +
               '   ret', []);
@@ -367,9 +367,9 @@ var
       n^.list.foreach(emit_arg);
       emit('   subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
-         emit('   call f$_%s', [n^.name^.id])
+         emit('   call f$_%s', [n^.binding^.key^.id])
       else
-         emit('   call %s', [n^.name^.id]);
+         emit('   call %s', [n^.binding^.key^.id]);
       emit('   addq $%d, %%rsp', [stack_size]);
    end;
 

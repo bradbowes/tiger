@@ -86,7 +86,7 @@ let
          else if t.op = minus then
             begin
                t := scan()
-               value := - factor()
+               value := -(factor())
             end
          else if t.op = lpar then
             begin

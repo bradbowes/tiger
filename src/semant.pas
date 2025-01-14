@@ -19,7 +19,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    begin
       compatible := (a = b) or
                     ((b = nil_type) and not (a^.tag in [primitive_type, enum_type, function_type])) or
-                    ((a = nil_type) and not (b^.tag in [primitive_type, enum_type, function_type]));
+                    ((a = nil_type) and not (b^.tag in [primitive_type, enum_type, function_type])) or
+                    ((a^.tag = array_type) and (b^.tag = array_type) and compatible(a^.base, b^.base));
    end;
 
    function type_or_nil(a, b: spec): spec;
@@ -341,8 +342,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
    function check_call(): spec;
    var
-      fname: string;
-      b: binding;
       f: spec;
       param: field;
       chk_arg: node_list.iter;
@@ -350,7 +349,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       procedure _chk_arg(n: node);
       begin
          if param = nil then
-            err('too many arguments to ' + fname, n^.loc);
+            err('too many arguments to function', n^.loc);
          if check(n, si, nest, env, tenv) <> param^.ty then
             err('argument is wrong type', n^.loc);
          param := param^.next;
@@ -358,16 +357,14 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
    begin
       chk_arg := @_chk_arg;
-      fname := '''' + n^.name^.id + '''';
-      b := lookup(env, n^.name, n^.loc);
-      f := b^.ty;
+      f := check(n^.left, si, nest, env, tenv);
       if f^.tag <> function_type then
-         err(fname + ' is not a function', n^.loc);
+         err('not a function', n^.loc);
       param := f^.fields;
       n^.list.foreach(chk_arg);
       if param <> nil then
-         err('not enough arguments to ' + fname, n^.loc);
-      n^.binding := b;
+         err('not enough arguments to function call', n^.loc);
+      n^.binding := n^.left^.binding;
       check_call := f^.base;
    end;
 
@@ -413,20 +410,11 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
 
    function check_array(): spec;
    var
-      ty1, base, ty2: spec;
-      ty_name: string;
+      ty: spec;
    begin
-      ty1 := lookup(tenv, n^.type_name, n^.loc)^.ty;
-      ty_name := n^.type_name^.id;
-      if ty1^.tag <> array_type then
-         err(ty_name + ' isn''t an array type.', n^.loc);
       if check(n^.left, si, nest, env, tenv) <> int_type then
          err('Array size must be an integer.', n^.loc);
-      base := ty1^.base;
-      ty2 := check(n^.right, si, nest, env, tenv);
-      if not compatible(ty2, base) then
-         err(ty_name + ' array initializer is the wrong type.', n^.loc);
-      check_array := ty1;
+      check_array := make_array_type(check(n^.right, si, nest, env, tenv));
    end;
 
    function check_indexed_var(): spec;

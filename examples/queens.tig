@@ -1,12 +1,10 @@
 let
    n = 8
 
-   type int_array = array of int
-
-   row = int_array [n] of 0
-   col = int_array [n] of 0
-   diag1 = int_array [n + n - 1] of 0
-   diag2 = int_array [n + n - 1] of 0
+   row = array [n] of 0
+   col = array [n] of 0
+   diag1 = array [n + n - 1] of 0
+   diag2 = array [n + n - 1] of 0
 
    print_board() =
       begin

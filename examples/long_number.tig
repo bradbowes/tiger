@@ -3,8 +3,7 @@
 *)
 
 let
-   type s_array = array of string
-   num = s_array[100] of ""
+   num = array[100] of ""
    zero = #"0"
    sum = ""
 

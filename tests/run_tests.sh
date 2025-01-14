@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-: << END_COMMENT
+# : << END_COMMENT
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
 test_code "writeln(str(-36545))" "-36545"
@@ -188,40 +188,6 @@ in writeln(str(fib(40)))
 end" "102334155"
 
 test_code "let
-   type int_array = array of int
-   a = int_array[3] of 42
-in
-   a[0] := 50
-   writeln(str(a[0] + a[1] + a[2]))
-end" "134"
-
-test_code "for i := 1 to 5 do
-   writeln(str(i))
-" "1
-2
-3
-4
-5"
-
-test_code "let
-   type int_array = array of int
-   a = int_array[5] of 0
-in
-   for i := 0 to 4 do
-      a[i] := (i + 1) * 2
-
-   for i := 0 to 4 do
-      writeln(str(a[i]))
-
-end" "2
-4
-6
-8
-10"
-
-
-
-test_code "let
    p(n: int) = let s = str(n) in writeln(s) end
 in
    p(42)
@@ -269,40 +235,6 @@ in
    update()
    writeln(str(i))
 end" "1"
-
-test_code "let
-   type int_array = array of int
-   type int_matrix = array of int_array
-
-   numbers = int_matrix[3] of int_array[3] of 0
-in
-   writeln(str(numbers[0][0]))
-end" "0"
-
-test_code "let
-   type int_array = array of int
-   type int_matrix = array of int_array
-   numbers = int_matrix[3] of nil
-in
-   for i := 0 to 2 do begin
-      numbers[i] := int_array[3] of 0
-      for j := 0 to 2 do
-         numbers[i][j] := i * 10 + j
-   end
-
-   for i := 0 to 2 do
-      for j := 0 to 2 do
-         writeln(str(numbers[i][j]))
-
-end" "0
-1
-2
-10
-11
-12
-20
-21
-22"
 
 test_code "writeln(str(length(\"abcdefg\")))" "7"
 
@@ -462,30 +394,6 @@ end" "world
 hello"
 
 test_code "let
-   type s_array = array of string
-   type i_array = array of int
-   sa = s_array[5] of \"hello\"
-   ia = i_array[5] of 0
-in
-   sa[0] := \"one\"
-   sa[1] := \"two\"
-   sa[2] := \"three\"
-   sa[3] := \"four\"
-   sa[4] := \"five\"
-
-   for i := 0 to 4 do
-      ia[i] := length(sa[i])
-
-   for i := 0 to 4 do
-      writeln(str(ia[i]))
-
-end" "3
-3
-5
-4
-4"
-
-test_code "let
    a = 15 + 29
    b =  6
 in
@@ -561,7 +469,6 @@ in
    writeln(a)
 end" "HELLO"
 
-END_COMMENT
 test_code "(* this is a comment *) writeln(\"ok\")" "ok"
 test_code "(**********) writeln(\"ok\")" "ok"
 test_code "(* this is a comment
@@ -569,4 +476,91 @@ test_code "(* this is a comment
 *
 *) writeln(\"ok\")" "ok"
 test_code "(* this is a comment (* this is a nested comment *) *) writeln(\"ok\")" "ok"
+
+# END_COMMENT
+
+test_code "let
+   a = array[3] of 42
+in
+   a[0] := 50
+   writeln(str(a[0] + a[1] + a[2]))
+end" "134"
+
+test_code "for i := 1 to 5 do
+   writeln(str(i))
+" "1
+2
+3
+4
+5"
+
+test_code "let
+   a = array[5] of 0
+in
+   for i := 0 to 4 do
+      a[i] := (i + 1) * 2
+
+   for i := 0 to 4 do
+      writeln(str(a[i]))
+
+end" "2
+4
+6
+8
+10"
+
+test_code "let
+   numbers = array[3] of array[3] of 0
+in
+   writeln(str(numbers[0][0]))
+end" "0"
+
+test_code "let
+   type int_array = array of int
+   type int_matrix = array of int_array
+   numbers : int_matrix = array [3] of nil
+in
+   for i := 0 to 2 do begin
+      numbers[i] := array[3] of 0
+      for j := 0 to 2 do
+         numbers[i][j] := i * 10 + j
+   end
+
+   for i := 0 to 2 do
+      for j := 0 to 2 do
+         writeln(str(numbers[i][j]))
+
+end" "0
+1
+2
+10
+11
+12
+20
+21
+22"
+
+test_code "let
+   type s_array = array of string
+   sa : s_array = array[5] of \"hello\"
+   ia = array[5] of 0
+in
+   sa[0] := \"one\"
+   sa[1] := \"two\"
+   sa[2] := \"three\"
+   sa[3] := \"four\"
+   sa[4] := \"five\"
+
+   for i := 0 to 4 do
+      ia[i] := length(sa[i])
+
+   for i := 0 to 4 do
+      writeln(str(ia[i]))
+
+end" "3
+3
+5
+4
+4"
+
 

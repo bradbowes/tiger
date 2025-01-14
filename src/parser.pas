@@ -133,7 +133,6 @@ var
    var
       loc: source_location;
       value: string;
-      list: node_list;
       factor: node = nil;
       id: symbol;
    begin
@@ -163,59 +162,27 @@ var
                next();
                factor := make_unary_minus_node(get_factor(), loc);
             end;
+         array_token:
+            begin
+               next();
+               advance(lbracket_token, '[');
+               factor := get_expression(); (* size *)
+               advance(rbracket_token, ']');
+               advance(of_token, 'of');
+               factor := make_array_node(factor, get_expression(), loc);
+            end;
          id_token:
             begin
                id := get_identifier();
-               case token.tag of
-                  lbrace_token:
-                     begin
-                        next();
-                        get_factor := make_record_node(id, get_field_list(), loc);
-                        advance(rbrace_token, '}');
-                        exit;
-                     end;
-                  lparen_token:
-                     begin
-                        next();
-                        if token.tag = rparen_token then
-                           list := node_list.create()
-                        else
-                           list := get_expression_list();
-                        advance(rparen_token, ')');
-                        factor := make_call_node(id, list, loc);
-                     end;
-                  lbracket_token:
-                     begin
-                        next();
-                        factor := get_expression();
-                        advance(rbracket_token, ']');
-                        if token.tag = of_token then
-                           begin
-                              next();
-                              get_factor := make_array_node(id, factor, get_expression(), loc);
-                              exit;
-                           end
-                        else
-                           factor :=  make_indexed_var_node(make_simple_var_node(id, loc), factor, loc);
-                     end;
-                  else
-                     factor := make_simple_var_node(id, loc);
-               end;
-
-               while token.tag in [dot_token, lbracket_token] do
-                  case token.tag of
-                    dot_token:
-                       begin
-                          next();
-                          factor := make_field_var_node(factor, get_identifier(), loc);
-                       end;
-                    lbracket_token:
-                       begin
-                          next();
-                          factor := make_indexed_var_node(factor, get_expression(), loc);
-                          advance(rbracket_token, '}');
-                       end;
-                  end;
+               if token.tag = lbrace_token then
+                  begin
+                     next();
+                     get_factor := make_record_node(id, get_field_list(), loc);
+                     advance(rbrace_token, '}');
+                     exit;
+                  end
+               else
+                  factor := make_simple_var_node(id, loc);
             end;
          lparen_token:
             begin
@@ -233,6 +200,42 @@ var
       get_factor := factor;
    end;
 
+   function get_subscript(): node;
+   var
+      loc: source_location;
+      left: node;
+      list: node_list;
+   begin
+      loc := token_location();
+      left := get_factor();
+
+      while token.tag in [dot_token, lbracket_token, lparen_token] do
+         case token.tag of
+            dot_token:
+               begin
+                  next();
+                  left := make_field_var_node(left, get_identifier(), loc);
+               end;
+            lbracket_token:
+               begin
+                  next();
+                  left := make_indexed_var_node(left, get_expression(), loc);
+                  advance(rbracket_token, ']');
+               end;
+            lparen_token:
+               begin
+                  next();
+                  if token.tag = rparen_token then
+                     list := node_list.create()
+                  else
+                     list := get_expression_list();
+                  advance(rparen_token, ')');
+                  left := make_call_node(left, list, loc);
+               end;
+         end;
+      get_subscript := left;
+   end;
+
    function get_product(): node;
    var
       loc: source_location;
@@ -240,7 +243,7 @@ var
       op: node_tag = empty_node;
    begin
       loc := token_location();
-      left := get_factor();
+      left := get_subscript();
 
       while token.tag in [mul_token, div_token, mod_token] do
          begin
@@ -250,7 +253,7 @@ var
                mod_token: op := mod_node;
             end;
             next();
-            left := make_binary_node(op, left, get_factor(), loc);
+            left := make_binary_node(op, left, get_subscript(), loc);
             loc := token_location();
          end;
 
