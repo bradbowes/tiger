@@ -74,17 +74,15 @@ var
    function expand_call(): node;
    var
       args: node_list;
-      add_arg: node_list.iter;
 
-      procedure _add_arg(n: node);
+      procedure add_arg(n: node);
       begin
          args.append(reduce(n));
       end;
 
    begin
-      add_arg := @_add_arg;
       args := node_list.create();
-      n^.list.foreach(add_arg);
+      n^.list.foreach(@add_arg);
       expand_call := expand(make_call_node(trans3(n^.left), args, loc));
    end;
 
@@ -137,18 +135,16 @@ var
    var
       value: node;
       list: node_list;
-      add_field: node_list.iter;
 
-      procedure _add_field(n: node);
+      procedure add_field(n: node);
       begin
          value := reduce(n^.left);
          list.append(make_field_node(n^.name, value, n^.loc));
       end;
 
    begin
-      add_field := @_add_field;
       list := node_list.create();
-      n^.list.foreach(add_field);
+      n^.list.foreach(@add_field);
       expand_record := expand(make_record_node(n^.type_name, list, loc));
    end;
 

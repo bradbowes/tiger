@@ -151,17 +151,15 @@ var
    procedure emit_let();
    var
       stack_index: longint;
-      emit_decl: node_list.iter;
 
-      procedure _emit_decl(n: node);
+      procedure emit_decl(n: node);
       begin
          emit_expression(n, stack_index, nest);
       end;
 
    begin
-      emit_decl := @_emit_decl;
       stack_index := n^.env^.stack_index * -8 - 8; (* room for pushed %rbp *)
-      n^.list.foreach(emit_decl);
+      n^.list.foreach(@emit_decl);
       if n^.right <> nil then
          emit_expression(n^.right, stack_index, nest);
    end;
@@ -298,9 +296,8 @@ var
    var
       target, i: longint;
       pos: longint;
-      emit_arg: node_list.iter;
 
-      procedure _emit_arg(n: node);
+      procedure emit_arg(n: node);
       begin
          emit_expression(n, -8, nest);
          emit('   movq %%rax, %d(%%rbp)', [pos]);
@@ -308,7 +305,6 @@ var
       end;
 
    begin
-      emit_arg := @_emit_arg;
       target := n^.binding^.nesting_level;
       pos := 16;
       { link }
@@ -324,7 +320,7 @@ var
                emit('   movq %%rbx, %d(%%rbp)', [pos]);
             end;
       pos := pos + 8;
-      n^.list.foreach(emit_arg);
+      n^.list.foreach(@emit_arg);
       emit('   popq %%rbp', []);
       if n^.binding^.external then
          emit('   jmp f$_%s', [n^.name^.id])
@@ -336,9 +332,8 @@ var
    var
       stack_size, target, i: longint;
       pos: longint;
-      emit_arg: node_list.iter;
 
-      procedure _emit_arg(n: node);
+      procedure emit_arg(n: node);
       begin
          emit_expression(n, -(stack_size + 8), nest);
          emit('   movq %%rax, %d(%%rbp)', [pos]);
@@ -346,7 +341,6 @@ var
       end;
 
    begin
-      emit_arg := @_emit_arg;
       target := n^.binding^.nesting_level;
       stack_size := ((8 * n^.list.length) - si + 15);
       stack_size := stack_size - (stack_size mod 16);
@@ -364,7 +358,7 @@ var
                emit('   movq %%rbx, %d(%%rbp)', [pos]);
             end;
       pos := pos + 8;
-      n^.list.foreach(emit_arg);
+      n^.list.foreach(@emit_arg);
       emit('   subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
          emit('   call f$_%s', [n^.binding^.key^.id])
@@ -374,17 +368,14 @@ var
    end;
 
    procedure emit_sequence();
-   var
-      emit_expr: node_list.iter;
 
-      procedure _emit_expr(n: node);
+      procedure emit_expr(n: node);
       begin
          emit_expression(n, si, nest);
       end;
 
    begin
-      emit_expr := @_emit_expr;
-      n^.list.foreach(emit_expr);
+      n^.list.foreach(@emit_expr);
    end;
 
    procedure emit_array();
@@ -405,13 +396,32 @@ var
            '   leaq 8(%%r15, %%rcx, 8), %%r15', [lbl, lbl]);
    end;
 
+   procedure emit_array_list();
+   var
+      len: longint;
+
+      procedure emit_item(n: node);
+      begin
+          emit_expression(n, si, nest);
+          emit('   movq %%rax, (%%r15)' + lineending +
+               '   addq $8, %%r15', []);
+      end;
+
+   begin
+      len := n^.list.length;
+      emit('   movq $%d, (%%r15)' + lineending +
+           '   addq $8, %%r15', [len]);
+      n^.list.foreach(@emit_item);
+      emit('   movq %%r15, %%rax' + lineending +
+           '   subq $%d, %%rax', [(len + 1) * 8]);
+   end;
+
    procedure emit_record();
    var
       ty: spec;
       size, stack_index, i: longint;
-      emit_field: node_list.iter;
 
-      procedure _emit_field(n: node);
+      procedure emit_field(n: node);
       var
          offset: longint;
       begin
@@ -421,11 +431,10 @@ var
       end;
 
    begin
-      emit_field := @_emit_field;
       size := n^.list.length;
       stack_index := si + (size * -8);
       ty := n^.binding^.ty;
-      n^.list.foreach(emit_field);
+      n^.list.foreach(@emit_field);
       for i := 0 to size - 1 do
          begin
             emit('   movq %d(%%rbp), %%rax', [si - i * 8]);
@@ -602,6 +611,8 @@ begin
             emit_var();
       array_node:
          emit_array();
+      array_list_node:
+         emit_array_list();
       record_node:
          emit_record();
       indexed_var_node:

@@ -38,21 +38,18 @@ var
    b: binding;
    loc: source_location;
    list: node_list;
-   add_arg, add_param: node_list.iter;
 
-   procedure _add_arg(n: node);
+   procedure add_arg(n: node);
    begin
       list.append(trans2(n));
    end;
 
-   procedure _add_param(arg: node);
+   procedure add_param(arg: node);
    begin
       list.append(make_field_desc_node(var_name(lookup(n^.env, arg^.name, arg^.loc)), arg^.type_name, loc));
    end;
 
 begin
-   add_arg := @_add_arg;
-   add_param := @_add_param;
    b := n^.binding;
    loc := n^.loc;
 
@@ -60,7 +57,7 @@ begin
       call_node, tail_call_node:
          begin
             list := node_list.create();
-            n^.list.foreach(add_arg);
+            n^.list.foreach(@add_arg);
             trans2 := make_call_node(trans2(n^.left), list, loc);
             trans2^.tag := n^.tag;
          end;
@@ -76,7 +73,7 @@ begin
          else
             begin
                list := node_list.create();
-               n^.list.foreach(add_param);
+               n^.list.foreach(@add_param);
                trans2 := make_fun_decl_node(var_name(b), list, n^.type_name, trans2(n^.right), loc);
             end;
       else

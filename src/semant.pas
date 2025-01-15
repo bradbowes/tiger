@@ -71,9 +71,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty, param_type, return_type: spec;
       fenv: scope;
       stack_index: integer;
-      bind_param: node_list.iter;
 
-      procedure _bind_param(n: node);
+      procedure bind_param(n: node);
       var
          key: symbol;
          loc: source_location;
@@ -87,7 +86,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      bind_param := @_bind_param;
       if n^.type_name = nil then
          return_type := void_type
       else
@@ -96,7 +94,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty := make_function_type(return_type);
       fenv := add_scope(env);
       stack_index := -2; { args go up from sp; leave space for link address and return address }
-      n^.list.foreach(bind_param);
+      n^.list.foreach(@bind_param);
       n^.env := fenv;
       n^.binding := bind(env, n^.name, ty, si, nest, n^.loc);
    end;
@@ -159,9 +157,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    var
       offset: integer;
       ty: spec;
-      check_field: node_list.iter;
 
-      procedure _check_field(n: node);
+      procedure check_field(n: node);
       var
          fld_ty: spec;
          loc: source_location;
@@ -173,19 +170,17 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      check_field := @_check_field;
       offset := 0;
       ty := n^.binding^.ty;
-      n^.right^.list.foreach(check_field);
+      n^.right^.list.foreach(@check_field);
    end;
 
    procedure check_enum_decl_body(n: node; tenv: scope);
    var
       offset: integer = 0;
       ty: spec;
-      bind_enum: node_list.iter;
 
-      procedure _bind_enum(n: node);
+      procedure bind_enum(n: node);
       var
          b: binding;
       begin
@@ -197,9 +192,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      bind_enum := @_bind_enum;
       ty := n^.binding^.ty;
-      n^.right^.list.foreach(bind_enum);
+      n^.right^.list.foreach(@bind_enum);
    end;
 
    function check_let(): spec;
@@ -211,18 +205,15 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          group: node_list = nil;
          new_env, new_tenv: scope;
          stack_index, offset: integer;
-         inc_stack, chk_decl: node_list.iter;
 
       procedure update_state(new_state: state_tag);
-      var
-         chk_fun, chk_ty: node_list.iter;
 
-         procedure _chk_fun(n: node);
+         procedure chk_fun(n: node);
          begin
             check_fun_body(n, stack_index, new_env, new_tenv);
          end;
 
-         procedure _chk_ty(n: node);
+         procedure chk_ty(n: node);
          begin
             case n^.right^.tag  of
                record_desc_node:
@@ -232,8 +223,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             end;
          end;
       begin
-         chk_fun := @_chk_fun;
-         chk_ty := @_chk_ty;
          case state of
             var_state:
                if new_state <> var_state then
@@ -241,7 +230,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             fun_state:
                if new_state <> fun_state then
                   begin
-                     group.foreach(chk_fun);
+                     group.foreach(@chk_fun);
                      group.destroy();
                      if new_state = type_state then
                         group := node_list.create();
@@ -249,7 +238,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             type_state:
                if new_state <> type_state then
                   begin
-                     group.foreach(chk_ty);
+                     group.foreach(@chk_ty);
                      group.destroy();
                      if new_state = fun_state then
                         group := node_list.create();
@@ -258,13 +247,13 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          state := new_state;
       end;
 
-      procedure _inc_stack(n: node);
+      procedure inc_stack(n: node);
       begin
          if n^.tag = var_decl_node then
             stack_index := stack_index + 1;
       end;
 
-      procedure _chk_decl(n: node);
+      procedure chk_decl(n: node);
       begin
          case n^.tag of
             var_decl_node:
@@ -289,15 +278,13 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      inc_stack := @_inc_stack;
-      chk_decl := @_chk_decl;
       state := var_state;
       offset := si;
       stack_index := si;
-      n^.list.foreach(inc_stack);
+      n^.list.foreach(@inc_stack);
       new_tenv := add_scope(tenv);
       new_env := add_scope(env);
-      n^.list.foreach(chk_decl);
+      n^.list.foreach(@chk_decl);
       update_state(var_state);
       new_env^.stack_index := stack_index;
       n^.env := new_env;
@@ -344,9 +331,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    var
       f: spec;
       param: field;
-      chk_arg: node_list.iter;
 
-      procedure _chk_arg(n: node);
+      procedure chk_arg(n: node);
       begin
          if param = nil then
             err('too many arguments to function', n^.loc);
@@ -356,12 +342,11 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      chk_arg := @_chk_arg;
       f := check(n^.left, si, nest, env, tenv);
       if f^.tag <> function_type then
          err('not a function', n^.loc);
       param := f^.fields;
-      n^.list.foreach(chk_arg);
+      n^.list.foreach(@chk_arg);
       if param <> nil then
          err('not enough arguments to function call', n^.loc);
       n^.binding := n^.left^.binding;
@@ -395,26 +380,43 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    function check_sequence(): spec;
    var
       ty: spec = nil;
-      chk_expr: node_list.iter;
 
-      procedure _chk_expr(n: node);
+      procedure chk_expr(n: node);
       begin
          ty := check(n, si, nest, env, tenv);
       end;
 
    begin
-      chk_expr := @_chk_expr;
-      n^.list.foreach(chk_expr);
+      n^.list.foreach(@chk_expr);
       check_sequence := ty;
    end;
 
    function check_array(): spec;
-   var
-      ty: spec;
    begin
       if check(n^.left, si, nest, env, tenv) <> int_type then
          err('Array size must be an integer.', n^.loc);
       check_array := make_array_type(check(n^.right, si, nest, env, tenv));
+   end;
+
+   function check_array_list(): spec;
+   var
+      ty: spec;
+
+      procedure check_item(n: node);
+      begin
+         if not compatible(ty, check(n, si, nest, env, tenv)) then
+            err('Array item is wrong type.', n^.loc);
+      end;
+
+   begin
+      if n^.list.length = 0 then
+         check_array_list := nil_type
+      else
+         begin
+            ty := check(n^.list.first.thing, si, nest, env, tenv);
+            n^.list.foreach(@check_item);
+            check_array_list := make_array_type(ty);
+         end;
    end;
 
    function check_indexed_var(): spec;
@@ -460,9 +462,8 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
    function check_case(): spec;
    var
       ty, ty2, ty_result: spec;
-      check_clause: node_list.iter;
 
-      procedure _check_clause(n: node);
+      procedure check_clause(n: node);
       begin
          if check(n^.left, si, nest, env, tenv) <> ty then
             err('match must be same type as case variable', n^.left^.loc);
@@ -478,12 +479,11 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      check_clause := @_check_clause;
       ty_result := nil;
       ty := check(n^.cond, si, nest, env, tenv);
       if (ty <> int_type) and (ty <> char_type) and (ty^.tag <> enum_type) then
          err('case variable must be a cardinal type', n^.cond^.loc);
-      n^.list.foreach(check_clause);
+      n^.list.foreach(@check_clause);
       if n^.right <> nil then (* default clause *)
          begin
             ty2 := check(n^.right, si, nest, env, tenv);
@@ -510,7 +510,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty, field_ty: spec;
       rec_type: symbol;
       f: field;
-      check_field: node_list.iter;
 
       procedure add_check(f: field);
       var fc: field_check;
@@ -535,7 +534,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          find_check := fc;
       end;
 
-      procedure _check_field(value: node);
+      procedure check_field(value: node);
       var
          name: symbol;
          loc: source_location;
@@ -555,7 +554,6 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       end;
 
    begin
-      check_field := @_check_field;
       rec_type := n^.type_name;
       b := lookup(tenv, rec_type, n^.loc);
       ty := b^.ty;
@@ -567,7 +565,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
             add_check(f);
             f := f^.next;
          end;
-      n^.list.foreach(check_field);
+      n^.list.foreach(@check_field);
       fc := checks;
       while fc <> nil do
          begin
@@ -675,6 +673,8 @@ begin
          check := check_sequence();
       array_node:
          check := check_array();
+      array_list_node:
+         check := check_array_list();
       record_node:
          check := check_record();
       indexed_var_node:

@@ -310,18 +310,16 @@ var
    var
       list: node_list;
       e: node;
-      trans_binding: node_list.iter;
 
-      procedure _trans_binding(n: node);
+      procedure trans_binding(n: node);
       begin
          if (n^.binding <> nil) and ((n^.binding^.mutates) or (n^.binding^.value = nil)) then
             list.append(trans1(n));
       end;
 
    begin
-      trans_binding := @_trans_binding;
       list := node_list.create();
-      n^.list.foreach(trans_binding);
+      n^.list.foreach(@trans_binding);
       e := trans1(n^.right);
       if list.length > 0 then
          trans_let := make_let_node(list, e, loc)

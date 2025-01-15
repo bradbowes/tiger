@@ -17,17 +17,14 @@ uses bindings, formats, semant;
 procedure annotate(n: node; nest: integer; fn: binding);
 
    procedure annotate_list();
-   var
-      annotate_item: node_list.iter;
 
-      procedure _annotate_item(n: node);
+      procedure annotate_item(n: node);
       begin
          annotate(n, nest, fn);
       end;
 
    begin
-      annotate_item := @_annotate_item;
-      n^.list.foreach(annotate_item);
+      n^.list.foreach(@annotate_item);
    end;
 
    procedure annotate_simple_var();
@@ -63,9 +60,8 @@ procedure annotate(n: node; nest: integer; fn: binding);
    var
       b: binding;
       body: node;
-      annotate_param: node_list.iter;
 
-      procedure _annotate_param(param: node);
+      procedure annotate_param(param: node);
       var
          b: binding;
       begin
@@ -74,10 +70,9 @@ procedure annotate(n: node; nest: integer; fn: binding);
       end;
 
    begin
-      annotate_param := @_annotate_param;
       b := n^.binding;
       b^.nesting_level := nest;
-      n^.list.foreach(annotate_param);
+      n^.list.foreach(@annotate_param);
       body := n^.right;
       if body <> nil then
          annotate(body, nest + 1, b);
@@ -155,21 +150,18 @@ var tf: tf_function = @shake;
 function shake(n: node): node;
 
    function is_reachable(b: binding): boolean;
-   var
-      reach: binding_list.iter;
 
-      procedure _reach(caller: binding);
+      procedure reach(caller: binding);
       begin
          if is_reachable(caller) then
             b^.reachable := reachable_yes;
       end;
 
    begin
-      reach := @_reach;
       if (b^.reachable = reachable_unknown) and (b^.call_count > 0) then
          begin
             b^.reachable := reachable_no;
-            b^.callers.foreach(reach);
+            b^.callers.foreach(@reach);
          end;
       is_reachable := b^.reachable = reachable_yes;
    end;
@@ -190,15 +182,13 @@ end;
 procedure report(n: node);
 var
    b: binding;
-   report_node: node_list.iter;
-   report_binding: binding_list.iter;
 
-   procedure _report_node(n: node);
+   procedure report_node(n: node);
    begin
       report(n);
    end;
 
-   procedure _report_binding(b: binding);
+   procedure report_binding(b: binding);
    begin
       if b = nil then
          writeln('    < - - - - >')
@@ -207,8 +197,6 @@ var
    end;
 
 begin
-   report_node := @_report_node;
-   report_binding := @_report_binding;
    if (n^.tag = fun_decl_node) and (not n^.binding^.external) then
       begin
          writeln('----------------------------------------');
@@ -217,11 +205,11 @@ begin
          writeln('call count: ', n^.binding^.call_count);
          writeln('recursive: ', n^.binding^.recursive);
          writeln('free variables:');
-         n^.binding^.free_vars.foreach(report_binding);
+         n^.binding^.free_vars.foreach(@report_binding);
          writeln('callers:');
-         n^.binding^.callers.foreach(report_binding);
+         n^.binding^.callers.foreach(@report_binding);
          writeln('callees:');
-         n^.binding^.callees.foreach(report_binding);
+         n^.binding^.callees.foreach(@report_binding);
          writeln('----------------------------------------');
          writeln();
          if n^.right <> nil then
@@ -230,7 +218,7 @@ begin
    else
       begin
          if n^.list <> nil then
-            n^.list.foreach(report_node);
+            n^.list.foreach(@report_node);
          if n^.cond <> nil then report(n^.cond);
          if n^.left <> nil then report(n^.left);
          if n^.right <> nil then report(n^.right);

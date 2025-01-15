@@ -10,32 +10,33 @@
 - `mod` (integer division remainder) operator.
 - `&` operator (logical and) changed to `and`.
 - `|` operator (logical or) changed to `or`.
-- boolean data type. Relational operators return booleans, `true` and
+- Boolean data type. Relational operators return booleans, `true` and
   `false` are pre-defined contants.
-- char data type. Char literals are `#` followed by a single letter in
+- Char data type. Char literals are `#` followed by a single letter in
   quotation marks. eg `#"a"` or escape sequences `#"\n"`.
-- file data type (C `FILE*` pointer) 
-- sequences are enclosed in `begin` and `end` instead of
+- File data type (C `FILE*` pointer) 
+- Sequences are enclosed in `begin` and `end` instead of
   parentheses.
-- semicolon separators are optional between expressions in sequences.
-- variable declarations: `var` keyword not used, format is
+- Semicolon separators are optional between expressions in sequences.
+- Variable declarations: `var` keyword not used, format is
   `<id>`[`: <type>`]` = <exp>` (uses `=` instead of `:=`).
-- function declarations: `function` keyword not used, format is
+- Function declarations: `function` keyword not used, format is
   `<id>(`[`<id>: <type> `{`, <id>: <type>`}]`) = <exp>`.
-- strings can include line breaks and span multiple lines.
-- comments are SML style `(* ... *)`
-- type aliases are not implemented.
+- Strings can include line breaks and span multiple lines.
+- Comments are Pascal/SML style `(* ... *)`
+- Type aliases are not implemented.
 - `break` is not implemented.
-- string comparison operators (`<`, `<=`, `>`, `>=`) not implemented --
+- String comparison operators (`<`, `<=`, `>`, `>=`) not implemented --
   use `string_compare` function instead.
 - `use "<file_name>"` to include external definition file inside a `let`
   declaration block
-- enum types. `type <id> = <id>`{`| <id>`}. Example `type color = red | green | blue`.
-- case expression `case <exp> of <const> : <exp> `{`| <const> : <exp>`}` else <exp>`.
+- Enum types. `type <id> = <id>`{`| <id>`}. Example `type color = red | green | blue`.
+- Case expression `case <exp> of <const> : <exp> `{`| <const> : <exp>`}` else <exp>`.
 - Array initialization uses the keyword `array` rather than a type name.
   `array[<exp>] of <value>`. Example `array[5] of 0`. 
-  Arrays type have structural equivalence and don't have to be declared (unless the
-  initialization value is `nil`).
+  Array types have structural equivalence and don't have to be declared. (Type can be
+  inferred unless the initialization value is `nil`).
+- Array literals. Example `[1, 2, 3, 4, 5]`. `[]` is equivalent to nil.
 
 
 # To do
@@ -45,7 +46,6 @@
 - anonymous functions, first class functions
 - type inference
 - closures
-- array literals
 - garbage collector
 - algebraic types and polymorphic functions
 - modules
@@ -53,6 +53,9 @@
 - ffi
 - unicode
 - alternate backends
+- floating point types
+- bitwise operators (and, or, not, shift)
+- string compare operators
 
 # Standard Library
 

@@ -135,6 +135,7 @@ var
       value: string;
       factor: node = nil;
       id: symbol;
+      list: node_list;
    begin
       loc := token_location();
       value := token.value;
@@ -178,6 +179,13 @@ var
                   end
                else
                   factor := make_simple_var_node(id, loc);
+            end;
+         lbracket_token:
+            begin
+               next();
+               list := get_expression_list();
+               advance(rbracket_token, ']');
+               factor := make_array_list_node(list, loc);
             end;
          lparen_token:
             begin

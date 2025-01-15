@@ -21,7 +21,7 @@ test_code () {
    sleep .5
 }
 
-# : << END_COMMENT
+: << END_COMMENT
 test_code "writeln(str(12345))" "12345"
 test_code "writeln(str(65536))" "65536"
 test_code "writeln(str(-36545))" "-36545"
@@ -477,8 +477,6 @@ test_code "(* this is a comment
 *) writeln(\"ok\")" "ok"
 test_code "(* this is a comment (* this is a nested comment *) *) writeln(\"ok\")" "ok"
 
-# END_COMMENT
-
 test_code "let
    a = array[3] of 42
 in
@@ -542,7 +540,7 @@ end" "0
 
 test_code "let
    type s_array = array of string
-   sa : s_array = array[5] of \"hello\"
+   sa: s_array = array[5] of \"hello\"
    ia = array[5] of 0
 in
    sa[0] := \"one\"
@@ -551,6 +549,25 @@ in
    sa[3] := \"four\"
    sa[4] := \"five\"
 
+   for i := 0 to 4 do
+      ia[i] := length(sa[i])
+
+   for i := 0 to 4 do
+      writeln(str(ia[i]))
+
+end" "3
+3
+5
+4
+4"
+
+
+END_COMMENT
+
+test_code "let
+   sa = [\"one\", \"two\", \"three\", \"four\", \"five\"]
+   ia = array[5] of 0
+in
    for i := 0 to 4 do
       ia[i] := length(sa[i])
 
