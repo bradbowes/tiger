@@ -16,6 +16,7 @@ type
       public
          key: t_key;
          item: t_item;
+         constructor create();
          destructor destroy(); override;
          function lookup(k: t_key): map;
          class function insert(m: map; k: t_key; it: t_item): map;
@@ -24,6 +25,17 @@ type
 implementation
 
 uses math;
+
+constructor map.create();
+begin
+   inherited;
+   valid := false;
+   key := nil;
+   item := nil;
+   left := nil;
+   right := nil;
+   height := 0;
+end;
 
 procedure map.init(k: t_key; it: t_item);
 begin

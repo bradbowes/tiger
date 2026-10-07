@@ -8,7 +8,7 @@ type symbol = {
 type symbol_table = array of symbol
 
 hash_size = 1021
-symtab = symbol_table[hash_size] of nil
+symtab: symbol_table = array [hash_size] of nil
 next_tmp = 0
 sbuf = make_buffer(32)
 
@@ -59,7 +59,7 @@ gensym(): symbol =
          if i > 0 then
             begin
                append_num(i / 10)
-               push_buffer(sbuf, chr(i - i / 10 * 10) + #"0")
+               push_buffer(sbuf, chr(i - i / 10 * 10) + '0')
             end
    in
       next_tmp := next_tmp + 1

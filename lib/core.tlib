@@ -42,7 +42,7 @@ write(s: string) =
 writeln(s: string) =
    begin
       write(s)
-      putchar(#"\n")
+      putchar('\n')
    end
 
 file_write(s: string, f: file) =
@@ -52,7 +52,7 @@ file_write(s: string, f: file) =
 file_writeln(s: string, f: file) =
    begin
       file_write(s, f)
-      file_putchar(#"\n", f)
+      file_putchar('\n', f)
    end
 
 max(m: int, n: int): int =
@@ -62,18 +62,19 @@ min(m: int, n: int): int =
    if m > n then n else m
 
 is_space(ch: char): bool =
-   ch = #" " or (ch >= #"\t" and ch <= #"\r")
+   ch = ' ' or (ch >= '\t' and ch <= '\r')
 
 is_digit(ch: char): bool =
-   ch >= #"0" and ch <= #"9"
+   ch >= '0' and ch <= '9'
 
 is_lower(ch: char): bool =
-   ch >= #"a" and ch <= #"z"
+   ch >= 'a' and ch <= 'z'
 
 is_upper(ch: char): bool =
-   ch >= #"A" and ch <= #"Z"
+   ch >= 'A' and ch <= 'Z'
 
 is_alpha(ch: char): bool =
    is_upper(ch) or is_lower(ch)
+
 
 

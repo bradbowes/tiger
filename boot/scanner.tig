@@ -114,22 +114,22 @@ push_tag(tag: token_tag) =
 scan_comment() =
    begin
       push_buf()
-      while buf.ptr < 4 or ch <> #")" do
+      while buf.ptr < 4 or ch <> ')' do
          begin
-            while ch <> #"*" do
+            while ch <> '*' do
                push_buf()
-            while ch = #"*" do
+            while ch = '*' do
                push_buf()
          end
       push_buf()
       recognize(comment_token)
    end
 
-scan_string() =
+scan_string(delim: char) =
    begin
       nextch()
-      while ch <> #"\"" do
-         if ch = #"\\" then
+      while ch <> delim do
+         if ch = '\\' then
             begin
                nextch()
                let
@@ -139,15 +139,15 @@ scan_string() =
                         chr(0)
                      end
                   esc = true
-                  escape = if ch = #"a" then #"\a"       (* alert *)
-                     else if ch = #"b" then #"\b"        (* backspace *)
-                     else if ch = #"t" then #"\t"        (* tab *)
-                     else if ch = #"n" then #"\n"        (* newline *)
-                     else if ch = #"v" then #"\v"        (* vertical tab *)
-                     else if ch = #"f" then #"\f"        (* form feed *)
-                     else if ch = #"r" then #"\r"        (* carriage return *)
-                     else if ch = #"\\" or ch = #"\"" then ch
-                     else if ch = #"^" then
+                  escape = if ch = 'a' then '\a'       (* alert *)
+                     else if ch = 'b' then '\b'        (* backspace *)
+                     else if ch = 't' then '\t'        (* tab *)
+                     else if ch = 'n' then '\n'        (* newline *)
+                     else if ch = 'v' then '\v'        (* vertical tab *)
+                     else if ch = 'f' then '\f'        (* form feed *)
+                     else if ch = 'r' then '\r'        (* carriage return *)
+                     else if ch = '\\' or ch = '\"' or ch = '\'' then ch
+                     else if ch = '^' then
                         begin
                            nextch()
                            if is_upper(ch) then
@@ -163,11 +163,11 @@ scan_string() =
                               begin
                                  nextch()
                                  if is_digit(ch) then
-                                    n * 10 + ord(ch) - ord(#"0")
+                                    n * 10 + ord(ch) - ord('0')
                                  else
                                     256
                               end
-                           code = digit(digit(ord(ch) - ord(#"0")))
+                           code = digit(digit(ord(ch) - ord('0')))
                         in
                            if code > 255 then
                               escape_err()
@@ -178,7 +178,7 @@ scan_string() =
                         begin
                            esc := false
                            skip_spaces()
-                           if ch = #"\\" then
+                           if ch = '\\' then
                               begin
                                  nextch()
                                  chr(0)
@@ -204,11 +204,7 @@ scan_string() =
 
 scan_char() =
    begin
-      nextch()
-      if ch = #"\"" then
-         scan_string()
-      else
-         err("illegal character literal", src_location())
+      scan_string('\'')
       if length(tok.value.id) <> 1 then
          err("illegal character literal", tok_location())
       recognize(char_token)
@@ -223,7 +219,7 @@ scan_number() =
 
 scan_id() =
    begin
-      while is_alpha(ch) or is_digit(ch) or ch = #"_" do
+      while is_alpha(ch) or is_digit(ch) or ch = '_' do
          push_buf();
       recognize(id_token)
       let
@@ -261,48 +257,48 @@ scan() =
       tok.line := src.line
       tok.col := src.col
       if ch = EOF then recognize(eof_token)
-      else if ch = #"," then push_tag(comma_token)
-      else if ch = #";" then push_tag(semicolon_token)
-      else if ch = #"." then push_tag(dot_token)
-      else if ch = #"(" then
+      else if ch = ',' then push_tag(comma_token)
+      else if ch = ';' then push_tag(semicolon_token)
+      else if ch = '.' then push_tag(dot_token)
+      else if ch = '(' then
          begin
             push_buf()
-            if ch = #"*" then scan_comment()
+            if ch = '*' then scan_comment()
             else recognize(lparen_token)
          end
-      else if ch = #")" then push_tag(rparen_token)
-      else if ch = #"[" then push_tag(lbracket_token)
-      else if ch = #"]" then push_tag(rbracket_token)
-      else if ch = #"{" then push_tag(lbrace_token)
-      else if ch = #"}" then push_tag(rbrace_token)
-      else if ch = #"|" then push_tag(pipe_token)
-      else if ch = #"+" then push_tag(plus_token)
-      else if ch = #"-" then push_tag(minus_token)
-      else if ch = #"*" then push_tag(mul_token)
-      else if ch = #"/" then push_tag(div_token)
-      else if ch = #"=" then push_tag(eq_token)
-      else if ch = #"<" then
+      else if ch = ')' then push_tag(rparen_token)
+      else if ch = '[' then push_tag(lbracket_token)
+      else if ch = ']' then push_tag(rbracket_token)
+      else if ch = '{' then push_tag(lbrace_token)
+      else if ch = '}' then push_tag(rbrace_token)
+      else if ch = '|' then push_tag(pipe_token)
+      else if ch = '+' then push_tag(plus_token)
+      else if ch = '-' then push_tag(minus_token)
+      else if ch = '*' then push_tag(mul_token)
+      else if ch = '/' then push_tag(div_token)
+      else if ch = '=' then push_tag(eq_token)
+      else if ch = '<' then
          begin
             push_buf()
-            if ch = #">" then push_tag(neq_token)
-            else if ch = #"=" then push_tag(leq_token)
+            if ch = '>' then push_tag(neq_token)
+            else if ch = '=' then push_tag(leq_token)
             else recognize(lt_token)
          end
-      else if ch = #">" then
+      else if ch = '>' then
          begin
             push_buf()
-            if ch = #"=" then push_tag(geq_token)
+            if ch = '=' then push_tag(geq_token)
             else recognize(gt_token)
          end
-      else if ch = #":" then
+      else if ch = ':' then
          begin
             push_buf()
-            if ch = #"=" then push_tag(assign_token)
+            if ch = '=' then push_tag(assign_token)
             else recognize(colon_token)
          end
       else if is_digit(ch) then scan_number()
-      else if ch = #"\"" then scan_string()
-      else if ch = #"#" then scan_char()
+      else if ch = '\"' then scan_string('\"')
+      else if ch = '\'' then scan_char()
       else if is_alpha(ch) then  scan_id()
       else err("Illegal character", src_location())
    end

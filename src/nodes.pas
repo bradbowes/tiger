@@ -85,7 +85,8 @@ function make_nil_node(loc: source_location): node;
 function make_empty_node(loc: source_location): node;
 function make_type_decl_node(name: symbol; spec: node; loc: source_location): node;
 function make_var_decl_node(name, ty: symbol; expr: node; loc: source_location): node;
-function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
+function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol;
+                            body: node; loc: source_location): node;
 function make_record_desc_node(fields: node_list; loc: source_location): node;
 function make_array_desc_node(base: symbol; loc: source_location): node;
 function make_enum_desc_node(items: node_list; loc: source_location): node;
@@ -106,12 +107,15 @@ function make_or_node(left, right: node; loc: source_location): node;
 function make_field_node(name: symbol; expr: node; loc: source_location): node;
 function make_field_desc_node(name, ty: symbol; loc: source_location): node;
 function make_enum_node(name: symbol; loc: source_location): node;
-function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
+function make_if_else_node(condition, consequent, alternative: node;
+                           loc: source_location): node;
 function make_if_node(condition, consequent: node; loc: source_location): node;
-function make_case_node(arg: node; clauses: node_list; default: node; loc: source_location): node;
+function make_case_node(arg: node; clauses: node_list; default: node;
+                        loc: source_location): node;
 function make_clause_node(match, action: node; loc: source_location): node;
 function make_while_node(condition, body: node; loc: source_location): node;
-function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
+function make_for_node(iter: symbol; start, finish, body: node;
+                       loc: source_location): node;
 function make_let_node(decls: node_list; body: node; loc: source_location): node;
 function make_sequence_node(sequence: node_list; loc: source_location): node;
 function make_record_node(ty: symbol; fields: node_list; loc: source_location): node;
@@ -303,7 +307,8 @@ begin
    make_var_decl_node := n;
 end;
 
-function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol; body: node; loc: source_location): node;
+function make_fun_decl_node(name: symbol; params: node_list; return_type: symbol;
+                            body: node; loc: source_location): node;
 var
    n: node;
 begin
@@ -456,7 +461,8 @@ begin
    make_enum_node := n;
 end;
 
-function make_if_else_node(condition, consequent, alternative: node; loc: source_location): node;
+function make_if_else_node(condition, consequent, alternative: node;
+                           loc: source_location): node;
 var
    n: node;
 begin
@@ -464,7 +470,8 @@ begin
    n^.cond := condition;
    n^.left := consequent;
    n^.right := alternative;
-   n^.ins_count := condition^.ins_count + consequent^.ins_count + alternative^.ins_count + 1;
+   n^.ins_count := condition^.ins_count + consequent^.ins_count +
+                   alternative^.ins_count + 1;
    make_if_else_node := n
 end;
 
@@ -479,7 +486,8 @@ begin
    make_if_node := n;
 end;
 
-function make_case_node(arg: node; clauses: node_list; default: node; loc: source_location): node;
+function make_case_node(arg: node; clauses: node_list; default: node;
+                        loc: source_location): node;
 var
    n: node;
 begin
@@ -513,7 +521,8 @@ begin
    make_while_node := n;
 end;
 
-function make_for_node(iter: symbol; start, finish, body: node; loc: source_location): node;
+function make_for_node(iter: symbol; start, finish, body: node;
+                       loc: source_location): node;
 var
    n: node;
 begin

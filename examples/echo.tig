@@ -8,7 +8,7 @@ in
    for i := 1 to last do
       begin
          write(command_arg(i))
-         if i < last then putchar(#" ")
+         if i < last then putchar(' ')
       end
-   putchar(#"\n")
+   putchar('\n')
 end

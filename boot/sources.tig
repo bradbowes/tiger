@@ -89,7 +89,7 @@ nextch() =
                   end
             end
          else
-            if ch = #"\n" then
+            if ch = '\n' then
                begin
                   src.line := src.line + 1;
                   src.col := 0;

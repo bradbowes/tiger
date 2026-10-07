@@ -581,3 +581,29 @@ end" "3
 4"
 
 
+test_code "let
+   a = [[1, 2, 3], [4, 5, 6]]
+in
+   for i := 0 to 1 do
+      writeln(str(a[i][0]))
+end" "1
+4"
+
+test_code "let
+   type person = { name: string, age: int }
+   ppl = [ person { name = \"Jack\", age = 25 },
+           person { name = \"Jill\", age = 22 } ]
+in
+   for i := 0 to 1 do
+      writeln(ppl[i].name)
+end" "Jack
+Jill"
+
+test_code "let
+   type ref = { val: int, name: string }
+   type ref2 = { r: ref, count: int }
+   a = ref2 { r = ref { val = 1, name = \"hello\"}, count = 2 }
+in
+   writeln(str(a.r.val))
+end" "1"
+

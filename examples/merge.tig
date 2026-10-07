@@ -6,15 +6,15 @@ let
       let
          i = 0
          isdigit(ch: char): bool =
-            ch >= #"0" and ch <= #"9"
+            ch >= '0' and ch <= '9'
       in
-         while ch = #" " or ch = #"\n" do
+         while ch = ' ' or ch = '\n' do
             ch := getchar()
 
          any.any := isdigit(ch)
          while isdigit(ch) do
             begin
-               i := i * 10 + ord(ch - #"0")
+               i := i * 10 + ord(ch - '0')
                ch := getchar()
             end
          i
@@ -50,26 +50,26 @@ let
             if i > 0 then
                begin
                   f(i / 10)
-                  putchar(chr(i - i / 10 * 10) + #"0")
+                  putchar(chr(i - i / 10 * 10) + '0')
                end
       in
          if i < 0 then
             begin
-               putchar(#"-")
+               putchar('-')
                f(-1)
             end
          else
             if i > 0 then f(i)
-            else putchar(#"0")
+            else putchar('0')
       end
 
    printlist(l: list) =
       if l = nil then
-         putchar(#"\n")
+         putchar('\n')
       else
          begin
             printint(l.first)
-            putchar(#" ")
+            putchar(' ')
             printlist(l.rest)
          end
 

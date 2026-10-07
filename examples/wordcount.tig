@@ -12,9 +12,9 @@ in
    while ch <> chr(-1) do
       begin
          cc := cc + 1
-         if ch = #" " or (ch >= #"\t" and ch <= #"\r") then
+         if ch = ' ' or (ch >= '\t' and ch <= '\r') then
             begin
-               if ch = #"\n" then
+               if ch = '\n' then
                   lc := lc + 1
                inword := false
             end
@@ -26,10 +26,10 @@ in
          ch := getchar()
       end
 
-   putchar(#"\t")
+   putchar('\t')
    write(str(lc))
-   putchar(#"\t")
+   putchar('\t')
    write(str(wc))
-   putchar(#"\t")
+   putchar('\t')
    writeln(str(cc))
 end

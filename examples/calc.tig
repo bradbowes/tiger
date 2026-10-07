@@ -10,13 +10,13 @@ let
               | lpar | rpar | newline | err
    type token = { op: tag, value: int }
 
-   ch = #" "
+   ch = ' '
    msg = ""
 
    error(s: string): token =
       begin
          msg := s
-         while ch <> #"\n" do
+         while ch <> '\n' do
             ch := getchar()
          token { op = err, value = 0 }
       end
@@ -24,10 +24,10 @@ let
    scan(): token =
       let
          digit(): bool =
-            ch >= #"0" and ch <= #"9"
+            ch >= '0' and ch <= '9'
 
          skip() =
-            while ch = #" " or ch = #"\t" do
+            while ch = ' ' or ch = '\t' do
                ch := getchar()
 
          number(): int =
@@ -36,7 +36,7 @@ let
             in
                while digit() do
                   begin
-                     n := n * 10 + ord(ch - #"0")
+                     n := n * 10 + ord(ch - '0')
                      ch := getchar()
                   end
                n
@@ -45,13 +45,13 @@ let
       in
          skip()
          op := case ch of
-              #"+" : plus
-            | #"-" : minus
-            | #"*" : mul
-            | #"/" : div
-            | #"(" : lpar
-            | #")" : rpar
-            | #"\n" : newline
+              '+' : plus
+            | '-' : minus
+            | '*' : mul
+            | '/' : div
+            | '(' : lpar
+            | ')' : rpar
+            | '\n' : newline
             | EOF : quit
             else if digit() then num else err
 
@@ -154,7 +154,7 @@ in
             end
          else
             writeln("syntax error")
-         while ch = #"\n" do
+         while ch = '\n' do
             ch := getchar()
          t := scan()
          value := sum()

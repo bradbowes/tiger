@@ -30,7 +30,7 @@ let
                      name = n.item
                   in
                      for i := 0 to length(name) - 1 do
-                        score := score + ord(name[i]) - ord(#"A") + 1
+                        score := score + ord(name[i]) - ord('A') + 1
                      total := total + pos * score
                   end
                   pos := pos + 1
@@ -52,7 +52,7 @@ in
       begin
          ch := file_getchar(f) (* eat quotation mark *)
          n := 0
-         while ch <> #"\"" do
+         while ch <> '\"' do
             begin
                buf[n] := ch
                n := n + 1

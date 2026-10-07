@@ -80,7 +80,7 @@ procedure scan();
 
    procedure recognize(tag: token_tag);
    begin
-      push_char;
+      push_char();
       token.tag := tag;
    end;
 
@@ -109,13 +109,13 @@ procedure scan();
          recognize(comment_token);
    end;
 
-   procedure get_string;
+   procedure get_string(delim: char);
    var
       escape: string = '';
       code: string;
    begin
       getch();
-      while src.ch <> '"' do
+      while src.ch <> delim do
          if src.ch = '\' then
             begin
                getch();
@@ -129,6 +129,7 @@ procedure scan();
                   'r': escape := #13; (* carriage return *)
                   '\': escape := '\';
                   '"': escape := '"';
+                  '''': escape := '''';
                   '^':
                      begin
                         getch();
@@ -156,7 +157,7 @@ procedure scan();
                            err('illegal escape sequence', src_location());
                         escape := chr(strtoint(code));
                      end;
-                  ' ', chr(9) .. chr(13):
+                  ' ', #9 .. #13:
                      begin
                         skip_white;
                         if src.ch = '\' then
@@ -174,18 +175,14 @@ procedure scan();
                getch();
             end
          else
-            push_char;
+            push_char();
       getch();
       token.tag := string_token;
    end;
 
    procedure get_char();
    begin
-      getch();
-      if src.ch = '"' then
-         get_string()
-      else
-         err('illegal character literal', src_location());
+      get_string('''');
       if length(token.value) <> 1 then
          err('illegal character literal', token_location());
       token.tag := char_token;
@@ -201,7 +198,7 @@ procedure scan();
    procedure get_id;
    begin
       while src.ch in ['a'..'z', 'A'..'Z', '0'..'9', '_'] do
-         push_char;
+         push_char();
       case token.value of
          'and': token.tag := and_token;
          'array': token.tag := array_token;
@@ -256,7 +253,7 @@ begin
       '=': recognize(eq_token);
       '<':
          begin
-            push_char;
+            push_char();
             case src.ch of
                '>': recognize(neq_token);
                '=': recognize(leq_token);
@@ -266,20 +263,20 @@ begin
          end;
       '>':
          begin
-            push_char;
+            push_char();
             if src.ch = '=' then recognize(geq_token)
             else token.tag := gt_token;
          end;
       ':':
          begin
-            push_char;
+            push_char();
             if src.ch = '=' then recognize(assign_token)
             else token.tag := colon_token;
          end;
       '0'..'9': get_number;
-      '"': get_string;
-      '#': get_char;
-      'a'..'z', 'A'..'Z': get_id;
+      '"': get_string('"');
+      '''': get_char();
+      'a'..'z', 'A'..'Z': get_id();
       #4:
          begin
             token.tag := eof_token;

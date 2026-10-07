@@ -12,8 +12,8 @@
 - `|` operator (logical or) changed to `or`.
 - Boolean data type. Relational operators return booleans, `true` and
   `false` are pre-defined contants.
-- Char data type. Char literals are `#` followed by a single letter in
-  quotation marks. eg `#"a"` or escape sequences `#"\n"`.
+- Char data type. Char literals are a single letter in
+  single quotes. eg `'a'` or escape sequences `'\n'`.
 - File data type (C `FILE*` pointer) 
 - Sequences are enclosed in `begin` and `end` instead of
   parentheses.

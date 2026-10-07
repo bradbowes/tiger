@@ -8,7 +8,7 @@ interface
 type
    generic list_item<t> = class
       thing: t;
-      next: list_item;
+      next: specialize list_item<t>;
    end;
 
    generic list<t> = class
@@ -26,6 +26,20 @@ type
 
 implementation
 
+destructor list.destroy();
+var
+   it, next: item;
+begin
+   it := first;
+   while it <> nil do
+      begin
+         next := it.next;
+         it.free();
+         it := next;
+      end;
+   inherited;
+end;
+
 procedure list.append(thing: t);
 var
    it: item;
@@ -41,19 +55,14 @@ begin
 end;
 
 function list.contains(thing: t): boolean;
-
-   function find(it: item): boolean;
-   begin
-      if it = nil then
-         find := false
-      else if it.thing = thing then
-         find := true
-      else
-         find := find(it.next);
-   end;
-
+var
+   it: item;
 begin
-   contains := find(first);
+   it := first;
+   while it <> nil do
+      if it.thing = thing then exit(true)
+      else it := it.next;
+   contains := false;
 end;
 
 procedure list.foreach(fn: iter);
@@ -66,20 +75,6 @@ begin
          fn(it.thing);
          it := it.next;
       end;
-end;
-
-destructor list.destroy();
-var
-   it, next: item;
-begin
-   it := first;
-   while it <> nil do
-      begin
-         next := it.next;
-         it.destroy();
-         it := next;
-      end;
-   inherited;
 end;
 
 end.
