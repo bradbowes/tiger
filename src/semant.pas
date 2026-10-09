@@ -166,7 +166,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          loc := n^.loc;
          fld_ty := lookup(tenv, n^.type_name, loc)^.ty;
          add_field(ty, n^.name, fld_ty, offset, loc);
-         offset := offset + 1;
+         inc(offset);
       end;
 
    begin
@@ -187,7 +187,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          b := bind(env, n^.name, ty, 0, 0, n^.loc);
          b^.value := make_integer_value(offset);
          b^.constant := true;
-         offset := offset + 1;
+         inc(offset);
          n^.binding := b;
       end;
 
@@ -250,7 +250,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       procedure inc_stack(n: node);
       begin
          if n^.tag = var_decl_node then
-            stack_index := stack_index + 1;
+            inc(stack_index);
       end;
 
       procedure chk_decl(n: node);
@@ -260,7 +260,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
                begin
                   update_state(var_state);
                   check_var_decl(n, stack_index, offset, new_env, new_tenv);
-                  offset := offset + 1;
+                  inc(offset);
                end;
             fun_decl_node:
                begin

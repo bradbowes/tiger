@@ -96,7 +96,7 @@ begin
       rec^.fields := f
    else
       append(rec^.fields, f, loc);
-   rec^.length := rec^.length + 1;
+   inc(rec^.length);
 end;
 
 procedure add_field(rec: spec; name: symbol; ty: spec; offset: longint; loc: source_location);
@@ -112,7 +112,7 @@ begin
       rec^.fields := f
    else
       append(rec^.fields, f, loc);
-   rec^.length := rec^.length + 1;
+   inc(rec^.length);
 end;
 
 function find(list: field; name: symbol): field;

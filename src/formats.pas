@@ -40,13 +40,13 @@ end;
 
 procedure indent();
 begin
-  indent_level := indent_level + 1;
+  inc(indent_level);
 end;
 
 procedure dedent();
 begin
   if indent_level > 0 then
-     indent_level := indent_level - 1;
+     dec(indent_level);
 end;
 
 function format_list(l: node_list; sep: string; break_lines: boolean): string;

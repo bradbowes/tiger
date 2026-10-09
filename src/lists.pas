@@ -51,7 +51,7 @@ begin
    else
       last.next := it;
    last := it;
-   length := length + 1;
+   inc(length);
 end;
 
 function list.contains(thing: t): boolean;

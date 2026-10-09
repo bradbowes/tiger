@@ -112,7 +112,7 @@ begin
    b^.key := key;
    b^.ty := ty;
    b^.id := next_id;
-   next_id := next_id + 1;
+   inc(next_id);
    b^.stack_index := stack_index;
    b^.nesting_level := nesting_level;
    b^.external := false;

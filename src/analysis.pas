@@ -86,7 +86,7 @@ procedure annotate(n: node; nest: integer; fn: binding);
       b^.nesting_level := nest;
       if b <> fn then
          begin
-            b^.call_count := b^.call_count + 1;
+            inc(b^.call_count);
             if fn = nil then
                b^.reachable := reachable_yes
             else

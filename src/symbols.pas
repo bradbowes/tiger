@@ -30,7 +30,7 @@ var
 
 function gensym(): symbol;
 begin
-   next_tmp := next_tmp + 1;
+   inc(next_tmp);
    gensym := intern('tmp$_' + inttostr(next_tmp));
 end;
 

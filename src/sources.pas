@@ -143,11 +143,11 @@ begin
             read(src.src, src.ch);
             if src.ch = chr(10) then
                begin
-                  src.line := src.line + 1;
+                  inc(src.line);
                   src.col := 0;
                end
             else
-               src.col := src.col + 1;
+               inc(src.col);
          end
    else
       err('Read past end of file', src_location());

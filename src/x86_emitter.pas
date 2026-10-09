@@ -68,7 +68,7 @@ begin
    sl^.id := next_string_id;
    sl^.next := strings;
    strings := sl;
-   next_string_id := next_string_id + 1;
+   inc(next_string_id);
    add_string := sl;
 end;
 
@@ -93,7 +93,7 @@ end;
 function new_label(): string;
 begin
    new_label := format('L%.5d', [next_label_id]);
-   next_label_id := next_label_id + 1;
+   inc(next_label_id);
 end;
 
 procedure emit(fmt: string; args: array of const);
