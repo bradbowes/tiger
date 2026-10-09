@@ -1,3 +1,4 @@
+{$mode objfpc}
 unit scanner;
 
 interface

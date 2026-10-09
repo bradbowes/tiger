@@ -1,3 +1,6 @@
+{$mode objfpc}
+{$overflowchecks off}
+
 unit symbols;
 
 interface
@@ -18,7 +21,7 @@ implementation
 uses sysutils;
 
 const
-   hash_size = 1021;
+   hash_size = 65521;
 
 var
    tbl : array [0 .. hash_size - 1] of symbol;
@@ -33,14 +36,27 @@ end;
 
 function hash(s: string): integer;
 var
-   h: longint;
-   i: integer;
+   h: dword;
+   i, len: integer;
 begin
-   h := 31;
-   for i := 1 to length(s) do
-      h := (ord(s[i]) + (h * 37)) mod 514229;
-   hash := h mod hash_size;
+   h := 2166136261; (* FNV-1a 32-bit offset basis *)
+   len := length(s);
+
+   for i := 1 to len do
+   begin
+      h := h xor byte(s[i]);
+      h := h * 16777619; (* FNV-1a 32-bit prime *)
+   end;
+
+   h := h xor (h shr 16);
+   h := h * $85EBCA6B;
+   h := h xor (h shr 13);
+   h := h * $C2B2AE35;
+   h := h xor (h shr 16);
+
+   hash := integer(h mod hash_size);
 end;
+
 
 function make_symbol(s: string): symbol;
 var

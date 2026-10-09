@@ -1,3 +1,4 @@
+{$mode objfpc}
 program tprint;
 uses
    nodes, formats, parser, transforms;

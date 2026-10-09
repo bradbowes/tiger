@@ -1,3 +1,4 @@
+{$mode objfpc}
 program report;
 uses
    nodes, bindings, semant, pass1, analysis, parser;

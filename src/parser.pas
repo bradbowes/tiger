@@ -1,3 +1,4 @@
+{$mode objfpc}
 unit parser;
 
 interface

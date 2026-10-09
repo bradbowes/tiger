@@ -1,3 +1,4 @@
+{$mode objfpc}
 unit datatypes;
 
 interface
@@ -5,7 +6,8 @@ interface
 uses sources, symbols;
 
 type
-   type_tag = (primitive_type, record_type, array_type, function_type, enum_type, pointer_type);
+   type_tag = (primitive_type, record_type, array_type,
+               function_type, enum_type, pointer_type);
 
    spec = ^spec_t;
    field = ^field_t;

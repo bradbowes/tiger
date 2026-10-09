@@ -60,7 +60,7 @@ type token = {
 }
 
 tok = token { tag = err_token, value = nil, file_name = "", line = 0, col = 0 }
-buf = make_buffer(4096)
+buf = make_buffer(65536)
 
 and_kw = intern_string("and")
 array_kw = intern_string("array")
