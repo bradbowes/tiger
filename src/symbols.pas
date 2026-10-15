@@ -12,9 +12,8 @@ type
       next: symbol;
    end;
 
-function intern (s: string): symbol;
+function intern (const s: string): symbol;
 function gensym(): symbol;
-
 
 implementation
 
@@ -26,7 +25,6 @@ const
 var
    tbl : array [0 .. hash_size - 1] of symbol;
    next_tmp: longint = 0;
-   i: integer;
 
 function gensym(): symbol;
 begin
@@ -34,18 +32,19 @@ begin
    gensym := intern('tmp$_' + inttostr(next_tmp));
 end;
 
-function hash(s: string): integer;
+(* FNV-1a hash algorithm *)
+function hash(const s: string): integer;
 var
-   h: dword;
+   h: cardinal;
    i, len: integer;
 begin
-   h := 2166136261; (* FNV-1a 32-bit offset basis *)
+   h := 2166136261;
    len := length(s);
 
    for i := 1 to len do
    begin
       h := h xor byte(s[i]);
-      h := h * 16777619; (* FNV-1a 32-bit prime *)
+      h := h * 16777619;
    end;
 
    h := h xor (h shr 16);
@@ -57,8 +56,7 @@ begin
    hash := integer(h mod hash_size);
 end;
 
-
-function make_symbol(s: string): symbol;
+function make_symbol(const s: string): symbol;
 var
    sym: symbol;
 begin
@@ -68,7 +66,7 @@ begin
    make_symbol := sym;
 end;
 
-function intern(s: string): symbol;
+function intern(const s: string): symbol;
 var
    h: integer;
    sym: symbol;
@@ -92,7 +90,4 @@ begin
    intern := sym;
 end;
 
-begin
-   for i := 0 to hash_size - 1 do
-      tbl[i] := nil;
 end.
