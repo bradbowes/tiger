@@ -1,5 +1,6 @@
 {$mode objfpc}
 {$overflowchecks off}
+{$h+}
 
 unit symbols;
 
@@ -35,8 +36,8 @@ end;
 (* FNV-1a hash algorithm *)
 function hash(const s: string): integer;
 var
-   h: cardinal;
-   i, len: integer;
+   h: longword;
+   i, len: longint;
 begin
    h := 2166136261;
    len := length(s);
@@ -71,7 +72,7 @@ var
    h: integer;
    sym: symbol;
 begin
-   h := hash (s);
+   h := hash(s);
    if tbl[h] = nil then
       begin
          tbl[h] := make_symbol(s);
