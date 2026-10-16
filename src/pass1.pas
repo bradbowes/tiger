@@ -11,7 +11,7 @@ function trans1(n: node): node;
 
 implementation
 
-uses sources, symbols, bindings, datatypes;
+uses sources, values, symbols, bindings, datatypes;
 
 var
    tf: tf_function = @trans1;
@@ -27,15 +27,15 @@ var
       b: binding;
    begin
       b := n^.binding;
-      if (not b^.mutates) and (b^.value <> nil) then
+      if (not b^.mutates) and (b^.value.vt <> empty_vt) then
          if b^.ty = int_type then
-            trans_simple_var := make_integer_node(b^.value^.int_val, loc)
+            trans_simple_var := make_integer_node(b^.value.int_val, loc)
          else if b^.ty = char_type then
-            trans_simple_var := make_char_node(b^.value^.int_val, loc)
+            trans_simple_var := make_char_node(b^.value.int_val, loc)
          else if b^.ty = bool_type then
-            trans_simple_var := make_boolean_node(b^.value^.bool_val, loc)
+            trans_simple_var := make_boolean_node(b^.value.bool_val, loc)
          else if b^.ty = string_type then
-            trans_simple_var := make_string_node(b^.value^.string_val, loc)
+            trans_simple_var := make_string_node(b^.value.string_val, loc)
          else
             trans_simple_var := copy_node(n, tf)
       else
@@ -48,7 +48,7 @@ var
    begin
       e := trans1(left);
       if e^.tag = integer_node then
-         trans_unary_minus := make_integer_node(-(e^.value^.int_val), loc)
+         trans_unary_minus := make_integer_node(-(e^.value.int_val), loc)
       else
          trans_unary_minus := copy_node(n, tf);
    end;
@@ -60,7 +60,7 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
-         trans_mul := make_integer_node(e1^.value^.int_val * e2^.value^.int_val, loc)
+         trans_mul := make_integer_node(e1^.value.int_val * e2^.value.int_val, loc)
       else
          trans_mul := copy_node(n, tf);
    end;
@@ -72,7 +72,7 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
-         trans_div := make_integer_node(e1^.value^.int_val div e2^.value^.int_val, loc)
+         trans_div := make_integer_node(e1^.value.int_val div e2^.value.int_val, loc)
       else
          trans_div := copy_node(n, tf);
    end;
@@ -84,7 +84,7 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
-         trans_mod := make_integer_node(e1^.value^.int_val mod e2^.value^.int_val, loc)
+         trans_mod := make_integer_node(e1^.value.int_val mod e2^.value.int_val, loc)
       else
          trans_mod := copy_node(n, tf);
    end;
@@ -96,9 +96,9 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
-         trans_plus := make_integer_node(e1^.value^.int_val + e2^.value^.int_val, loc)
+         trans_plus := make_integer_node(e1^.value.int_val + e2^.value.int_val, loc)
       else if (e1^.tag = char_node) and (e2^.tag = char_node) then
-         trans_plus := make_char_node(e1^.value^.int_val + e2^.value^.int_val, loc)
+         trans_plus := make_char_node(e1^.value.int_val + e2^.value.int_val, loc)
       else
          trans_plus := copy_node(n, tf);
    end;
@@ -110,9 +110,9 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if (e1^.tag = integer_node) and (e2^.tag = integer_node) then
-         trans_minus := make_integer_node(e1^.value^.int_val - e2^.value^.int_val, loc)
+         trans_minus := make_integer_node(e1^.value.int_val - e2^.value.int_val, loc)
       else if (e1^.tag = char_node) and (e2^.tag = char_node) then
-         trans_minus := make_char_node(e1^.value^.int_val - e2^.value^.int_val, loc)
+         trans_minus := make_char_node(e1^.value.int_val - e2^.value.int_val, loc)
       else
          trans_minus := copy_node(n, tf);
    end;
@@ -125,7 +125,7 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_lt := make_boolean_node(e1^.value^.int_val < e2^.value^.int_val, loc)
+         trans_lt := make_boolean_node(e1^.value.int_val < e2^.value.int_val, loc)
       else
          trans_lt := copy_node(n, tf);
    end;
@@ -138,7 +138,7 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_leq := make_boolean_node(e1^.value^.int_val <= e2^.value^.int_val, loc)
+         trans_leq := make_boolean_node(e1^.value.int_val <= e2^.value.int_val, loc)
       else
          trans_leq := copy_node(n, tf);
    end;
@@ -151,7 +151,7 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_gt := make_boolean_node(e1^.value^.int_val > e2^.value^.int_val, loc)
+         trans_gt := make_boolean_node(e1^.value.int_val > e2^.value.int_val, loc)
       else
          trans_gt := copy_node(n, tf);
    end;
@@ -164,7 +164,7 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_geq := make_boolean_node(e1^.value^.int_val >= e2^.value^.int_val, loc)
+         trans_geq := make_boolean_node(e1^.value.int_val >= e2^.value.int_val, loc)
       else
          trans_geq := copy_node(n, tf);
    end;
@@ -177,9 +177,9 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_eq := make_boolean_node(e1^.value^.int_val = e2^.value^.int_val, loc)
+         trans_eq := make_boolean_node(e1^.value.int_val = e2^.value.int_val, loc)
       else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
-         trans_eq := make_boolean_node(e1^.value^.bool_val = e2^.value^.bool_val, loc)
+         trans_eq := make_boolean_node(e1^.value.bool_val = e2^.value.bool_val, loc)
       else
          trans_eq := copy_node(n, tf);
    end;
@@ -192,9 +192,9 @@ var
       e2 := trans1(right);
       if ((e1^.tag = integer_node) and (e2^.tag = integer_node))
          or ((e1^.tag = char_node) and (e2^.tag = char_node)) then
-         trans_neq := make_boolean_node(e1^.value^.int_val <> e2^.value^.int_val, loc)
+         trans_neq := make_boolean_node(e1^.value.int_val <> e2^.value.int_val, loc)
       else if (e1^.tag = boolean_node) and (e2^.tag = boolean_node) then
-         trans_neq := make_boolean_node(e1^.value^.bool_val <> e2^.value^.bool_val, loc)
+         trans_neq := make_boolean_node(e1^.value.bool_val <> e2^.value.bool_val, loc)
       else
          trans_neq := copy_node(n, tf);
    end;
@@ -206,12 +206,12 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if e1^.tag = boolean_node then
-         if e1^.value^.bool_val then
+         if e1^.value.bool_val then
             trans_and := e2
          else
             trans_and := e1
       else if (e2^.tag = boolean_node) then
-         if  e2^.value^.bool_val then
+         if  e2^.value.bool_val then
             trans_and := e1
          else
             trans_and := e2
@@ -226,12 +226,12 @@ var
       e1 := trans1(left);
       e2 := trans1(right);
       if e1^.tag = boolean_node then
-         if e1^.value^.bool_val then
+         if e1^.value.bool_val then
             trans_or := e1
          else
             trans_or := e2
       else if (e2^.tag = boolean_node) then
-         if  e2^.value^.bool_val then
+         if  e2^.value.bool_val then
             trans_or := e2
          else
             trans_or := e1
@@ -245,7 +245,7 @@ var
    begin
       e := trans1(cond);
       if e^.tag = boolean_node then
-         if e^.value^.bool_val then
+         if e^.value.bool_val then
             trans_if := trans1(left)
          else
             trans_if := make_empty_node(loc)
@@ -259,7 +259,7 @@ var
    begin
       e := trans1(cond);
       if e^.tag = boolean_node then
-         if e^.value^.bool_val then
+         if e^.value.bool_val then
             trans_if_else := trans1(left)
          else
             trans_if_else := trans1(right)
@@ -300,7 +300,7 @@ var
       e: node;
    begin
       e := trans1(cond);
-      if (e^.tag = boolean_node) and (not e^.value^.bool_val) then
+      if (e^.tag = boolean_node) and (not e^.value.bool_val) then
          trans_while := make_empty_node(loc)
       else
          trans_while := copy_node(n, tf);
@@ -313,7 +313,7 @@ var
 
       procedure trans_binding(n: node);
       begin
-         if (n^.binding <> nil) and ((n^.binding^.mutates) or (n^.binding^.value = nil)) then
+         if (n^.binding <> nil) and ((n^.binding^.mutates) or (n^.binding^.value.vt = empty_vt)) then
             list.append(trans1(n));
       end;
 

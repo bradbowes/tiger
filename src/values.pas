@@ -6,60 +6,45 @@ interface
 uses symbols;
 
 type
-   value = ^value_t;
 
-   value_t = record
-      string_val: symbol;
-      int_val: int64;
-      bool_val: boolean
+   value_type = (integer_vt, string_vt, bool_vt, empty_vt);
+
+   value = record
+      case vt: value_type of
+         integer_vt: (int_val: int64);
+         string_vt: (string_val: symbol);
+         bool_vt: (bool_val: boolean);
+         empty_vt: ();
    end;
 
    function make_integer_value(n: int64): value;
    function make_string_value(s: symbol): value;
    function make_boolean_value(b: boolean): value;
+   function make_empty_value(): value;
 
 implementation
 
-function make_value(): value;
-var
-   v: value;
+function make_empty_value(): value;
 begin
-   new(v);
-   v^.string_val := nil;
-   v^.int_val := 0;
-   v^.bool_val := false;
-   make_value := v;
+   result.vt := empty_vt;
 end;
-
 
 function make_integer_value(n: int64): value;
-var
-   v: value;
 begin
-   v := make_value();
-   v^.int_val := n;
-   make_integer_value := v;
+   result.vt := integer_vt;
+   result.int_val := n;
 end;
-
 
 function make_string_value(s: symbol): value;
-var
-   v: value;
 begin
-   v := make_value();
-   v^.string_val := s;
-   make_string_value := v;
+   result.vt := string_vt;
+   result.string_val := s;
 end;
-
 
 function make_boolean_value(b: boolean): value;
-var
-   v: value;
 begin
-   v := make_value();
-   v^.bool_val := b;
-   make_boolean_value := v;
+   result.vt := bool_vt;
+   result.bool_val := b;
 end;
-
 
 end.

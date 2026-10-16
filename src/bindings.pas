@@ -126,7 +126,7 @@ begin
    b^.callers := binding_list.create();
    b^.callees := binding_list.create();
  *)
-   b^.value := nil;
+   b^.value := make_empty_value();
    env^.bindings := tree.insert(t, key, b);
    bind := b;
 end;

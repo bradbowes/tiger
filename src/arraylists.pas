@@ -5,40 +5,39 @@ unit arraylists;
 interface
 
 type
-   generic ArrayList<T> = class
+   generic array_list<t> = class
    private
-      items: array of T;
+      items: array of t;
       count: longint;
       capacity: longint;
       increment: longint;
    public
       type
-         Enumerator = class
+         iterator = class
          private
             index: longint;
-            list: specialize ArrayList<T>;
+            list: specialize array_list<t>;
          public
-            constructor create(ls: specialize ArrayList<T>);
-            function getCurrent(): T; inline;
+            constructor create(ls: specialize array_list<t>);
+            function getCurrent(): t; inline;
             function moveNext(): boolean; inline;
             procedure reset();
-            property current: T read getCurrent;
+            property current: t read getCurrent;
          end;
       constructor create(n: longint);
       constructor create();
       destructor destroy(); override;
       property length: longint read count;
-      procedure push(value: T);
-      function get(i: longint): T;
-      function getEnumerator(): Enumerator;
+      procedure add(value: t);
+      function get(i: longint): t;
+      function getEnumerator(): iterator;
    end;
-
 
 implementation
 
 uses sysutils;
 
-constructor ArrayList.create(n: longint);
+constructor array_list.create(n: longint);
 begin
    inherited create();
    count := 0;
@@ -47,7 +46,7 @@ begin
    setlength(items, capacity);
 end;
 
-constructor ArrayList.create();
+constructor array_list.create();
 begin
    inherited create();
    count := 0;
@@ -56,13 +55,13 @@ begin
    setlength(items, capacity);
 end;
 
-destructor ArrayList.destroy();
+destructor array_list.destroy();
 begin
    setlength(items, 0);
    inherited;
 end;
 
-procedure ArrayList.push(value: T);
+procedure array_list.add(value: t);
 begin
    if count = capacity then
       begin
@@ -73,37 +72,37 @@ begin
    inc(count);
 end;
 
-function ArrayList.get(i: longint): T;
+function array_list.get(i: longint): t;
 begin
    if (i < 0) or (i >= count) then
-      raise exception.create('ArrayList access out of bounds');
+      raise exception.create('array_list access out of bounds');
    get := items[i];
 end;
 
-function ArrayList.getEnumerator(): ArrayList.Enumerator;
+function array_list.getEnumerator(): array_list.iterator;
 begin
-   getEnumerator := Enumerator.create(self);
+   getEnumerator := iterator.create(self);
 end;
 
-constructor ArrayList.Enumerator.create(ls: specialize ArrayList<T>);
+constructor array_list.iterator.create(ls: specialize array_list<t>);
 begin
    inherited create();
    list := ls;
    index := -1;
 end;
 
-function ArrayList.Enumerator.getCurrent() : T;
+function array_list.iterator.getCurrent() : t;
 begin
    getCurrent := list.get(index);
 end;
 
-function ArrayList.Enumerator.moveNext() : boolean;
+function array_list.iterator.moveNext() : boolean;
 begin
    inc(index);
    moveNext := index < list.length;
 end;
 
-procedure ArrayList.Enumerator.reset();
+procedure array_list.iterator.reset();
 begin
    index := -1;
 end;

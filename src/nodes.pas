@@ -148,7 +148,7 @@ begin
    n^.tag := tag;
    n^.loc := loc;
    n^.ins_count := 0;
-   n^.value := nil;
+   n^.value := make_empty_value();
    n^.binding := nil;
    n^.name := nil;
    n^.type_name := nil;
@@ -599,10 +599,10 @@ begin
    if n^.left <> nil then delete_node(n^.left);
    if n^.right <> nil then delete_node(n^.right);
    if n^.list <> nil then
-   begin
-      n^.list.foreach(@del_item);
-      n^.list.destroy();
-   end;
+      begin
+         n^.list.foreach(@del_item);
+         n^.list.free();
+      end;
    if n^.tenv <> nil then delete_scope(n^.tenv);
    if n^.env <> nil then delete_scope(n^.env);
    dispose(n);
