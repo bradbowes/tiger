@@ -1,5 +1,4 @@
 {$mode objfpc}
-{$modeswitch nestedprocvars}
 
 unit arraylists;
 
@@ -9,15 +8,15 @@ type
    generic transform<t, u> = function(x: t): u;
    generic predicate<t> = function(x: t): boolean;
 
-   generic array_list<t> = class
+   generic arraylist<t> = class
    private
    type
       iterator = class
       private
          index: longint;
-         list: array_list;
+         list: arraylist;
       public
-         constructor create(ls: array_list);
+         constructor create(ls: arraylist);
          function getCurrent(): t; inline;
          function moveNext(): boolean; inline;
          procedure reset();
@@ -25,9 +24,9 @@ type
       end;
    const
       max_capacity = 1073741824;
-      err_max_msg = 'array_list maximum capacity of 1073741824 exceeded.';
-      err_min_msg = 'array_list capacity must be a positive integer.';
-      err_bounds_msg = 'array_list access out of bounds.';
+      err_max_msg = 'arraylist maximum capacity of 1073741824 exceeded.';
+      err_min_msg = 'arraylist capacity must be a positive integer.';
+      err_bounds_msg = 'arraylist access out of bounds.';
    var
       items: array of t;
       count: longint;
@@ -49,16 +48,16 @@ type
 
    generic function filter<t>(
          f: specialize predicate<t>;
-         ls: specialize array_list<t>): specialize array_list<t>;
+         ls: specialize arraylist<t>): specialize arraylist<t>;
    generic function map<t, u>(
          f: specialize transform<t, u>;
-         ls: specialize array_list<t>): specialize array_list<u>;
+         ls: specialize arraylist<t>): specialize arraylist<u>;
 
 implementation
 
 uses sysutils, math;
 
-constructor array_list.create(cap: longint);
+constructor arraylist.create(cap: longint);
 begin
    if cap > max_capacity then
       raise exception.create(err_max_msg);
@@ -72,7 +71,7 @@ begin
    setlength(items, capacity);
 end;
 
-constructor array_list.create();
+constructor arraylist.create();
 begin
    inherited create();
    count := 0;
@@ -82,13 +81,13 @@ begin
    setlength(items, capacity);
 end;
 
-destructor array_list.destroy();
+destructor arraylist.destroy();
 begin
    setlength(items, 0);
    inherited;
 end;
 
-procedure array_list.clear();
+procedure arraylist.clear();
 begin
    count := 0;
    increment := initial;
@@ -96,7 +95,7 @@ begin
    setlength(items, capacity);
 end;
 
-procedure array_list.add(value: t);
+procedure arraylist.add(value: t);
 var
    fib: longint;
 begin
@@ -117,34 +116,34 @@ begin
    inc(count);
 end;
 
-function array_list.get(i: longint): t;
+function arraylist.get(i: longint): t;
 begin
    if (i < 0) or (i >= count) then
       raise exception.create(err_bounds_msg);
    get := items[i];
 end;
 
-procedure array_list.modify(i: longint; value: t);
+procedure arraylist.modify(i: longint; value: t);
 begin
    if (i < 0) or (i >= count) then
       raise exception.create(err_bounds_msg);
    items[i] := value;
 end;
 
-function array_list.getEnumerator(): array_list.iterator;
+function arraylist.getEnumerator(): arraylist.iterator;
 begin
    getEnumerator := iterator.create(self);
 end;
 
 generic function filter<t>(
       f: specialize predicate<t>;
-      ls: specialize array_list<t>): specialize array_list<t>;
+      ls: specialize arraylist<t>): specialize arraylist<t>;
 var
    item: t;
    i, len: longint;
 begin
    len := ls.length;
-   result := specialize array_list<t>.create(len);
+   result := specialize arraylist<t>.create(len);
    for i := 0 to len - 1 do
       begin
          item := ls.get(i);
@@ -154,35 +153,35 @@ end;
 
 generic function map<t, u>(
       f: specialize transform<t, u>;
-      ls: specialize array_list<t>): specialize array_list<u>;
+      ls: specialize arraylist<t>): specialize arraylist<u>;
 var
    i, len: longint;
 begin
    len := ls.length;
-   result := specialize array_list<u>.create(len);
+   result := specialize arraylist<u>.create(len);
    for i := 0 to len - 1 do
       result.add(f(ls.get(i)));
 end;
 
-constructor array_list.iterator.create(ls: array_list);
+constructor arraylist.iterator.create(ls: arraylist);
 begin
    inherited create();
    list := ls;
    index := -1;
 end;
 
-function array_list.iterator.getCurrent() : t;
+function arraylist.iterator.getCurrent() : t;
 begin
    getCurrent := list.get(index);
 end;
 
-function array_list.iterator.moveNext() : boolean;
+function arraylist.iterator.moveNext() : boolean;
 begin
    inc(index);
    moveNext := index < list.length;
 end;
 
-procedure array_list.iterator.reset();
+procedure arraylist.iterator.reset();
 begin
    index := -1;
 end;
