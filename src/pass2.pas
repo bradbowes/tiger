@@ -29,7 +29,7 @@ begin
             prefix := 'const$_'
          else
             prefix := 'var$_';
-         var_name := intern(prefix + b^.key^.id + '_' + inttostr(b^.id));
+         var_name := intern(prefix + b^.key.name + '_' + inttostr(b^.id));
       end;
 end;
 

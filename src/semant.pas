@@ -50,7 +50,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       ty1 := check(right, si, nest, env, tenv);
       ty2 := nil;
       if ty1 = void_type then
-         err(n^.name^.id + ' variable initializer doesn''t produce a value', right^.loc);
+         err(n^.name.name + ' variable initializer doesn''t produce a value', right^.loc);
       if (n^.type_name = nil) then
          if  (ty1 = nil_type) then
             err('variable with nil initializer needs explicit type', loc)
@@ -371,7 +371,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       if left^.tag = simple_var_node then
          begin
             if left^.binding^.constant then
-               err('assignment to constant ' + n^.binding^.key^.id, n^.loc);
+               err('assignment to constant ' + n^.binding^.key.name, n^.loc);
             left^.binding^.mutates := true;
          end;
       check_assign := void_type;
@@ -543,14 +543,14 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
          loc := value^.loc;
          fc := find_check(name);
          if fc = nil then
-            err('''' + name^.id + ''' field doesn''t exist', loc);
+            err('''' + name.name + ''' field doesn''t exist', loc);
          if fc^.check then
-            err('''' + name^.id + ''' field appears more than once.', loc);
+            err('''' + name.name + ''' field appears more than once.', loc);
          field_ty := check(value^.left, si + n^.list.length, nest, env, tenv);
          if compatible(field_ty, fc^.f^.ty) then
             fc^.check := true
          else
-            err('''' + name^.id + ''' field is wrong type', loc);
+            err('''' + name.name + ''' field is wrong type', loc);
       end;
 
    begin
@@ -558,7 +558,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       b := lookup(tenv, rec_type, n^.loc);
       ty := b^.ty;
       if ty^.tag <> record_type then
-         err ('''' + rec_type^.id + ''' is not a record', n^.loc);
+         err ('''' + rec_type.name + ''' is not a record', n^.loc);
       f := ty^.fields;
       while f <> nil do
          begin
@@ -570,7 +570,7 @@ function check(n: node; si, nest: integer; env, tenv: scope): spec;
       while fc <> nil do
          begin
             if not fc^.check then
-               err('''' + fc^.f^.name^.id + ''' field is missing from record', n^.loc);
+               err('''' + fc^.f^.name.name + ''' field is missing from record', n^.loc);
             fc := fc^.next;
          end;
       n^.binding := b;

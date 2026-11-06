@@ -111,7 +111,7 @@ begin
    sl := strings;
    while sl <> nil do
       begin
-         s := sl^.sym^.id;
+         s := sl^.sym.name;
          l := length(s);
          s := stringreplace(stringreplace(s, '\', '\\', [rfReplaceAll]), '"', '\"', [rfReplaceAll]);
          emit(lineending +
@@ -136,7 +136,7 @@ begin
               '   .p2align 3' + lineending +
               '%s:' + lineending +
               '   pushq %%rbp' + lineending +
-              '   movq %%rsp, %%rbp', [f^.binding^.key^.id]);
+              '   movq %%rsp, %%rbp', [f^.binding^.key.name]);
          emit_expression(f^.right, -8, f^.binding^.nesting_level + 1);
          emit('   popq %%rbp' + lineending +
               '   ret', []);
@@ -323,9 +323,9 @@ var
       n^.list.foreach(@emit_arg);
       emit('   popq %%rbp', []);
       if n^.binding^.external then
-         emit('   jmp f$_%s', [n^.name^.id])
+         emit('   jmp f$_%s', [n^.name.name])
       else
-         emit('   jmp f%d$_%s', [n^.binding^.id, n^.name^.id]);
+         emit('   jmp f%d$_%s', [n^.binding^.id, n^.name.name]);
    end;
 
    procedure emit_call();
@@ -361,9 +361,9 @@ var
       n^.list.foreach(@emit_arg);
       emit('   subq $%d, %%rsp', [stack_size]);
       if n^.binding^.external then
-         emit('   call f$_%s', [n^.binding^.key^.id])
+         emit('   call f$_%s', [n^.binding^.key.name])
       else
-         emit('   call %s', [n^.binding^.key^.id]);
+         emit('   call %s', [n^.binding^.key.name]);
       emit('   addq $%d, %%rsp', [stack_size]);
    end;
 

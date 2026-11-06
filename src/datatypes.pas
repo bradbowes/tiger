@@ -77,7 +77,7 @@ end;
 procedure append(list: field; f: field; loc: source_location);
 begin
    if list^.name = f^.name then
-      err('field ''' + f^.name^.id + ''' specified more than once', loc)
+      err('field ''' + f^.name.name + ''' specified more than once', loc)
    else if list^.next = nil then
       list^.next := f
    else
@@ -130,7 +130,7 @@ var f: field;
 begin
    f := find(rec^.fields, name);
    if f = nil then
-      err('object has no field ''' + name^.id + '''', loc);
+      err('object has no field ''' + name.name + '''', loc);
    get_field := f;
 end;
 

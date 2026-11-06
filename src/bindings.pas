@@ -30,7 +30,7 @@ type
 *)
    end;
 
-   tree = specialize map<symbol, binding>;
+   tree = specialize map<binding>;
 
    scope = ^scope_t;
    scope_t = record
@@ -107,7 +107,7 @@ var
 begin
    t := env^.bindings;
    if t.lookup(key) <> nil then
-      err('identifier ''' + key^.id + ''' was previously defined in scope', loc);
+      err('identifier ''' + key.name + ''' was previously defined in scope', loc);
    new(b);
    b^.key := key;
    b^.ty := ty;
@@ -131,12 +131,13 @@ begin
    bind := b;
 end;
 
-function lookup(env: scope; key: symbol; loc: source_location): binding;
+function lookup(env: scope; 
+key: symbol; loc: source_location): binding;
 var
    t: tree;
 begin
    if env = nil then
-      err('identifier ''' + key^.id + ''' is not defined', loc);
+      err('identifier ''' + key.name + ''' is not defined', loc);
    t := env^.bindings.lookup(key);
    if t = nil then
       lookup := lookup(env^.next, key, loc)

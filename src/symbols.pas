@@ -7,14 +7,20 @@ unit symbols;
 interface
 
 type
-   symbol = ^symbol_t;
-   symbol_t = record
+   symbol = class
+   protected
       id: string;
       next: symbol;
+      constructor create(const s: string);
+   public
+      property name: string read id;
    end;
 
 function intern (const s: string): symbol;
 function gensym(): symbol;
+
+operator < (const left, right: symbol): boolean; inline;
+operator > (const left, right: symbol): boolean; inline;
 
 implementation
 
@@ -57,14 +63,11 @@ begin
    hash := integer(h mod hash_size);
 end;
 
-function make_symbol(const s: string): symbol;
-var
-   sym: symbol;
+constructor symbol.create(const s: string);
 begin
-   new(sym);
-   sym^.id := s;
-   sym^.next := nil;
-   make_symbol := sym;
+   inherited create();
+   id := s;
+   next := nil;
 end;
 
 function intern(const s: string): symbol;
@@ -75,20 +78,30 @@ begin
    h := hash(s);
    if tbl[h] = nil then
       begin
-         tbl[h] := make_symbol(s);
+         tbl[h] := symbol.create(s);
          sym := tbl[h];
       end
    else
       begin
          sym := tbl[h];
-         while sym^.id <> s do
+         while sym.id <> s do
             begin
-               if sym^.next = nil then
-                  sym^.next := make_symbol(s);
-               sym := sym^.next;
+               if sym.next = nil then
+                  sym.next := symbol.create(s);
+               sym := sym.next;
             end;
       end;
    intern := sym;
+end;
+
+operator < (const left, right: symbol): boolean; inline;
+begin
+  result := pointer(left) < pointer(right);
+end;
+
+operator > (const left, right: symbol): boolean; inline;
+begin
+  result := pointer(left) > pointer(right);
 end;
 
 end.

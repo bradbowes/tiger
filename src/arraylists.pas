@@ -35,7 +35,6 @@ type
       increment: longint;
       initial: longint;
    public
-   type
       constructor create(cap: longint);
       constructor create();
       destructor destroy(); override;

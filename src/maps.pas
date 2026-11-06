@@ -3,23 +3,25 @@ unit maps;
 
 interface
 
+uses symbols;
+
 type
-   generic map<t_key, t_item> = class
+   generic map<T> = class
       protected
          valid: boolean;
          left, right: map;
          height: integer;
-         procedure init(k: t_key; it: t_item);
+         procedure init(k: symbol; it: T);
          function balance(): integer;
          class function rotate_left(m: map): map;
          class function rotate_right(m: map): map;
       public
-         key: t_key;
-         item: t_item;
+         key: symbol;
+         item: T;
          constructor create();
          destructor destroy(); override;
-         function lookup(k: t_key): map;
-         class function insert(m: map; k: t_key; it: t_item): map;
+         function lookup(k: symbol): map;
+         class function insert(m: map; k: symbol; it: T): map;
    end;
 
 implementation
@@ -37,7 +39,7 @@ begin
    height := 0;
 end;
 
-procedure map.init(k: t_key; it: t_item);
+procedure map.init(k: symbol; it: T);
 begin
    valid := true;
    key := k;
@@ -78,7 +80,7 @@ begin
    rotate_right := t1;
 end;
 
-function map.lookup(k: t_key): map;
+function map.lookup(k: symbol): map;
 begin
    if (not valid) then
       lookup := nil
@@ -90,7 +92,7 @@ begin
       lookup := self;
 end;
 
-class function map.insert(m: map; k: t_key; it: t_item): map;
+class function map.insert(m: map; k: symbol; it: T): map;
 var
    bal: integer;
 begin

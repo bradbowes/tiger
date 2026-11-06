@@ -77,11 +77,11 @@ begin
       assign_node:
          format := format(n^.left) + ' := ' + format(n^.right);
       call_node, tail_call_node:
-         format :=  n^.name^.id + '(' + format_list(n^.list, ', ', false) + ')';
+         format :=  n^.name.name + '(' + format_list(n^.list, ', ', false) + ')';
       simple_var_node, enum_node:
-         format := n^.name^.id;
+         format := n^.name.name;
       field_var_node:
-         format := format(n^.left) + '.' + n^.name^.id;
+         format := format(n^.left) + '.' + n^.name.name;
       indexed_var_node:
          format := format(n^.left) + '[' + format(n^.right) + ']';
       integer_node:
@@ -90,7 +90,7 @@ begin
             format := s;
          end;
       string_node:
-         format := '"' + escape(n^.value.string_val^.id) + '"';
+         format := '"' + escape(n^.value.string_val.name) + '"';
       char_node:
          format := '#"' + escape(chr(n^.value.int_val)) + '"';
       boolean_node:
@@ -98,20 +98,20 @@ begin
       nil_node:
          format := 'nil';
       type_decl_node:
-         format := 'type ' + n^.name^.id + ' = ' + format(n^.right) + newline;
+         format := 'type ' + n^.name.name + ' = ' + format(n^.right) + newline;
       var_decl_node:
          begin
-            s := n^.name^.id;
+            s := n^.name.name;
             if n^.type_name <> nil then
-               s := s + ': ' + n^.type_name^.id;
+               s := s + ': ' + n^.type_name.name;
             format := s + ' = ' + format( n^.right);
          end;
       fun_decl_node:
          begin
-            s := n^.name^.id +
+            s := n^.name.name +
                  '(' + format_list(n^.list, ', ', false) + ')';
             if n^.type_name <> nil then
-               s := s + ': ' + n^.type_name^.id;
+               s := s + ': ' + n^.type_name.name;
             if n^.right <> nil then
                begin
                   s := s + ' = ';
@@ -138,7 +138,7 @@ begin
       enum_desc_node:
          format := format_list(n^.list, ' | ', false);
       array_desc_node:
-         format := 'array of ' + n^.type_name^.id;
+         format := 'array of ' + n^.type_name.name;
       unary_minus_node:
          format := '- ' + format(n^.left);
       plus_node:
@@ -168,9 +168,9 @@ begin
       or_node:
          format := '(' + format(n^.left) + ' or ' + format(n^.right) + ')';
       field_node:
-         format := n^.name^.id + ' = ' + format(n^.left);
+         format := n^.name.name + ' = ' + format(n^.left);
       field_desc_node:
-         format := n^.name^.id + ': ' + n^.type_name^.id;
+         format := n^.name.name + ': ' + n^.type_name.name;
       if_else_node:
          begin
             s := 'if ' + format(n^.cond) + ' then';
@@ -206,7 +206,7 @@ begin
          end;
       for_node:
          begin
-            s := 'for ' + n^.name^.id + ' := ' + format(n^.left) + ' to ' + format(n^.cond) + ' do';
+            s := 'for ' + n^.name.name + ' := ' + format(n^.left) + ' to ' + format(n^.cond) + ' do';
             indent();
             s := s + newline + format(n^.right);
             dedent();
@@ -233,9 +233,9 @@ begin
             format := s + 'end';
          end;
       record_node:
-         format := n^.type_name^.id + ' {' + format_list(n^.list, ',', true) + newline + '}';
+         format := n^.type_name.name + ' {' + format_list(n^.list, ',', true) + newline + '}';
       array_node:
-         format := n^.type_name^.id + '[' + format(n^.left) + '] of ' + format(n^.right);
+         format := n^.type_name.name + '[' + format(n^.left) + '] of ' + format(n^.right);
       empty_node:
          format := '';
       else
