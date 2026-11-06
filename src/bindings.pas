@@ -131,18 +131,18 @@ begin
    bind := b;
 end;
 
-function lookup(env: scope; 
+function lookup(env: scope;
 key: symbol; loc: source_location): binding;
 var
-   t: tree;
+   b: binding;
 begin
    if env = nil then
       err('identifier ''' + key.name + ''' is not defined', loc);
-   t := env^.bindings.lookup(key);
-   if t = nil then
+   b := env^.bindings.lookup(key);
+   if b = nil then
       lookup := lookup(env^.next, key, loc)
    else
-      lookup := t.item;
+      lookup := b;
 end;
 
 procedure delete_scope(var env: scope);

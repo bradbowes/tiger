@@ -17,10 +17,10 @@ type
          empty_vt: ();
    end;
 
-   function make_integer_value(n: int64): value;
-   function make_string_value(s: symbol): value;
-   function make_boolean_value(b: boolean): value;
-   function make_empty_value(): value;
+function make_integer_value(n: int64): value;
+function make_string_value(s: symbol): value;
+function make_boolean_value(b: boolean): value;
+function make_empty_value(): value;
 
 implementation
 

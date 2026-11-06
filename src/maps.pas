@@ -20,7 +20,7 @@ type
          item: T;
          constructor create();
          destructor destroy(); override;
-         function lookup(k: symbol): map;
+         function lookup(k: symbol): T;
          class function insert(m: map; k: symbol; it: T): map;
    end;
 
@@ -80,7 +80,7 @@ begin
    rotate_right := t1;
 end;
 
-function map.lookup(k: symbol): map;
+function map.lookup(k: symbol): T;
 begin
    if (not valid) then
       lookup := nil
@@ -89,7 +89,7 @@ begin
    else if k > key then
       lookup := right.lookup(k)
    else
-      lookup := self;
+      lookup := self.item;
 end;
 
 class function map.insert(m: map; k: symbol; it: T): map;
@@ -127,8 +127,8 @@ end;
 
 destructor map.destroy();
 begin
-   if left <> nil then left.destroy();
-   if right <> nil then right.destroy();
+   left.free();
+   right.free();
    dispose(item);
    inherited;
 end;
